@@ -12,9 +12,8 @@
 
 // Locale, from release/5.4 stdlib/public/Darwin/Foundation/Locale.swift.
 // Darling: NSLocale properties are read through -objectForKey:/-displayNameForKey:value: with the NSLocale*
-// constants (Darling has no NSLocale.Key), the private __NSLocaleCurrent/__NSLocaleAutoupdating shims are replaced by
-// +currentLocale/+autoupdatingCurrentLocale, and the members that need Calendar (calendar,
-// localizedString(for: Calendar.Identifier)) are left out until there is a Calendar overlay.
+// constants (Darling has no NSLocale.Key), and the private __NSLocaleCurrent/__NSLocaleAutoupdating shims are replaced
+// by +currentLocale/+autoupdatingCurrentLocale.
 
 @_exported import Foundation // Clang module
 
@@ -111,6 +110,14 @@ public struct Locale : Hashable, Equatable, ReferenceConvertible {
         return _displayName(forKey: NSLocaleCurrencyCode, value: currencyCode)
     }
 
+    /// Returns a localized string for a specified `Calendar.Identifier`.
+    ///
+    /// For example, in the "en" locale, the result for `.buddhist` is `"Buddhist Calendar"`.
+    public func localizedString(for calendarIdentifier: Calendar.Identifier) -> String? {
+        // The calendar identifier key (not NSLocaleCalendar, which has no display names) with ICU's identifier.
+        return _displayName(forKey: CFLocaleKey.calendarIdentifier.rawValue as String, value: Calendar._names(calendarIdentifier).apple)
+    }
+
     /// Returns a localized string for a specified ICU collation identifier.
     public func localizedString(forCollationIdentifier collationIdentifier: String) -> String? {
         return _displayName(forKey: NSLocaleCollationIdentifier, value: collationIdentifier)
@@ -162,6 +169,14 @@ public struct Locale : Hashable, Equatable, ReferenceConvertible {
             return result
         }
         return nil
+    }
+
+    /// Returns the calendar for the locale, or the Gregorian calendar as a fallback.
+    public var calendar: Calendar {
+        if let calendar = _wrapped.object(forKey: NSLocaleCalendar) as? NSCalendar {
+            return Calendar._unconditionallyBridgeFromObjectiveC(calendar)
+        }
+        return Calendar(identifier: .gregorian)
     }
 
     /// Returns the exemplar character set for the locale, or nil if has none.
