@@ -50,7 +50,7 @@ private func _hexValue(_ byte: UInt8) -> UInt8? {
 }
 
 /// Decodes percent escapes; returns nil for a malformed escape or bytes that aren't valid UTF-8.
-private func _percentDecode(_ string: String) -> String? {
+internal func _percentDecode(_ string: String) -> String? {
     var bytes: [UInt8] = []
     bytes.reserveCapacity(string.utf8.count)
     var iterator = string.utf8.makeIterator()
