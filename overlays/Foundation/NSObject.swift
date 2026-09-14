@@ -23,6 +23,9 @@ import ObjectiveC
 public protocol _KeyValueCodingAndObserving {}
 extension NSObject : _KeyValueCodingAndObserving {}
 
+// From release/5.4 Foundation.swift.
+extension NSObject : CustomStringConvertible {}
+
 public struct NSKeyValueObservedChange<Value> {
     public typealias Kind = NSKeyValueChange
     public let kind: Kind
