@@ -72,3 +72,19 @@ extension OS_dispatch_queue_serial {
 		self.init(__label: label, attr: attr, queue: target)
 	}
 }
+
+// DispatchSerialQueue as a Swift concurrency executor (macOS 14 SDK).
+@available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+extension OS_dispatch_queue_serial_executor: @unchecked Sendable, SerialExecutor {
+	public func enqueue(_ job: consuming ExecutorJob) {
+		let job = UnownedJob(job)
+		let executor = asUnownedSerialExecutor()
+		self.async {
+			job.runSynchronously(on: executor)
+		}
+	}
+
+	public func asUnownedSerialExecutor() -> UnownedSerialExecutor {
+		return UnownedSerialExecutor(ordinary: self)
+	}
+}

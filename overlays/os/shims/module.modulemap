@@ -1,0 +1,4 @@
+module _DarlingOSShims {
+  header "DarlingOSShims.h"
+  export *
+}
