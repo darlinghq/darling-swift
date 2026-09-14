@@ -14,7 +14,7 @@
 // Darling: NSURL's accessors are methods returning implicitly unwrapped values, resource values, bookmarks and
 // promised items are omitted (Darling's NSURL doesn't implement them), and the path-appending API from newer SDKs
 // (DirectoryHint, appending(path:directoryHint:), appending(component:directoryHint:), path(percentEncoded:)) is
-// written on top of the NSURL methods.
+// written on top of the NSURL methods and CFURL functions.
 
 @_exported import Foundation // Clang module
 
@@ -58,7 +58,19 @@ public struct URL : ReferenceConvertible, Equatable {
     /// If an empty string is used for the path, then the path is assumed to be ".".
     public init(fileURLWithPath path: __shared String, relativeTo base: __shared URL?) {
         let p = path.isEmpty ? "." : path
-        if let base = base, !p.hasPrefix("/"), let relative = NSURL(string: p, relativeTo: base._url) {
+        if let base = base, !p.hasPrefix("/") {
+            // Not NSURL(string:relativeTo:): spaces, % and #/? in a file name must stay part of the path.
+            func fileURL(isDirectory: Bool) -> NSURL {
+                return p.withCString {
+                    NSURL.fileURL(withFileSystemRepresentation: $0, isDirectory: isDirectory, relativeTo: base._url)
+                } as! NSURL
+            }
+            var relative = fileURL(isDirectory: p.hasSuffix("/"))
+            // Like -initFileURLWithPath:relativeToURL:, ask the file system when there's no trailing slash.
+            var info = stat()
+            if !p.hasSuffix("/"), stat(relative.fileSystemRepresentation(), &info) == 0, info.st_mode & S_IFMT == S_IFDIR {
+                relative = fileURL(isDirectory: true)
+            }
             _url = URL._converted(from: relative)
         } else {
             _url = URL._converted(from: NSURL(fileURLWithPath: p))
@@ -171,9 +183,14 @@ public struct URL : ReferenceConvertible, Equatable {
 
     /// Returns the path of the URL, optionally percent-encoded (macOS 13+ API).
     public func path(percentEncoded: Bool = true) -> String {
-        let decoded = path
-        guard percentEncoded else { return decoded }
-        return (decoded as NSString).addingPercentEscapes(usingEncoding: UInt(NSUTF8StringEncoding)) ?? decoded
+        // CFURLCopyPath keeps the trailing slash and the URL's own percent-encoding, which -[NSURL path] drops.
+        let absolute = unsafeBitCast(_url.absolute() ?? _url, to: CFURL.self)
+        var encoded = CFURLCopyPath(absolute).map { $0 as String } ?? ""
+        if let parameterString = CFURLCopyParameterString(absolute, nil) {
+            encoded += ";" + (parameterString as String)
+        }
+        guard !percentEncoded else { return encoded }
+        return CFURLCreateStringByReplacingPercentEscapes(nil, encoded as CFString, "" as CFString).map { $0 as String } ?? ""
     }
 
     /// If the URL conforms to RFC 1808 (the most common form of URL), returns the fragment component of the URL; otherwise it returns nil.
@@ -188,7 +205,8 @@ public struct URL : ReferenceConvertible, Equatable {
 
     /// Returns true if the URL path represents a directory.
     public var hasDirectoryPath: Bool {
-        return path.hasSuffix("/")
+        // -[NSURL path] drops the trailing slash; Darling's NSURL is toll-free bridged to CFURL.
+        return CFURLHasDirectoryPath(unsafeBitCast(_url, to: CFURL.self))
     }
 
     /// Passes the URL's path in file system representation to `block`.
@@ -440,8 +458,11 @@ extension URL : _ObjectiveCBridgeable {
 }
 
 extension URL : CustomStringConvertible, CustomDebugStringConvertible {
-    // Darling: NSURL's -description clashes with +description in Swift; for URLs it's the absolute string.
+    // Darling: NSURL's -description clashes with +description in Swift, so build NSURL's format here.
     public var description: String {
+        if let base = baseURL {
+            return relativeString + " -- " + base.description
+        }
         return absoluteString
     }
 

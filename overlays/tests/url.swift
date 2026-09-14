@@ -41,6 +41,25 @@ var mutable = dir
 mutable.append(component: "y.txt")
 check(mutable.lastPathComponent == "y.txt", "append(component:)")
 
+// Directory paths, percent-encoded paths and file names relative to a base
+let encodedDir = URL(string: "file:///tmp/a%20b/")!
+check(encodedDir.hasDirectoryPath && dir.hasDirectoryPath && !file.hasDirectoryPath, "hasDirectoryPath")
+check(encodedDir.path(percentEncoded: false) == "/tmp/a b/" && encodedDir.path() == "/tmp/a%20b/",
+      "path(percentEncoded:) keeps the trailing slash (\(encodedDir.path(percentEncoded: false)), \(encodedDir.path()))")
+let escaped = URL(string: "https://h/a%2Fb/c+d;e")!
+check(escaped.path(percentEncoded: true) == "/a%2Fb/c+d;e", "path(percentEncoded: true) keeps the URL's encoding (\(escaped.path()))")
+check(relative.path(percentEncoded: false) == "/a/b/c/d.txt", "path(percentEncoded:) of a relative URL (\(relative.path(percentEncoded: false)))")
+let tmpDir = URL(fileURLWithPath: "/tmp/", isDirectory: true)
+for (name, expected) in [("a b", "file:///tmp/a%20b"), ("100%", "file:///tmp/100%25"), ("x#y?z", "file:///tmp/x%23y%3Fz"), ("sub/", "file:///tmp/sub/")] {
+    let u = URL(fileURLWithPath: name, relativeTo: tmpDir)
+    check(u.absoluteString == expected && u.baseURL == tmpDir, "init(fileURLWithPath:relativeTo:) \"\(name)\" (\(u.absoluteString))")
+}
+check(URL(fileURLWithPath: "tmp", relativeTo: URL(fileURLWithPath: "/", isDirectory: true)).absoluteString == "file:///tmp/",
+      "init(fileURLWithPath:relativeTo:) marks an existing directory")
+check(URL(fileURLWithPath: "", relativeTo: tmpDir).description == "./ -- file:///tmp/",
+      "init(fileURLWithPath:relativeTo:) with an empty path (\(URL(fileURLWithPath: "", relativeTo: tmpDir).description))")
+check(relative.description == "c/d.txt -- https://example.com/a/b/", "relative URL description (\(relative.description))")
+
 // Bridging and equality
 let ns = web as NSURL
 check(ns.absoluteString() == web.absoluteString, "URL bridges to NSURL")
