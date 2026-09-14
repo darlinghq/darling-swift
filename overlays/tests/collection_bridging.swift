@@ -38,6 +38,16 @@ let mutableDict = NSMutableDictionary()
 mutableDict.setObject(42, forKey: "answer" as NSString)
 let fromObjC = mutableDict as! [String: Any]
 check((fromObjC["answer"] as? Int) == 42, "NSMutableDictionary built in ObjC bridges to [String: Any]")
+// Two different NSStrings can be equal Strings (precomposed vs decomposed é); bridging keeps one entry.
+let canonicallyEqualKeys = NSMutableDictionary()
+canonicallyEqualKeys.setObject(1, forKey: "\u{E9}" as NSString)
+canonicallyEqualKeys.setObject(2, forKey: "e\u{301}" as NSString)
+check(canonicallyEqualKeys.count() == 2, "NSDictionary holds precomposed and decomposed keys separately")
+let mergedKeys = canonicallyEqualKeys as! [String: Int]
+check(mergedKeys.count == 1 && mergedKeys["e\u{301}"] != nil, "as! [String: Int] keeps one entry per equal String key (\(mergedKeys))")
+check((canonicallyEqualKeys as? [String: Int])?.count == 1, "as? [String: Int] keeps one entry per equal String key")
+let mergedAny = [String: Any]._unconditionallyBridgeFromObjectiveC(canonicallyEqualKeys)
+check(mergedAny.count == 1 && mergedAny["\u{E9}"] != nil, "unconditional bridge keeps one entry per equal String key")
 
 // Set
 let set: Set<String> = ["x", "y", "z"]

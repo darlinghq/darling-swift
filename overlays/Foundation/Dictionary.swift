@@ -57,13 +57,13 @@ extension Dictionary : _ObjectiveCBridgeable {
       return
     }
 
-    var builder = _DictionaryBuilder<Key, Value>(count: d.count())
+    // Assign through the subscript: two distinct NSString keys can be equal Strings ("\u{E9}" and "e\u{301}"),
+    // and _DictionaryBuilder doesn't allow duplicate keys.
+    var dictionary = Dictionary<Key, Value>(minimumCapacity: d.count())
     d.enumerateKeysAndObjects({ anyKey, anyValue, _ in
-      builder.add(
-        key: anyKey as! Key,
-        value: anyValue as! Value)
+      dictionary[anyKey as! Key] = (anyValue as! Value)
     })
-    result = builder.take()
+    result = dictionary
   }
 
   public static func _conditionallyBridgeFromObjectiveC(
