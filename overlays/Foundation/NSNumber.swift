@@ -630,6 +630,13 @@ extension NSNumber : _HasCustomAnyHashableRepresentation {
         // Compare numbers through the largest box available (Int64, then Double), so that e.g.
         // ([Int : Any] as [AnyHashable : Any]) and [NSNumber : Any] agree. Darling: without a Decimal overlay,
         // NSDecimalNumber isn't special-cased.
+        // Booleans first: +numberWithBool: returns the kCFBoolean singletons, which must hash like Bool, not Int64.
+        if self === kCFBooleanTrue {
+            return AnyHashable(true)
+        }
+        if self === kCFBooleanFalse {
+            return AnyHashable(false)
+        }
         let int64Value = longLongValue()
         if NSNumber(longLong: int64Value) == self {
             return AnyHashable(int64Value)
