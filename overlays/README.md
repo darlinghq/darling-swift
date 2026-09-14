@@ -21,7 +21,7 @@ Measured against every binary in `/System/Applications` of a macOS 26.6.2 instal
 - **CoreFoundation:** 15/15, including the `$s12CoreGraphics7CGFloatV…` metadata and conformances.
 - **os:** 44/44.
 - **XPC:** 21/21.
-- **Dispatch:** 94/104. The missing 11 are the Combine `Scheduler` conformance of `DispatchQueue` with its `SchedulerTimeType`/`SchedulerOptions` types, .
+- **Dispatch:** 94/104. The missing 10 are the Combine `Scheduler` conformance of `DispatchQueue` and its `SchedulerTimeType`/`SchedulerOptions` types (Combine is closed source).
 
 ## Building
 
