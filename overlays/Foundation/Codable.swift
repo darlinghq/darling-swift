@@ -61,3 +61,33 @@ extension DecodingError {
         }
     }
 }
+
+//===----------------------------------------------------------------------===//
+// Number Utilities
+//===----------------------------------------------------------------------===//
+
+/// CoreFoundation's private 128-bit integer number type (CFSInt128Struct), which property lists use for
+/// integers above Int64.max.
+internal struct _CFSInt128 {
+    var high: Int64
+    var low: UInt64
+}
+internal let _kCFNumberSInt128Type = CFNumberType(rawValue: 17)!
+
+/// The number's value as `T`, if it is exactly representable.
+internal func _exactly<T : BinaryInteger>(_ number: NSNumber, as type: T.Type) -> T? {
+    switch number.objCType().map({ String(cString: $0) }) ?? "" {
+    case "f", "d":
+        return T(exactly: number.doubleValue())
+    case "":
+        // Darling's __NSCFNumber reports no type encoding for 128-bit integers (UInt64 values above Int64.max in
+        // property lists). JSON integers above Int64.max arrive as _JSONUnsignedNumber instead.
+        var wide = _CFSInt128(high: 0, low: 0)
+        guard CFNumberGetValue(unsafeBitCast(number, to: CFNumber.self), _kCFNumberSInt128Type, &wide) else { return nil }
+        // CoreFoundation only creates 128-bit numbers for values above Int64.max.
+        guard wide.high == 0 else { return nil }
+        return T(exactly: wide.low)
+    default:
+        return T(exactly: number.longLongValue())
+    }
+}

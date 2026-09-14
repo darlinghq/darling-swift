@@ -2169,7 +2169,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let int = __JSONDecoder._exactly(number, as: type) else {
+        guard let int = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2190,7 +2190,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let int8 = __JSONDecoder._exactly(number, as: type) else {
+        guard let int8 = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2211,7 +2211,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let int16 = __JSONDecoder._exactly(number, as: type) else {
+        guard let int16 = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2232,7 +2232,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let int32 = __JSONDecoder._exactly(number, as: type) else {
+        guard let int32 = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2253,7 +2253,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let int64 = __JSONDecoder._exactly(number, as: type) else {
+        guard let int64 = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2274,7 +2274,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let uint = __JSONDecoder._exactly(number, as: type) else {
+        guard let uint = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2295,7 +2295,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let uint8 = __JSONDecoder._exactly(number, as: type) else {
+        guard let uint8 = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2316,7 +2316,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let uint16 = __JSONDecoder._exactly(number, as: type) else {
+        guard let uint16 = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2337,7 +2337,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let uint32 = __JSONDecoder._exactly(number, as: type) else {
+        guard let uint32 = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2358,7 +2358,7 @@ private extension __JSONDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        guard let uint64 = __JSONDecoder._exactly(number, as: type) else {
+        guard let uint64 = _exactly(number, as: type) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number <\(number)> does not fit in \(type)."))
         }
 
@@ -2699,19 +2699,6 @@ private enum _ISO8601 {
         // Reject dates that don't exist (for example February 30).
         guard civil(days: days) == (year, month, day) else { return nil }
         return Date(timeIntervalSince1970: TimeInterval(days * 86400 + hour * 3600 + minute * 60 + second - offset))
-    }
-}
-
-extension __JSONDecoder {
-    /// The number's value as `T`, if it is exactly representable.
-    fileprivate static func _exactly<T : BinaryInteger>(_ number: NSNumber, as type: T.Type) -> T? {
-        switch number.objCType().map({ String(cString: $0) }) ?? "" {
-        case "f", "d":
-            return T(exactly: number.doubleValue())
-        default:
-            // Darling's CFNumber types are all signed; larger integers arrive as _JSONUnsignedNumber.
-            return T(exactly: number.longLongValue())
-        }
     }
 }
 
