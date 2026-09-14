@@ -629,6 +629,11 @@ public struct IndexSet : ReferenceConvertible, Equatable, BidirectionalCollectio
         return try withoutActuallyEscaping(includeInteger) { includeInteger in try _handle.map {
             var error: Error?
             let result = $0.indexes(in: r, options: 0, passingTest: { (i, stop) -> Bool in
+                // Darling's multi-range path only honors `stop` within the current range.
+                if error != nil {
+                    stop?.pointee = true
+                    return false
+                }
                 do {
                     let include = try includeInteger(i)
                     return include

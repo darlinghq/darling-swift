@@ -25,6 +25,20 @@ check(set.contains(integersIn: other), "contains(integersIn:)")
 let union = other.union(IndexSet(integersIn: 0..<2))
 check(Array(union) == [0, 1, 5], "union")
 check(Array(set.filteredIndexSet { $0 % 2 == 0 }) == [10, 12], "filteredIndexSet")
+// A throwing predicate isn't called again, even for the set's later ranges.
+struct FilterError: Error { let index: Int }
+var predicateCalls = 0
+do {
+    _ = try set.filteredIndexSet { i -> Bool in
+        predicateCalls += 1
+        throw FilterError(index: i)
+    }
+    check(false, "filteredIndexSet rethrows")
+} catch let e as FilterError {
+    check(e.index == 1 && predicateCalls == 1, "filteredIndexSet stops at the first throw (index \(e.index), \(predicateCalls) calls)")
+} catch {
+    check(false, "filteredIndexSet threw an unexpected error")
+}
 let ns = set as NSIndexSet
 check(ns.count() == 5 && ns.firstIndex() == 1, "IndexSet bridges to NSIndexSet")
 check((ns as IndexSet) == set, "NSIndexSet bridges back and ==")
