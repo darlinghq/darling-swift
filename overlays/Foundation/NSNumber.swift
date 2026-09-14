@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-// NSNumber bridging for the integer, Bool and Double types apps import, and NSNumber's literal initializers, from
+// NSNumber bridging for the integer, floating-point, Bool and CGFloat types, and NSNumber's literal initializers, from
 // release/5.4 stdlib/public/Darwin/Foundation/NSNumber.swift.
 // Darling: NSNumber's value accessors are methods and its initializers are init(integer:), init(bool:), ...; Bool's
 // exact-value check compares against 0/1 instead of kCFBooleanTrue/kCFBooleanFalse identity.
@@ -227,6 +227,397 @@ extension Bool : _ObjectiveCBridgeable {
         var result: Bool?
         guard let src = source else { return false }
         guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return false }
+        return result!
+    }
+}
+
+extension UInt8 : _ObjectiveCBridgeable {
+    @available(swift, deprecated: 4, renamed: "init(truncating:)")
+    public init(_ number: __shared NSNumber) {
+        self = number.unsignedCharValue()
+    }
+
+    public init(truncating number: __shared NSNumber) {
+        self = number.unsignedCharValue()
+    }
+
+    public init?(exactly number: __shared NSNumber) {
+        let value = number.unsignedCharValue()
+        guard NSNumber(unsignedChar: value) == number else { return nil }
+        self = value
+    }
+
+    @_semantics("convertToObjectiveC")
+    public func _bridgeToObjectiveC() -> NSNumber {
+        return NSNumber(unsignedChar: self)
+    }
+
+    public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt8?) {
+        if !_conditionallyBridgeFromObjectiveC(x, result: &result) {
+            fatalError("Unable to bridge \(_ObjectiveCType.self) to \(self)")
+        }
+    }
+
+    public static func _conditionallyBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt8?) -> Bool {
+        guard let value = UInt8(exactly: x) else { return false }
+        result = value
+        return true
+    }
+
+    @_effects(readonly)
+    public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNumber?) -> UInt8 {
+        var result: UInt8?
+        guard let src = source else { return UInt8(0) }
+        guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return UInt8(0) }
+        return result!
+    }
+}
+
+extension Int16 : _ObjectiveCBridgeable {
+    @available(swift, deprecated: 4, renamed: "init(truncating:)")
+    public init(_ number: __shared NSNumber) {
+        self = number.shortValue()
+    }
+
+    public init(truncating number: __shared NSNumber) {
+        self = number.shortValue()
+    }
+
+    public init?(exactly number: __shared NSNumber) {
+        let value = number.shortValue()
+        guard NSNumber(short: value) == number else { return nil }
+        self = value
+    }
+
+    @_semantics("convertToObjectiveC")
+    public func _bridgeToObjectiveC() -> NSNumber {
+        return NSNumber(short: self)
+    }
+
+    public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Int16?) {
+        if !_conditionallyBridgeFromObjectiveC(x, result: &result) {
+            fatalError("Unable to bridge \(_ObjectiveCType.self) to \(self)")
+        }
+    }
+
+    public static func _conditionallyBridgeFromObjectiveC(_ x: NSNumber, result: inout Int16?) -> Bool {
+        guard let value = Int16(exactly: x) else { return false }
+        result = value
+        return true
+    }
+
+    @_effects(readonly)
+    public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNumber?) -> Int16 {
+        var result: Int16?
+        guard let src = source else { return Int16(0) }
+        guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return Int16(0) }
+        return result!
+    }
+}
+
+extension UInt16 : _ObjectiveCBridgeable {
+    @available(swift, deprecated: 4, renamed: "init(truncating:)")
+    public init(_ number: __shared NSNumber) {
+        self = number.unsignedShortValue()
+    }
+
+    public init(truncating number: __shared NSNumber) {
+        self = number.unsignedShortValue()
+    }
+
+    public init?(exactly number: __shared NSNumber) {
+        let value = number.unsignedShortValue()
+        guard NSNumber(unsignedShort: value) == number else { return nil }
+        self = value
+    }
+
+    @_semantics("convertToObjectiveC")
+    public func _bridgeToObjectiveC() -> NSNumber {
+        return NSNumber(unsignedShort: self)
+    }
+
+    public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt16?) {
+        if !_conditionallyBridgeFromObjectiveC(x, result: &result) {
+            fatalError("Unable to bridge \(_ObjectiveCType.self) to \(self)")
+        }
+    }
+
+    public static func _conditionallyBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt16?) -> Bool {
+        guard let value = UInt16(exactly: x) else { return false }
+        result = value
+        return true
+    }
+
+    @_effects(readonly)
+    public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNumber?) -> UInt16 {
+        var result: UInt16?
+        guard let src = source else { return UInt16(0) }
+        guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return UInt16(0) }
+        return result!
+    }
+}
+
+extension Int32 : _ObjectiveCBridgeable {
+    @available(swift, deprecated: 4, renamed: "init(truncating:)")
+    public init(_ number: __shared NSNumber) {
+        self = number.intValue()
+    }
+
+    public init(truncating number: __shared NSNumber) {
+        self = number.intValue()
+    }
+
+    public init?(exactly number: __shared NSNumber) {
+        let value = number.intValue()
+        guard NSNumber(int: value) == number else { return nil }
+        self = value
+    }
+
+    @_semantics("convertToObjectiveC")
+    public func _bridgeToObjectiveC() -> NSNumber {
+        return NSNumber(int: self)
+    }
+
+    public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Int32?) {
+        if !_conditionallyBridgeFromObjectiveC(x, result: &result) {
+            fatalError("Unable to bridge \(_ObjectiveCType.self) to \(self)")
+        }
+    }
+
+    public static func _conditionallyBridgeFromObjectiveC(_ x: NSNumber, result: inout Int32?) -> Bool {
+        guard let value = Int32(exactly: x) else { return false }
+        result = value
+        return true
+    }
+
+    @_effects(readonly)
+    public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNumber?) -> Int32 {
+        var result: Int32?
+        guard let src = source else { return Int32(0) }
+        guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return Int32(0) }
+        return result!
+    }
+}
+
+extension UInt32 : _ObjectiveCBridgeable {
+    @available(swift, deprecated: 4, renamed: "init(truncating:)")
+    public init(_ number: __shared NSNumber) {
+        self = number.unsignedIntValue()
+    }
+
+    public init(truncating number: __shared NSNumber) {
+        self = number.unsignedIntValue()
+    }
+
+    public init?(exactly number: __shared NSNumber) {
+        let value = number.unsignedIntValue()
+        guard NSNumber(unsignedInt: value) == number else { return nil }
+        self = value
+    }
+
+    @_semantics("convertToObjectiveC")
+    public func _bridgeToObjectiveC() -> NSNumber {
+        return NSNumber(unsignedInt: self)
+    }
+
+    public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt32?) {
+        if !_conditionallyBridgeFromObjectiveC(x, result: &result) {
+            fatalError("Unable to bridge \(_ObjectiveCType.self) to \(self)")
+        }
+    }
+
+    public static func _conditionallyBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt32?) -> Bool {
+        guard let value = UInt32(exactly: x) else { return false }
+        result = value
+        return true
+    }
+
+    @_effects(readonly)
+    public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNumber?) -> UInt32 {
+        var result: UInt32?
+        guard let src = source else { return UInt32(0) }
+        guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return UInt32(0) }
+        return result!
+    }
+}
+
+extension UInt64 : _ObjectiveCBridgeable {
+    @available(swift, deprecated: 4, renamed: "init(truncating:)")
+    public init(_ number: __shared NSNumber) {
+        self = number.unsignedLongLongValue()
+    }
+
+    public init(truncating number: __shared NSNumber) {
+        self = number.unsignedLongLongValue()
+    }
+
+    public init?(exactly number: __shared NSNumber) {
+        let value = number.unsignedLongLongValue()
+        guard NSNumber(unsignedLongLong: value) == number else { return nil }
+        self = value
+    }
+
+    @_semantics("convertToObjectiveC")
+    public func _bridgeToObjectiveC() -> NSNumber {
+        return NSNumber(unsignedLongLong: self)
+    }
+
+    public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt64?) {
+        if !_conditionallyBridgeFromObjectiveC(x, result: &result) {
+            fatalError("Unable to bridge \(_ObjectiveCType.self) to \(self)")
+        }
+    }
+
+    public static func _conditionallyBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt64?) -> Bool {
+        guard let value = UInt64(exactly: x) else { return false }
+        result = value
+        return true
+    }
+
+    @_effects(readonly)
+    public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNumber?) -> UInt64 {
+        var result: UInt64?
+        guard let src = source else { return UInt64(0) }
+        guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return UInt64(0) }
+        return result!
+    }
+}
+
+extension UInt : _ObjectiveCBridgeable {
+    @available(swift, deprecated: 4, renamed: "init(truncating:)")
+    public init(_ number: __shared NSNumber) {
+        self = number.unsignedIntegerValue()
+    }
+
+    public init(truncating number: __shared NSNumber) {
+        self = number.unsignedIntegerValue()
+    }
+
+    public init?(exactly number: __shared NSNumber) {
+        let value = number.unsignedIntegerValue()
+        guard NSNumber(unsignedInteger: value) == number else { return nil }
+        self = value
+    }
+
+    @_semantics("convertToObjectiveC")
+    public func _bridgeToObjectiveC() -> NSNumber {
+        return NSNumber(unsignedInteger: self)
+    }
+
+    public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt?) {
+        if !_conditionallyBridgeFromObjectiveC(x, result: &result) {
+            fatalError("Unable to bridge \(_ObjectiveCType.self) to \(self)")
+        }
+    }
+
+    public static func _conditionallyBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt?) -> Bool {
+        guard let value = UInt(exactly: x) else { return false }
+        result = value
+        return true
+    }
+
+    @_effects(readonly)
+    public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNumber?) -> UInt {
+        var result: UInt?
+        guard let src = source else { return UInt(0) }
+        guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return UInt(0) }
+        return result!
+    }
+}
+
+extension Float : _ObjectiveCBridgeable {
+    @available(swift, deprecated: 4, renamed: "init(truncating:)")
+    public init(_ number: __shared NSNumber) {
+        self = number.floatValue()
+    }
+
+    public init(truncating number: __shared NSNumber) {
+        self = number.floatValue()
+    }
+
+    public init?(exactly number: __shared NSNumber) {
+        // Unsigned ('I', 'L', 'Q') and signed ('i', 'l', 'q') integer encodings are checked through 64-bit values.
+        let type = number.objCType().pointee
+        if type == 0x49 || type == 0x4c || type == 0x51 {
+            guard let result = Float(exactly: number.unsignedLongLongValue()) else { return nil }
+            self = result
+        } else if type == 0x69 || type == 0x6c || type == 0x71 {
+            guard let result = Float(exactly: number.longLongValue()) else { return nil }
+            self = result
+        } else {
+            guard let result = Float(exactly: number.doubleValue()) else { return nil }
+            self = result
+        }
+    }
+
+    @_semantics("convertToObjectiveC")
+    public func _bridgeToObjectiveC() -> NSNumber {
+        return NSNumber(float: self)
+    }
+
+    public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Float?) {
+        if !_conditionallyBridgeFromObjectiveC(x, result: &result) {
+            fatalError("Unable to bridge \(_ObjectiveCType.self) to \(self)")
+        }
+    }
+
+    public static func _conditionallyBridgeFromObjectiveC(_ x: NSNumber, result: inout Float?) -> Bool {
+        if x.floatValue().isNaN {
+            result = x.floatValue()
+            return true
+        }
+        result = Float(exactly: x)
+        return result != nil
+    }
+
+    @_effects(readonly)
+    public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNumber?) -> Float {
+        var result: Float?
+        guard let src = source else { return Float(0) }
+        guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return Float(0) }
+        return result!
+    }
+}
+
+extension CGFloat : _ObjectiveCBridgeable {
+    @available(swift, deprecated: 4, renamed: "init(truncating:)")
+    public init(_ number: __shared NSNumber) {
+        self.init(CGFloat.NativeType(truncating: number))
+    }
+
+    public init(truncating number: __shared NSNumber) {
+        self.init(CGFloat.NativeType(truncating: number))
+    }
+
+    public init?(exactly number: __shared NSNumber) {
+        var nativeValue: CGFloat.NativeType? = 0
+        guard CGFloat.NativeType._conditionallyBridgeFromObjectiveC(number, result: &nativeValue) else { return nil }
+        self.init(nativeValue!)
+    }
+
+    @_semantics("convertToObjectiveC")
+    public func _bridgeToObjectiveC() -> NSNumber {
+        return self.native._bridgeToObjectiveC()
+    }
+
+    public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout CGFloat?) {
+        if !_conditionallyBridgeFromObjectiveC(x, result: &result) {
+            fatalError("Unable to bridge \(_ObjectiveCType.self) to \(self)")
+        }
+    }
+
+    public static func _conditionallyBridgeFromObjectiveC(_ x: NSNumber, result: inout CGFloat?) -> Bool {
+        var nativeValue: CGFloat.NativeType? = 0
+        guard CGFloat.NativeType._conditionallyBridgeFromObjectiveC(x, result: &nativeValue) else { return false }
+        result = CGFloat(nativeValue!)
+        return true
+    }
+
+    @_effects(readonly)
+    public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNumber?) -> CGFloat {
+        var result: CGFloat?
+        guard let src = source else { return CGFloat(0) }
+        guard _conditionallyBridgeFromObjectiveC(src, result: &result) else { return CGFloat(0) }
         return result!
     }
 }
