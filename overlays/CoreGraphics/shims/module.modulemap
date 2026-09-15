@@ -1,0 +1,4 @@
+module _DarlingCoreGraphicsShims {
+  header "DarlingCoreGraphicsShims.h"
+  export *
+}
