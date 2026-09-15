@@ -79,12 +79,13 @@ internal func _exactly<T : BinaryInteger>(_ number: NSNumber, as type: T.Type) -
     switch number.objCType().map({ String(cString: $0) }) ?? "" {
     case "f", "d":
         return T(exactly: number.doubleValue())
-    case "":
-        // Darling's __NSCFNumber reports no type encoding for 128-bit integers (UInt64 values above Int64.max in
-        // property lists). JSON integers above Int64.max arrive as _JSONUnsignedNumber instead.
+    case "Q", "":
+        // Darling's __NSCFNumber reports 128-bit integers (UInt64 values above Int64.max) as "Q", or as "" before
+        // darling-corefoundation#7; longLongValue would truncate them. JSON integers above Int64.max arrive as
+        // _JSONUnsignedNumber instead.
         var wide = _CFSInt128(high: 0, low: 0)
         guard CFNumberGetValue(unsafeBitCast(number, to: CFNumber.self), _kCFNumberSInt128Type, &wide) else { return nil }
-        // CoreFoundation only creates 128-bit numbers for values above Int64.max.
+        // The plist parsers never set the high word; nothing that needs it fits in 64 bits.
         guard wide.high == 0 else { return nil }
         return T(exactly: wide.low)
     default:
