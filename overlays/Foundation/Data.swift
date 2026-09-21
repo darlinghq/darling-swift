@@ -2031,7 +2031,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
     /// - parameter options: Decoding options. Default value is `[]`.
     @inlinable // This is @inlinable as a convenience initializer.
     public init?(base64Encoded base64Data: __shared Data, options: Data.Base64DecodingOptions = Data.Base64DecodingOptions(rawValue: 0)) {
-        if let d = NSData(base64EncodedData: base64Data._bridgeToObjectiveC(), options: Base64DecodingOptions(rawValue: options.rawValue)) {
+        if let d = NSData(base64EncodedData: base64Data, options: Base64DecodingOptions(rawValue: options.rawValue)) {
             self.init(referencing: d)
         } else {
             return nil
@@ -2291,7 +2291,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
             nsRange = NSRange(location: 0, length: count)
         }
         let result = _representation.withInteriorPointerReference {
-            $0.range(of: dataToFind._bridgeToObjectiveC(), options: options, range: nsRange)
+            $0.range(of: dataToFind, options: options, range: nsRange)
         }
         if result.location == NSNotFound {
             return nil
@@ -2508,7 +2508,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
     @inlinable // This is @inlinable as trivially forwarding.
     public func base64EncodedData(options: Data.Base64EncodingOptions = Data.Base64EncodingOptions(rawValue: 0)) -> Data {
         return _representation.withInteriorPointerReference {
-            return Data(referencing: $0.base64EncodedData(options: options))
+            return $0.base64EncodedData(options: options)
         }
     }
     

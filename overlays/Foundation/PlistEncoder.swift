@@ -687,7 +687,7 @@ open class PropertyListDecoder {
     open func decode<T : Decodable>(_ type: T.Type, from data: Data, format: inout NSPropertyListFormat) throws -> T {
         let topLevel: Any
         do {
-            topLevel = try NSPropertyListSerialization.propertyList(with: data as NSData, options: 0, format: &format)
+            topLevel = try NSPropertyListSerialization.propertyList(with: data, options: 0, format: &format)
         } catch {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "The given data was not a valid property list.", underlyingError: error))
         }

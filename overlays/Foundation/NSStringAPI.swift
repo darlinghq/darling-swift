@@ -82,7 +82,7 @@ extension String {
   /// Returns a `String` initialized by converting given `data` into
   /// Unicode characters using a given `encoding`.
   public init?(data: __shared Data, encoding: Encoding) {
-    guard let s = NSString(data: data._bridgeToObjectiveC(), encoding: encoding.rawValue) else { return nil }
+    guard let s = NSString(data: data, encoding: encoding.rawValue) else { return nil }
     self = String._unconditionallyBridgeFromObjectiveC(s)
   }
 
@@ -95,7 +95,7 @@ extension String {
     guard let d = _bridgeToObjectiveC().data(usingEncoding: encoding.rawValue, allowLossyConversion: allowLossyConversion) else {
       return nil
     }
-    return Data(referencing: d)
+    return d
   }
 }
 
