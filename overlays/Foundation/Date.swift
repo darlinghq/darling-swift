@@ -21,14 +21,6 @@ import CoreFoundation
 public typealias TimeInterval = NSTimeInterval
 public typealias ComparisonResult = NSComparisonResult
 
-// Darling's NS_ENUM imports NSComparisonResult as a raw-value struct (it still mangles as __C.NSComparisonResult),
-// so provide the Swift case names apps and the overlay use.
-extension NSComparisonResult {
-    public static var orderedAscending: NSComparisonResult { return NSComparisonResult(rawValue: -1) }
-    public static var orderedSame: NSComparisonResult { return NSComparisonResult(rawValue: 0) }
-    public static var orderedDescending: NSComparisonResult { return NSComparisonResult(rawValue: 1) }
-}
-
 /**
  `Date` represents a single point in time.
 

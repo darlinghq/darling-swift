@@ -36,7 +36,7 @@ open class PropertyListEncoder {
     // MARK: - Options
 
     /// The output format to write the property list data in. Defaults to `.binary`.
-    open var outputFormat: NSPropertyListFormat = NSPropertyListBinaryFormat_v1_0
+    open var outputFormat: NSPropertyListFormat = .binaryFormat_v1_0
 
     /// Contextual user-provided information for use during encoding.
     open var userInfo: [CodingUserInfoKey : Any] = [:]
@@ -672,7 +672,7 @@ open class PropertyListDecoder {
     /// - throws: `DecodingError.dataCorrupted` if values requested from the payload are corrupted, or if the given data is not a valid property list.
     /// - throws: An error if any value throws an error during decoding.
     open func decode<T : Decodable>(_ type: T.Type, from data: Data) throws -> T {
-        var format: NSPropertyListFormat = NSPropertyListBinaryFormat_v1_0
+        var format: NSPropertyListFormat = .binaryFormat_v1_0
         return try decode(type, from: data, format: &format)
     }
 
