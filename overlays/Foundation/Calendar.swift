@@ -210,9 +210,13 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
 
     private func _formatter() -> NSDateFormatter? {
         guard let formatter = NSDateFormatter() as NSDateFormatter? else { return nil }
-        formatter.setCalendar(_ns)
+        // NSDateFormatter declares calendar, timeZone and locale as @property, so these are
+        // assignments rather than setX(_:) calls. _ns.locale() stays a method call because
+        // NSCalendar's accessors are still method pairs; if those are ever converted too, the
+        // getter here has to become _ns.locale as well, since a Swift property cannot be called.
+        formatter.calendar = _ns
         if let locale = _ns.locale() {
-            formatter.setLocale(locale)
+            formatter.locale = locale
         }
         return formatter
     }
