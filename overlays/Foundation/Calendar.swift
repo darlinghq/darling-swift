@@ -954,22 +954,22 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
         var result: UInt = 0
         for u in units {
             switch u {
-            case .era: result |= NSCalendarUnit.calendarUnitEra.rawValue
-            case .year: result |= NSCalendarUnit.calendarUnitYear.rawValue
-            case .month: result |= NSCalendarUnit.calendarUnitMonth.rawValue
-            case .day: result |= NSCalendarUnit.calendarUnitDay.rawValue
-            case .hour: result |= NSCalendarUnit.calendarUnitHour.rawValue
-            case .minute: result |= NSCalendarUnit.calendarUnitMinute.rawValue
-            case .second: result |= NSCalendarUnit.calendarUnitSecond.rawValue
-            case .weekday: result |= NSCalendarUnit.calendarUnitWeekday.rawValue
-            case .weekdayOrdinal: result |= NSCalendarUnit.calendarUnitWeekdayOrdinal.rawValue
-            case .quarter: result |= NSCalendarUnit.calendarUnitQuarter.rawValue
-            case .weekOfMonth: result |= NSCalendarUnit.calendarUnitWeekOfMonth.rawValue
-            case .weekOfYear: result |= NSCalendarUnit.calendarUnitWeekOfYear.rawValue
-            case .yearForWeekOfYear: result |= NSCalendarUnit.calendarUnitYearForWeekOfYear.rawValue
-            case .nanosecond: result |= NSCalendarUnit.calendarUnitNanosecond.rawValue
-            case .calendar: result |= NSCalendarUnit.calendarUnitCalendar.rawValue
-            case .timeZone: result |= NSCalendarUnit.calendarUnitTimeZone.rawValue
+            case .era: result |= NSCalendarUnit.era.rawValue
+            case .year: result |= NSCalendarUnit.year.rawValue
+            case .month: result |= NSCalendarUnit.month.rawValue
+            case .day: result |= NSCalendarUnit.day.rawValue
+            case .hour: result |= NSCalendarUnit.hour.rawValue
+            case .minute: result |= NSCalendarUnit.minute.rawValue
+            case .second: result |= NSCalendarUnit.second.rawValue
+            case .weekday: result |= NSCalendarUnit.weekday.rawValue
+            case .weekdayOrdinal: result |= NSCalendarUnit.weekdayOrdinal.rawValue
+            case .quarter: result |= NSCalendarUnit.quarter.rawValue
+            case .weekOfMonth: result |= NSCalendarUnit.weekOfMonth.rawValue
+            case .weekOfYear: result |= NSCalendarUnit.weekOfYear.rawValue
+            case .yearForWeekOfYear: result |= NSCalendarUnit.yearForWeekOfYear.rawValue
+            case .nanosecond: result |= NSCalendarUnit.nanosecond.rawValue
+            case .calendar: result |= NSCalendarUnit.calendar.rawValue
+            case .timeZone: result |= NSCalendarUnit.timeZone.rawValue
             }
         }
         return NSCalendarUnit(rawValue: result)
