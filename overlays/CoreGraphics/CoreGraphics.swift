@@ -18,3 +18,32 @@ extension CGContext {
     CGContextAddArc(self, center.x, center.y, radius, startAngle, endAngle, clockwise)
   }
 }
+
+// CGRect.applying, CGPoint.applying, CGSize.applying, CGImage.width and CGImage.height are
+// Clang-importer renames of C functions on macOS, driven by the SDK's CoreGraphics.apinotes
+// (CGRectApplyAffineTransform becomes CGRect.applying(_:), CGImageGetWidth becomes
+// getter:CGImage.width(self:)). Darling's SDK ships no such file, so they are written here over
+// the same C functions, the way the CGContext methods above are. There is no Swift source for
+// them in swiftlang/swift: the Darwin overlay never declared them either.
+extension CGRect {
+  public func applying(_ t: CGAffineTransform) -> CGRect {
+    return CGRectApplyAffineTransform(self, t)
+  }
+}
+
+extension CGPoint {
+  public func applying(_ t: CGAffineTransform) -> CGPoint {
+    return __CGPointApplyAffineTransform(self, t)
+  }
+}
+
+extension CGSize {
+  public func applying(_ t: CGAffineTransform) -> CGSize {
+    return __CGSizeApplyAffineTransform(self, t)
+  }
+}
+
+extension CGImage {
+  public var width: Int { return CGImageGetWidth(self) }
+  public var height: Int { return CGImageGetHeight(self) }
+}
