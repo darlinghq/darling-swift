@@ -277,3 +277,18 @@ extension CGRect: Equatable {
         return r1.origin == r2.origin && r1.size == r2.size
     }
 }
+
+extension CGSize : Codable {
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        let width = try container.decode(CGFloat.self)
+        let height = try container.decode(CGFloat.self)
+        self.init(width: width, height: height)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        try container.encode(width)
+        try container.encode(height)
+    }
+}
