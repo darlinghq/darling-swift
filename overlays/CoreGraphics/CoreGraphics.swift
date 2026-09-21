@@ -2,6 +2,10 @@
 // CoreFoundation and Foundation. This module exists so the Clang importer can map C `CGFloat` to
 // `CoreGraphics.CGFloat` (defined in the CoreFoundation overlay), and so arm64 binaries that autolink
 // libswiftCoreGraphics find a slice.
+// Re-export the CoreGraphics Clang module. Without this, a Swift module named CoreGraphics
+// shadows the Clang module of the same name and every C type behind it becomes unreachable from
+// Swift, even though Darling's headers declare them all.
+@_exported import CoreGraphics
 @_exported import CoreFoundation
 import _DarlingCoreGraphicsShims
 
