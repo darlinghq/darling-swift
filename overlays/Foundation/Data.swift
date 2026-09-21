@@ -2497,7 +2497,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
     @inlinable // This is @inlinable as trivially forwarding.
     public func base64EncodedString(options: Data.Base64EncodingOptions = Data.Base64EncodingOptions(rawValue: 0)) -> String {
         return _representation.withInteriorPointerReference {
-            return $0.base64EncodedString(with: options)
+            return $0.base64EncodedString(options: options)
         }
     }
     
@@ -2508,7 +2508,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
     @inlinable // This is @inlinable as trivially forwarding.
     public func base64EncodedData(options: Data.Base64EncodingOptions = Data.Base64EncodingOptions(rawValue: 0)) -> Data {
         return _representation.withInteriorPointerReference {
-            return Data(referencing: $0.base64EncodedData(with: options))
+            return Data(referencing: $0.base64EncodedData(options: options))
         }
     }
     

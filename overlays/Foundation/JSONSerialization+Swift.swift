@@ -155,7 +155,7 @@ internal enum _JSONSerialization {
             }
             if options.sortedKeys {
                 // The order JSONSerialization's sortedKeys uses for apps built against these SDKs.
-                let order = NSStringCompareOptions(rawValue: NSNumericSearch.rawValue | NSCaseInsensitiveSearch.rawValue | NSForcedOrderingSearch.rawValue)
+                let order = NSStringCompareOptions([.numericSearch, .caseInsensitiveSearch, .forcedOrderingSearch])
                 entries.sort { $0.key.compare($1.key, options: order) == .orderedAscending }
             }
             guard !entries.isEmpty else {
