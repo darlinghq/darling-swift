@@ -16,7 +16,7 @@
 
 @_exported import Foundation // Clang module
 
-extension NSFileManager {
+extension FileManager {
     @available(macOS 10.6, iOS 4.0, *)
     @nonobjc
     public func enumerator(at url: URL, includingPropertiesForKeys keys: [URLResourceKey]?,
