@@ -278,6 +278,22 @@ extension CGRect: Equatable {
     }
 }
 
+// Consistent with ==: equal rects are equal once standardized, and all null rects are equal.
+extension CGRect: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        if isNull {
+            hasher.combine(0 as UInt8)
+            return
+        }
+        let r = standardized
+        hasher.combine(1 as UInt8)
+        hasher.combine(r.origin.x)
+        hasher.combine(r.origin.y)
+        hasher.combine(r.size.width)
+        hasher.combine(r.size.height)
+    }
+}
+
 extension CGSize : Codable {
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()

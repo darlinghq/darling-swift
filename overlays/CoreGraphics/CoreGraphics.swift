@@ -86,6 +86,14 @@ extension CGContext {
     CGContextDrawImage(self, rect, image)
   }
 
+  public func draw(_ image: CGImage, in rect: CGRect, byTiling: Bool = false) {
+    if byTiling {
+      CGContextDrawTiledImage(self, rect, image)
+    } else {
+      CGContextDrawImage(self, rect, image)
+    }
+  }
+
   // CGBitmapContextCreateImage, which Apple's apinotes renames onto CGContext rather than onto a
   // bitmap-context type: CGBitmapContext is not a separate type in C. Darling's CGBitmapContext.h is
   // outside a CF_IMPLICIT_BRIDGING region, so the importer hands back an Unmanaged; the C function
