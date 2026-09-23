@@ -10,7 +10,6 @@
 
 internal import cmark_gfm
 internal import cmark_gfm_extensions
-@_spi(Reflection) import Swift
 
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension AttributedString {
@@ -133,7 +132,7 @@ private struct _MarkdownTranslator {
     init<S : AttributeScope>(scope: S.Type, options: AttributedString.MarkdownParsingOptions, baseURL: URL?) {
         self.options = options
         self.baseURL = baseURL
-        markdownKeys = options.allowsExtendedAttributes ? _markdownDecodableKeys(in: scope) : [:]
+        markdownKeys = options.allowsExtendedAttributes ? S.markdownKeyTypes() : [:]
     }
 
     static func error(_ description: String) -> CocoaError {
@@ -358,21 +357,6 @@ private struct _MarkdownTranslator {
 // MARK: Extended attributes
 
 private let _markdownKeysUserInfoKey = CodingUserInfoKey(rawValue: "Foundation.MarkdownDecodableAttributedStringKeys")!
-
-/// The scope's `MarkdownDecodableAttributedStringKey`s by Markdown name, including nested scopes'. swift-foundation
-/// only gathers these under FOUNDATION_FRAMEWORK, so this walks the scope's stored properties itself.
-private func _markdownDecodableKeys(in scope: Any.Type) -> [String : any MarkdownDecodableAttributedStringKey.Type] {
-    var keys: [String : any MarkdownDecodableAttributedStringKey.Type] = [:]
-    _forEachField(of: scope, options: .ignoreUnknown) { _, _, type, _ in
-        if let key = type as? any MarkdownDecodableAttributedStringKey.Type {
-            keys[key.markdownName] = key
-        } else if let nested = type as? any AttributeScope.Type {
-            keys.merge(_markdownDecodableKeys(in: nested)) { _, new in new }
-        }
-        return true
-    }
-    return keys
-}
 
 private struct _ExtendedAttributes : Decodable {
     struct Key : CodingKey {

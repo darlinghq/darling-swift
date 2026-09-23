@@ -189,8 +189,6 @@ public struct ScopedAttributeContainer<S: AttributeScope> : Sendable {
 
 // MARK: Internals
 
-#if FOUNDATION_FRAMEWORK
-
 internal extension AttributedStringKey {
     static func _convertToObjectiveCValue(_ value: Value) throws -> AnyObject {
         if let convertibleType = Self.self as? any ObjectiveCConvertibleAttributedStringKey.Type {
@@ -219,4 +217,3 @@ internal extension AttributedStringKey {
         }
     }
 }
-#endif // FOUNDATION_FRAMEWORK

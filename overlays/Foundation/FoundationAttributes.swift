@@ -430,9 +430,23 @@ extension AttributeScopes.FoundationAttributes {
     
     @frozen
     @available(FoundationPreview 6.2, *)
-    public enum ListItemDelimiterAttribute : CodableAttributedStringKey {
+    public enum ListItemDelimiterAttribute : CodableAttributedStringKey, ObjectiveCConvertibleAttributedStringKey {
         public typealias Value = Character
+        public typealias ObjectiveCValue = NSString
+        
         public static let name = "NSListItemDelimiter"
+        
+        public static func objectiveCValue(for value: Character) throws -> NSString {
+            String(value) as NSString
+        }
+        
+        public static func value(for object: NSString) throws -> Character {
+            let stringValue = object as String
+            guard stringValue.count == 1 else {
+                throw CocoaError(.coderInvalidValue)
+            }
+            return stringValue[stringValue.startIndex]
+        }
         
         public static func encode(_ value: Character, to encoder: any Encoder) throws {
             var container = encoder.singleValueContainer()
@@ -454,9 +468,18 @@ extension AttributeScopes.FoundationAttributes {
     
 	@frozen
     @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-    public enum InlinePresentationIntentAttribute : CodableAttributedStringKey {
+    public enum InlinePresentationIntentAttribute : CodableAttributedStringKey, ObjectiveCConvertibleAttributedStringKey {
         public typealias Value = InlinePresentationIntent
+        public typealias ObjectiveCValue = NSNumber
         public static let name = NSAttributedString.Key.inlinePresentationIntent.rawValue
+        
+        public static func objectiveCValue(for value: InlinePresentationIntent) throws -> NSNumber {
+            NSNumber(value: value.rawValue)
+        }
+        
+        public static func value(for object: NSNumber) throws -> InlinePresentationIntent {
+            InlinePresentationIntent(rawValue: UInt(truncating: object))
+        }
     }
     
     @frozen
@@ -716,6 +739,32 @@ extension AttributeScopes.FoundationAttributes.InlinePresentationIntentAttribute
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension InlinePresentationIntent : Hashable, Codable {}
 
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension AttributeScopes.FoundationAttributes.LinkAttribute : ObjectiveCConvertibleAttributedStringKey {
+    public typealias ObjectiveCValue = NSObject // NSURL or NSString
+    
+    public static func objectiveCValue(for value: URL) throws -> NSObject {
+        value as NSURL
+    }
+    
+    public static func value(for object: NSObject) throws -> URL {
+        if let object = object as? NSURL {
+            return object as URL
+        } else if let object = object as? NSString {
+            // TODO: Do we need to call up to [NSTextView _URLForString:] on macOS here?
+            if let result = URL(string: object as String) {
+                return result
+            }
+        }
+        throw CocoaError(.coderInvalidValue)
+    }
+}
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension AttributeScopes.FoundationAttributes.PersonNameComponentAttribute : ObjectiveCConvertibleAttributedStringKey {
+    public typealias ObjectiveCValue = NSString
+}
+
 #if FOUNDATION_FRAMEWORK
 
 @available(macOS, unavailable, introduced: 14.0)
@@ -829,34 +878,8 @@ extension AttributeScopes.FoundationAttributes.LocalizedStringArgumentAttributes
 extension AttributeScopes.FoundationAttributes.LocalizedStringArgumentAttributes.LocalizedDateIntervalArgumentAttribute : Sendable {}
 
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension AttributeScopes.FoundationAttributes.LinkAttribute : ObjectiveCConvertibleAttributedStringKey {
-    public typealias ObjectiveCValue = NSObject // NSURL or NSString
-    
-    public static func objectiveCValue(for value: URL) throws -> NSObject {
-        value as NSURL
-    }
-    
-    public static func value(for object: NSObject) throws -> URL {
-        if let object = object as? NSURL {
-            return object as URL
-        } else if let object = object as? NSString {
-            // TODO: Do we need to call up to [NSTextView _URLForString:] on macOS here?
-            if let result = URL(string: object as String) {
-                return result
-            }
-        }
-        throw CocoaError(.coderInvalidValue)
-    }
-}
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension AttributeScopes.FoundationAttributes.LanguageIdentifierAttribute : MarkdownDecodableAttributedStringKey {
     public static let markdownName = "languageIdentifier"
-}
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension AttributeScopes.FoundationAttributes.PersonNameComponentAttribute : ObjectiveCConvertibleAttributedStringKey {
-    public typealias ObjectiveCValue = NSString
 }
 
 @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
