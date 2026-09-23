@@ -335,6 +335,18 @@ public struct URL : ReferenceConvertible, Equatable {
         self = self.standardized
     }
 
+    /// Standardizes the path of a file URL. Non-file URLs are unchanged.
+    public var standardizedFileURL: URL {
+        guard isFileURL, let result = _url.standardizingPath() else { return self }
+        return URL(reference: result)
+    }
+
+    /// Resolves symbolic links in the path of a file URL. Non-file URLs are unchanged.
+    public func resolvingSymlinksInPath() -> URL {
+        guard isFileURL, let result = _url.resolvingSymlinksInPath() else { return self }
+        return URL(reference: result)
+    }
+
     // MARK: - Reachability
 
     /// Returns whether the URL's resource exists and is reachable.
