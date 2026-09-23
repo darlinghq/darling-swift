@@ -39,8 +39,8 @@ check(back == note, "Notification equality after a round trip")
 
 // Darling's +defaultCenter returns id, and NSNotification has no SwiftBridge entry, so convert explicitly.
 var received: Notification?
-let center = NSNotificationCenter.defaultCenter() as! NSNotificationCenter
-let token = center.addObserver(forName: name.rawValue, object: nil as Any?, queue: nil as NSOperationQueue?) { (n: NSNotification?) in
+let center = NotificationCenter.defaultCenter() as! NotificationCenter
+let token = center.addObserver(forName: name.rawValue, object: nil as Any?, queue: nil as OperationQueue?) { (n: NSNotification?) in
     received = n.map { $0 as Notification }
 }
 center.post(Notification(name: name, userInfo: ["k": "v"]) as NSNotification)

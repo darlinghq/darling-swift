@@ -39,7 +39,7 @@ try? #"""
 "order %lld %@" = "%2$@ first, then %1$lld";
 "key.title" = "Translated title %lld";
 """#.write(to: URL(fileURLWithPath: bundleDirectory + "/en.lproj/Localizable.strings"), atomically: true, encoding: .utf8)
-if let bundle = NSBundle(url: URL(fileURLWithPath: bundleDirectory)) {
+if let bundle = Bundle(url: URL(fileURLWithPath: bundleDirectory)) {
     check(String(localized: "Hello \(name)", bundle: bundle) == "Bonjour Ada", "String(localized:bundle:) uses the strings table (\(String(localized: "Hello \(name)", bundle: bundle)))")
     check(String(localized: "order \(5, specifier: "%lld") \(name)", bundle: bundle) == "Ada first, then 5", "a translation can reorder arguments")
     let fromTable = LocalizedStringResource("key.title", defaultValue: "Title \(7, specifier: "%lld")", bundle: .atURL(URL(fileURLWithPath: bundleDirectory)))
@@ -51,7 +51,7 @@ if let bundle = NSBundle(url: URL(fileURLWithPath: bundleDirectory)) {
 func describe<T : CustomStringConvertible>(_ value: T) -> String { return value.description }
 check(describe(NSObject()).hasPrefix("<NSObject: "), "NSObject is CustomStringConvertible (\(describe(NSObject())))")
 
-let center = NSNotificationCenter.defaultCenter() as! NSNotificationCenter
+let center = NotificationCenter.defaultCenter() as! NotificationCenter
 let notificationName = NSNotificationName(rawValue: "org.darling.async-notification")
 let sender = NSObject()
 let notifications = center.notifications(named: notificationName, object: sender)
