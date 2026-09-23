@@ -668,3 +668,11 @@ extension NSNumber : ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral, Exp
         self.init(bool: value)
     }
 }
+
+extension NSNumber {
+    /// Box a Core Graphics floating-point value as a number.
+    @nonobjc
+    public convenience init(value: CGFloat) {
+        self.init(double: Double(value))
+    }
+}
