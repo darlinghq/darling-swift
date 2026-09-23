@@ -56,6 +56,23 @@ extension String {
   public typealias CompareOptions = NSStringCompareOptions
 }
 
+extension StringProtocol {
+  /// Encodes a string or substring with the requested NSString encoding.
+  public func data(using encoding: String.Encoding, allowLossyConversion: Bool = false) -> Data? {
+    let string = String(self)
+    if encoding == .utf8 {
+      return Data(string.utf8)
+    }
+    guard let encoded = string._bridgeToObjectiveC().data(
+      usingEncoding: encoding.rawValue,
+      allowLossyConversion: allowLossyConversion
+    ) else {
+      return nil
+    }
+    return Data(referencing: encoded)
+  }
+}
+
 extension String.Encoding : Hashable {
   public var hashValue: Int {
     return rawValue.hashValue
