@@ -501,22 +501,22 @@ extension __PlistEncoder {
 
     /// Returns the given value boxed in a container appropriate for pushing onto the container stack.
     fileprivate func box(_ value: Bool)   -> NSObject { return value ? _JSONSerialization.trueNumber : _JSONSerialization.falseNumber }
-    fileprivate func box(_ value: Int)    -> NSObject { return NSNumber(integer: value) }
-    fileprivate func box(_ value: Int8)   -> NSObject { return NSNumber(char: value) }
-    fileprivate func box(_ value: Int16)  -> NSObject { return NSNumber(short: value) }
-    fileprivate func box(_ value: Int32)  -> NSObject { return NSNumber(int: value) }
-    fileprivate func box(_ value: Int64)  -> NSObject { return NSNumber(longLong: value) }
+    fileprivate func box(_ value: Int)    -> NSObject { return NSNumber(value: value) }
+    fileprivate func box(_ value: Int8)   -> NSObject { return NSNumber(value: value) }
+    fileprivate func box(_ value: Int16)  -> NSObject { return NSNumber(value: value) }
+    fileprivate func box(_ value: Int32)  -> NSObject { return NSNumber(value: value) }
+    fileprivate func box(_ value: Int64)  -> NSObject { return NSNumber(value: value) }
     fileprivate func box(_ value: UInt)   -> NSObject { return box(UInt64(value)) }
-    fileprivate func box(_ value: UInt8)  -> NSObject { return NSNumber(unsignedChar: value) }
-    fileprivate func box(_ value: UInt16) -> NSObject { return NSNumber(unsignedShort: value) }
-    fileprivate func box(_ value: UInt32) -> NSObject { return NSNumber(unsignedInt: value) }
+    fileprivate func box(_ value: UInt8)  -> NSObject { return NSNumber(value: value) }
+    fileprivate func box(_ value: UInt16) -> NSObject { return NSNumber(value: value) }
+    fileprivate func box(_ value: UInt32) -> NSObject { return NSNumber(value: value) }
     fileprivate func box(_ value: UInt64) -> NSObject {
-        guard value > UInt64(Int64.max) else { return NSNumber(longLong: Int64(value)) }
+        guard value > UInt64(Int64.max) else { return NSNumber(value: Int64(value)) }
         var wide = _CFSInt128(high: 0, low: value)
         return unsafeBitCast(CFNumberCreate(nil, _kCFNumberSInt128Type, &wide), to: NSNumber.self)
     }
-    fileprivate func box(_ value: Float)  -> NSObject { return NSNumber(float: value) }
-    fileprivate func box(_ value: Double) -> NSObject { return NSNumber(double: value) }
+    fileprivate func box(_ value: Float)  -> NSObject { return NSNumber(value: value) }
+    fileprivate func box(_ value: Double) -> NSObject { return NSNumber(value: value) }
     fileprivate func box(_ value: String) -> NSObject { return NSString(string: value) }
 
     fileprivate func box<T : Encodable>(_ value: T) throws -> NSObject {
@@ -1758,7 +1758,7 @@ extension __PlistDecoder {
         }
 
         let float = number.floatValue()
-        guard NSNumber(float: float).isEqual(to: number) else {
+        guard NSNumber(value: float).isEqual(to: number) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed property list number <\(number)> does not fit in \(type)."))
         }
 
@@ -1773,7 +1773,7 @@ extension __PlistDecoder {
         }
 
         let double = number.doubleValue()
-        guard NSNumber(double: double).isEqual(to: number) else {
+        guard NSNumber(value: double).isEqual(to: number) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed property list number <\(number)> does not fit in \(type)."))
         }
 

@@ -29,13 +29,13 @@ extension Int8 : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.charValue()
-        guard NSNumber(char: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(char: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Int8?) {
@@ -71,13 +71,13 @@ extension Int64 : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.longLongValue()
-        guard NSNumber(longLong: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(longLong: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Int64?) {
@@ -113,13 +113,13 @@ extension Int : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.integerValue()
-        guard NSNumber(integer: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(integer: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Int?) {
@@ -155,13 +155,13 @@ extension Double : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.doubleValue()
-        guard NSNumber(double: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(double: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Double?) {
@@ -196,9 +196,9 @@ extension Bool : _ObjectiveCBridgeable {
     }
 
     public init?(exactly number: __shared NSNumber) {
-        if NSNumber(integer: 1) == number {
+        if NSNumber(value: 1) == number {
             self = true
-        } else if NSNumber(integer: 0) == number {
+        } else if NSNumber(value: 0) == number {
             self = false
         } else {
             return nil
@@ -207,7 +207,7 @@ extension Bool : _ObjectiveCBridgeable {
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(bool: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Bool?) {
@@ -243,13 +243,13 @@ extension UInt8 : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.unsignedCharValue()
-        guard NSNumber(unsignedChar: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(unsignedChar: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt8?) {
@@ -285,13 +285,13 @@ extension Int16 : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.shortValue()
-        guard NSNumber(short: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(short: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Int16?) {
@@ -327,13 +327,13 @@ extension UInt16 : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.unsignedShortValue()
-        guard NSNumber(unsignedShort: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(unsignedShort: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt16?) {
@@ -369,13 +369,13 @@ extension Int32 : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.intValue()
-        guard NSNumber(int: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(int: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Int32?) {
@@ -411,13 +411,13 @@ extension UInt32 : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.unsignedIntValue()
-        guard NSNumber(unsignedInt: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(unsignedInt: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt32?) {
@@ -453,13 +453,13 @@ extension UInt64 : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.unsignedLongLongValue()
-        guard NSNumber(unsignedLongLong: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(unsignedLongLong: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt64?) {
@@ -495,13 +495,13 @@ extension UInt : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         let value = number.unsignedIntegerValue()
-        guard NSNumber(unsignedInteger: value) == number else { return nil }
+        guard NSNumber(value: value) == number else { return nil }
         self = value
     }
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(unsignedInteger: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout UInt?) {
@@ -552,7 +552,7 @@ extension Float : _ObjectiveCBridgeable {
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNumber {
-        return NSNumber(float: self)
+        return NSNumber(value: self)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNumber, result: inout Float?) {
@@ -638,11 +638,11 @@ extension NSNumber : _HasCustomAnyHashableRepresentation {
             return AnyHashable(false)
         }
         let int64Value = longLongValue()
-        if NSNumber(longLong: int64Value) == self {
+        if NSNumber(value: int64Value) == self {
             return AnyHashable(int64Value)
         }
         let doubleValue = doubleValue()
-        if NSNumber(double: doubleValue) == self {
+        if NSNumber(value: doubleValue) == self {
             return AnyHashable(doubleValue)
         }
         return nil
@@ -653,19 +653,19 @@ extension NSNumber : ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral, Exp
     /// Create an instance initialized to `value`.
     @nonobjc
     public required convenience init(integerLiteral value: Int) {
-        self.init(integer: value)
+        self.init(value: value)
     }
 
     /// Create an instance initialized to `value`.
     @nonobjc
     public required convenience init(floatLiteral value: Double) {
-        self.init(double: value)
+        self.init(value: value)
     }
 
     /// Create an instance initialized to `value`.
     @nonobjc
     public required convenience init(booleanLiteral value: Bool) {
-        self.init(bool: value)
+        self.init(value: value)
     }
 }
 

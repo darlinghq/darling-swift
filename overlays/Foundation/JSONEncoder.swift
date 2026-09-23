@@ -746,16 +746,16 @@ extension __JSONEncoder : SingleValueEncodingContainer {
 private extension __JSONEncoder {
     /// Returns the given value boxed in a container appropriate for pushing onto the container stack.
     func box(_ value: Bool)   -> NSObject { return value ? _JSONSerialization.trueNumber : _JSONSerialization.falseNumber }
-    func box(_ value: Int)    -> NSObject { return NSNumber(integer: value) }
-    func box(_ value: Int8)   -> NSObject { return NSNumber(char: value) }
-    func box(_ value: Int16)  -> NSObject { return NSNumber(short: value) }
-    func box(_ value: Int32)  -> NSObject { return NSNumber(int: value) }
-    func box(_ value: Int64)  -> NSObject { return NSNumber(longLong: value) }
+    func box(_ value: Int)    -> NSObject { return NSNumber(value: value) }
+    func box(_ value: Int8)   -> NSObject { return NSNumber(value: value) }
+    func box(_ value: Int16)  -> NSObject { return NSNumber(value: value) }
+    func box(_ value: Int32)  -> NSObject { return NSNumber(value: value) }
+    func box(_ value: Int64)  -> NSObject { return NSNumber(value: value) }
     func box(_ value: UInt)   -> NSObject { return box(UInt64(value)) }
-    func box(_ value: UInt8)  -> NSObject { return NSNumber(unsignedChar: value) }
-    func box(_ value: UInt16) -> NSObject { return NSNumber(unsignedShort: value) }
-    func box(_ value: UInt32) -> NSObject { return NSNumber(unsignedInt: value) }
-    func box(_ value: UInt64) -> NSObject { return value > UInt64(Int64.max) ? _JSONUnsignedNumber(value) : NSNumber(longLong: Int64(value)) }
+    func box(_ value: UInt8)  -> NSObject { return NSNumber(value: value) }
+    func box(_ value: UInt16) -> NSObject { return NSNumber(value: value) }
+    func box(_ value: UInt32) -> NSObject { return NSNumber(value: value) }
+    func box(_ value: UInt64) -> NSObject { return value > UInt64(Int64.max) ? _JSONUnsignedNumber(value) : NSNumber(value: Int64(value)) }
     func box(_ value: String) -> NSObject { return NSString(string: value) }
 
     func box(_ float: Float) throws -> NSObject {
@@ -775,7 +775,7 @@ private extension __JSONEncoder {
             }
         }
 
-        return NSNumber(float: float)
+        return NSNumber(value: float)
     }
 
     func box(_ double: Double) throws -> NSObject {
@@ -795,7 +795,7 @@ private extension __JSONEncoder {
             }
         }
 
-        return NSNumber(double: double)
+        return NSNumber(value: double)
     }
 
     func box(_ date: Date) throws -> NSObject {
@@ -807,10 +807,10 @@ private extension __JSONEncoder {
             return self.storage.popContainer()
 
         case .secondsSince1970:
-            return NSNumber(double: date.timeIntervalSince1970)
+            return NSNumber(value: date.timeIntervalSince1970)
 
         case .millisecondsSince1970:
-            return NSNumber(double: 1000.0 * date.timeIntervalSince1970)
+            return NSNumber(value: 1000.0 * date.timeIntervalSince1970)
 
         case .iso8601:
             guard let string = _ISO8601.string(from: date) else {

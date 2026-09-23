@@ -65,18 +65,18 @@ check(n.integerValue() == 5, "NSNumber integer literal")
 check((true as NSNumber).boolValue(), "NSNumber boolean literal")
 check((2.5 as NSNumber).doubleValue() == 2.5, "NSNumber float literal")
 check((42 as NSNumber) as? Int == 42, "NSNumber as? Int")
-check((NSNumber(integer: 1) as? Bool) == true, "NSNumber(1) as? Bool")
-check((NSNumber(integer: 7) as? Bool) == nil, "NSNumber(7) as? Bool fails")
+check((NSNumber(value: 1) as? Bool) == true, "NSNumber(1) as? Bool")
+check((NSNumber(value: 7) as? Bool) == nil, "NSNumber(7) as? Bool fails")
 let anyNumbers = [1, 2, 3] as NSArray
 check((anyNumbers as? [Int]) == [1, 2, 3], "[Int] through NSArray uses Int bridging")
-check((Int64(1) << 40) as NSNumber == NSNumber(longLong: 1 << 40), "Int64 bridging")
+check((Int64(1) << 40) as NSNumber == NSNumber(value: Int64(1) << 40), "Int64 bridging")
 // NSNumber Booleans hash like Bool, not like Int64(1) and Int64(0).
 check((true as NSNumber as AnyHashable) == AnyHashable(true), "@YES as AnyHashable == AnyHashable(true)")
-check((NSNumber(bool: false)! as AnyHashable) == AnyHashable(false), "@NO as AnyHashable == AnyHashable(false)")
-check((NSNumber(integer: 1) as AnyHashable) == AnyHashable(Int64(1)) && (NSNumber(integer: 1) as AnyHashable) != AnyHashable(true),
+check((NSNumber(value: false)! as AnyHashable) == AnyHashable(false), "@NO as AnyHashable == AnyHashable(false)")
+check((NSNumber(value: 1) as AnyHashable) == AnyHashable(Int64(1)) && (NSNumber(value: 1) as AnyHashable) != AnyHashable(true),
       "NSNumber(1) as AnyHashable is still an integer, not a Boolean")
 let boolKeyed = NSMutableDictionary()
-boolKeyed.setObject("yes", forKey: NSNumber(bool: true)!)
+boolKeyed.setObject("yes", forKey: NSNumber(value: true)!)
 check(((boolKeyed as! [AnyHashable: Any])[true] as? String) == "yes", "NSDictionary with a Boolean key bridges to [AnyHashable: Any] found by true")
 
 // Formatting and localization

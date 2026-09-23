@@ -444,13 +444,13 @@ internal enum _JSONSerialization {
             let text = String(decoding: bytes[start..<offset], as: UTF8.self)
             // "-0" stays a Double so its sign survives; integer decoding still gets 0.
             if isInteger && text != "-0" {
-                if let value = Int64(text) { return NSNumber(longLong: value) }
+                if let value = Int64(text) { return NSNumber(value: value) }
                 if let value = UInt64(text) { return _JSONUnsignedNumber(value) }
             }
             guard let value = Double(text), value.isFinite else {
                 throw Error.invalidJSON("Number \(text) is not representable", offset: start)
             }
-            return NSNumber(double: value)
+            return NSNumber(value: value)
         }
     }
 }
