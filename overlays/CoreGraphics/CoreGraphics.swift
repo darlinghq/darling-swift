@@ -96,6 +96,10 @@ extension CGContext {
 }
 
 extension CGColor {
+  public static var white: CGColor { return CGColorGetConstantColor(kCGColorWhite)! }
+  public static var black: CGColor { return CGColorGetConstantColor(kCGColorBlack)! }
+  public static var clear: CGColor { return CGColorGetConstantColor(kCGColorClear)! }
+
   public var alpha: CGFloat { return CGColorGetAlpha(self) }
 
   public var colorSpace: CGColorSpace? { return CGColorGetColorSpace(self) }
