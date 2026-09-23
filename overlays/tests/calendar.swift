@@ -146,9 +146,9 @@ check(gregorian.date(bySettingHour: 18, minute: 45, second: 0, of: summer) == ut
 check(gregorian.date(bySetting: .hour, value: 20, of: summer) == utcDate(2021, 7, 15, 20), "date(bySetting:value:of:)")
 check(gregorian.date(summer, matchesComponents: DateComponents(month: 7, day: 15)), "date(_:matchesComponents:)")
 
-// Symbols, compared with NSDateFormatter since Darling's CFDateFormatter provides them
-let formatter = NSDateFormatter()!
-formatter.calendar = gregorian
+// Symbols, compared with DateFormatter since Darling's CFDateFormatter provides them
+let formatter = DateFormatter()
+formatter.calendar = gregorian as NSCalendar
 let objcWeekdays = (formatter.weekdaySymbols() ?? []).compactMap { $0 as? String }
 check(gregorian.weekdaySymbols == objcWeekdays, "weekdaySymbols matches NSDateFormatter (\(gregorian.weekdaySymbols))")
 

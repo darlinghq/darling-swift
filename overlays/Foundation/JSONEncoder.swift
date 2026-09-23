@@ -112,7 +112,7 @@ open class JSONEncoder {
         case iso8601
 
         /// Encode the `Date` as a string formatted by the given formatter.
-        case formatted(NSDateFormatter)
+        case formatted(DateFormatter)
 
         /// Encode the `Date` as a custom value encoded by the given closure.
         ///
@@ -1068,7 +1068,7 @@ open class JSONDecoder {
         case iso8601
 
         /// Decode the `Date` as a string parsed by the given formatter.
-        case formatted(NSDateFormatter)
+        case formatted(DateFormatter)
 
         /// Decode the `Date` as a custom value decoded by the given closure.
         case custom((_ decoder: Decoder) throws -> Date)

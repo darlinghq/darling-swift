@@ -208,9 +208,9 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
 
     // MARK: - Symbols (from a date formatter using this calendar and its locale)
 
-    private func _formatter() -> NSDateFormatter? {
-        guard let formatter = NSDateFormatter() as NSDateFormatter? else { return nil }
-        // NSDateFormatter declares calendar, timeZone and locale as @property, so these are
+    private func _formatter() -> DateFormatter? {
+        guard let formatter = DateFormatter() as DateFormatter? else { return nil }
+        // DateFormatter declares calendar, timeZone and locale as @property, so these are
         // assignments rather than setX(_:) calls. _ns.locale() stays a method call because
         // NSCalendar's accessors are still method pairs; if those are ever converted too, the
         // getter here has to become _ns.locale as well, since a Swift property cannot be called.
@@ -221,12 +221,12 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
         return formatter
     }
 
-    private func _symbols(_ symbols: (NSDateFormatter) -> [Any]?) -> [String] {
+    private func _symbols(_ symbols: (DateFormatter) -> [Any]?) -> [String] {
         guard let formatter = _formatter() else { return [] }
         return (symbols(formatter) ?? []).compactMap { $0 as? String }
     }
 
-    private func _symbol(_ symbol: (NSDateFormatter) -> String?) -> String {
+    private func _symbol(_ symbol: (DateFormatter) -> String?) -> String {
         guard let formatter = _formatter() else { return "" }
         return symbol(formatter) ?? ""
     }

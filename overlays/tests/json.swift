@@ -136,6 +136,16 @@ custom.dateDecodingStrategy = .custom { decoder in
     Date(timeIntervalSince1970: try Double(decoder.singleValueContainer().decode(String.self))!)
 }
 check((try? custom.decode([Date].self, from: Data(#"["1626350400"]"#.utf8))) == [summer], "custom date strategy")
+let dayFormatter = DateFormatter()
+dayFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+dayFormatter.timeZone = NSTimeZone(name: "UTC")
+dayFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+let formattedEncoder = JSONEncoder()
+formattedEncoder.dateEncodingStrategy = .formatted(dayFormatter)
+check(text(try? formattedEncoder.encode([summer])) == #"["2021-07-15 12:00"]"#, "formatted date encoding")
+let formattedDecoder = JSONDecoder()
+formattedDecoder.dateDecodingStrategy = .formatted(dayFormatter)
+check((try? formattedDecoder.decode([Date].self, from: Data(#"["2021-07-15 12:00"]"#.utf8))) == [summer], "formatted date decoding")
 check(text(try? snake.encode(["someKey": 1] as [String : Int])) == #"{"someKey":1}"#, "string-keyed dictionaries keep their keys")
 
 print(failures == 0 ? "ALL PASSED" : "\(failures) FAILED")
