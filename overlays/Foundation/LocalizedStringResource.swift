@@ -14,21 +14,63 @@
 
 @_exported import Foundation // Clang module
 
-/// A value whose format specifier is used when it's interpolated into a `String.LocalizationValue`.
-public protocol _FormatSpecifiable : Equatable {
-    associatedtype _Arg : CVarArg
+/// A value that can be interpolated into a `String.LocalizationValue` as a C variadic argument. As in Apple's
+/// Foundation, integers narrower than 64 bits are passed as 32-bit values and the others as 64-bit ones.
+public protocol _FormatSpecifiable : Equatable, Sendable {
+    associatedtype _Arg : CVarArg, Sendable
     var _arg: _Arg { get }
-    var _specifier: String { get }
 }
 
 extension Int : _FormatSpecifiable {
-    public var _arg: Int { return self }
-    public var _specifier: String { return "%lld" }
+    public var _arg: Int64 { return Int64(self) }
+}
+
+extension Int8 : _FormatSpecifiable {
+    public var _arg: Int32 { return Int32(self) }
+}
+
+extension Int16 : _FormatSpecifiable {
+    public var _arg: Int32 { return Int32(self) }
+}
+
+extension Int32 : _FormatSpecifiable {
+    public var _arg: Int32 { return self }
+}
+
+extension Int64 : _FormatSpecifiable {
+    public var _arg: Int64 { return self }
+}
+
+extension UInt : _FormatSpecifiable {
+    public var _arg: UInt64 { return UInt64(self) }
+}
+
+extension UInt8 : _FormatSpecifiable {
+    public var _arg: UInt32 { return UInt32(self) }
+}
+
+extension UInt16 : _FormatSpecifiable {
+    public var _arg: UInt32 { return UInt32(self) }
+}
+
+extension UInt32 : _FormatSpecifiable {
+    public var _arg: UInt32 { return self }
+}
+
+extension UInt64 : _FormatSpecifiable {
+    public var _arg: UInt64 { return self }
+}
+
+extension Float : _FormatSpecifiable {
+    public var _arg: Float { return self }
 }
 
 extension Double : _FormatSpecifiable {
     public var _arg: Double { return self }
-    public var _specifier: String { return "%lf" }
+}
+
+extension CGFloat : _FormatSpecifiable {
+    public var _arg: CGFloat { return self }
 }
 
 extension String {
