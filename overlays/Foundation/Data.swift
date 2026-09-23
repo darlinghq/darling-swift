@@ -2005,7 +2005,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
     /// - throws: An error in the Cocoa domain, if `url` cannot be read.
     @inlinable // This is @inlinable as a convenience initializer.
     public init(contentsOf url: __shared URL, options: Data.ReadingOptions = Data.ReadingOptions(rawValue: 0)) throws {
-        let d = try NSData(contentsOf: url._bridgeToObjectiveC(), options: ReadingOptions(rawValue: options.rawValue))
+        let d = try NSData(contentsOf: url, options: ReadingOptions(rawValue: options.rawValue))
         self.init(referencing: d)
     }
     
@@ -2269,7 +2269,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
 #if DEPLOYMENT_RUNTIME_SWIFT
             try $0.write(to: url, options: WritingOptions(rawValue: options.rawValue))
 #else
-            try $0.write(to: url._bridgeToObjectiveC(), options: options)
+            try $0.write(to: url, options: options)
 #endif
         }
     }

@@ -148,7 +148,7 @@ check(gregorian.date(summer, matchesComponents: DateComponents(month: 7, day: 15
 
 // Symbols, compared with NSDateFormatter since Darling's CFDateFormatter provides them
 let formatter = NSDateFormatter()!
-formatter.calendar = gregorian as NSCalendar
+formatter.calendar = gregorian
 let objcWeekdays = (formatter.weekdaySymbols() ?? []).compactMap { $0 as? String }
 check(gregorian.weekdaySymbols == objcWeekdays, "weekdaySymbols matches NSDateFormatter (\(gregorian.weekdaySymbols))")
 

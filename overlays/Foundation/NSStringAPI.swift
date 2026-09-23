@@ -167,23 +167,23 @@ extension StringProtocol {
 
   /// A capitalized representation of the string that is produced using the current locale.
   public var localizedCapitalized: String {
-    return _ns.capitalizedString(with: NSLocale.currentLocale() as? NSLocale)
+    return _ns.capitalizedString(with: Locale.current)
   }
 
   /// A lowercase version of the string that is produced using the current locale.
   public var localizedLowercase: String {
-    return _ns.lowercaseString(with: NSLocale.currentLocale() as? NSLocale)
+    return _ns.lowercaseString(with: Locale.current)
   }
 
   /// An uppercase version of the string that is produced using the current locale.
   public var localizedUppercase: String {
-    return _ns.uppercaseString(with: NSLocale.currentLocale() as? NSLocale)
+    return _ns.uppercaseString(with: Locale.current)
   }
 
   /// Returns a version of the string with all letters converted to uppercase, taking into account the specified
   /// locale.
   public func uppercased(with locale: Locale?) -> String {
-    return _ns.uppercaseString(with: locale?._bridgeToObjectiveC())
+    return _ns.uppercaseString(with: locale)
   }
 
   //===--- Comparison -------------------------------------------------------===//
@@ -212,7 +212,7 @@ extension StringProtocol {
   ) -> ComparisonResult {
     let other = String(aString)
     if let locale = locale {
-      return _ns.compare(other, options: mask, range: _nsRange(range), locale: locale._bridgeToObjectiveC())
+      return _ns.compare(other, options: mask, range: _nsRange(range), locale: locale)
     }
     return _ns.compare(other, options: mask, range: _nsRange(range))
   }
@@ -230,7 +230,7 @@ extension StringProtocol {
     let other = String(aString)
     let result: NSRange
     if let locale = locale {
-      result = _ns.range(of: other, options: mask, range: _nsRange(searchRange), locale: locale._bridgeToObjectiveC())
+      result = _ns.range(of: other, options: mask, range: _nsRange(searchRange), locale: locale)
     } else {
       result = _ns.range(of: other, options: mask, range: _nsRange(searchRange))
     }
@@ -267,7 +267,7 @@ extension StringProtocol {
     options mask: String.CompareOptions = String.CompareOptions(rawValue: 0),
     range aRange: Range<String.Index>? = nil
   ) -> Range<String.Index>? {
-    return _range(_ns.rangeOfCharacter(from: aSet._bridgeToObjectiveC(), options: mask, range: _nsRange(aRange)))
+    return _range(_ns.rangeOfCharacter(from: aSet, options: mask, range: _nsRange(aRange)))
   }
 
   //===--- Splitting, trimming and replacing ---------------------------------===//
@@ -279,13 +279,13 @@ extension StringProtocol {
 
   /// Returns an array containing substrings from the string that have been divided by characters in the given set.
   public func components(separatedBy separator: CharacterSet) -> [String] {
-    return (_ns.componentsSeparatedByCharacters(in: separator._bridgeToObjectiveC()) ?? []).compactMap { $0 as? String }
+    return (_ns.componentsSeparatedByCharacters(in: separator) ?? []).compactMap { $0 as? String }
   }
 
   /// Returns a new string made by removing from both ends of the `String` characters contained in a given
   /// character set.
   public func trimmingCharacters(in set: CharacterSet) -> String {
-    return _ns.trimmingCharacters(in: set._bridgeToObjectiveC())
+    return _ns.trimmingCharacters(in: set)
   }
 
   /// Returns a new string in which all occurrences of a target string in a specified range of the string are
@@ -371,6 +371,6 @@ extension StringProtocol {
 
   /// Writes the contents of the `String` to the URL specified by url using the specified encoding.
   public func write(to url: URL, atomically useAuxiliaryFile: Bool, encoding enc: String.Encoding) throws {
-    try _ns.write(to: url._bridgeToObjectiveC(), atomically: useAuxiliaryFile, encoding: enc.rawValue)
+    try _ns.write(to: url, atomically: useAuxiliaryFile, encoding: enc.rawValue)
   }
 }

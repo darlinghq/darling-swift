@@ -819,7 +819,7 @@ private extension __JSONEncoder {
             return NSString(string: string)
 
         case .formatted(let formatter):
-            guard let string = formatter.string(from: date._bridgeToObjectiveC()) else {
+            guard let string = formatter.string(from: date) else {
                 throw EncodingError.invalidValue(date, EncodingError.Context(codingPath: self.codingPath, debugDescription: "The date formatter returned no string."))
             }
             return NSString(string: string)
@@ -2487,7 +2487,7 @@ private extension __JSONDecoder {
 
         case .formatted(let formatter):
             let string = try self.unbox(value, as: String.self)!
-            guard let date = formatter.date(from: string).map({ Date._unconditionallyBridgeFromObjectiveC($0) }) else {
+            guard let date = formatter.date(from: string) else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Date string does not match format expected by formatter."))
             }
 

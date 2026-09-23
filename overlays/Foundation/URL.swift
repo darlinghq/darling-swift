@@ -34,7 +34,7 @@ public struct URL : ReferenceConvertible, Equatable {
     ///
     /// Returns `nil` if a `URL` cannot be formed with the string (for example, if the string contains characters that are illegal in a URL, or is an empty string).
     public init?(string: __shared String, relativeTo url: __shared URL?) {
-        guard !string.isEmpty, let inner = NSURL(string: string, relativeTo: url?._url) else { return nil }
+        guard !string.isEmpty, let inner = NSURL(string: string, relativeTo: url) else { return nil }
         _url = URL._converted(from: inner)
     }
 
@@ -62,7 +62,7 @@ public struct URL : ReferenceConvertible, Equatable {
             // Not NSURL(string:relativeTo:): spaces, % and #/? in a file name must stay part of the path.
             func fileURL(isDirectory: Bool) -> NSURL {
                 return p.withCString {
-                    NSURL.fileURL(withFileSystemRepresentation: $0, isDirectory: isDirectory, relativeTo: base._url)
+                    NSURL.fileURL(withFileSystemRepresentation: $0, isDirectory: isDirectory, relativeTo: base)
                 } as! NSURL
             }
             var relative = fileURL(isDirectory: p.hasSuffix("/"))
@@ -102,7 +102,7 @@ public struct URL : ReferenceConvertible, Equatable {
     ///
     /// If the URL is itself absolute, then this value is nil.
     public var baseURL: URL? {
-        return _url.base().map { URL(reference: $0) }
+        return _url.base()
     }
 
     /// Returns the absolute URL.
@@ -110,7 +110,7 @@ public struct URL : ReferenceConvertible, Equatable {
     /// If the URL is itself absolute, this will return self.
     public var absoluteURL: URL {
         if let url = _url.absolute() {
-            return URL(reference: url)
+            return url
         } else {
             // This should never fail for non-file reference URLs
             return self
@@ -184,7 +184,7 @@ public struct URL : ReferenceConvertible, Equatable {
     /// Returns the path of the URL, optionally percent-encoded (macOS 13+ API).
     public func path(percentEncoded: Bool = true) -> String {
         // CFURLCopyPath keeps the trailing slash and the URL's own percent-encoding, which -[NSURL path] drops.
-        let absolute = unsafeBitCast(_url.absolute() ?? _url, to: CFURL.self)
+        let absolute = unsafeBitCast(_url.absolute().map { $0 as NSURL } ?? _url, to: CFURL.self)
         var encoded = CFURLCopyPath(absolute).map { $0 as String } ?? ""
         if let parameterString = CFURLCopyParameterString(absolute, nil) {
             encoded += ";" + (parameterString as String)
@@ -242,7 +242,7 @@ public struct URL : ReferenceConvertible, Equatable {
     /// - parameter isDirectory: If `true`, then a trailing `/` is added to the resulting path.
     public func appendingPathComponent(_ pathComponent: String, isDirectory: Bool) -> URL {
         if let result = _url.appendingPathComponent(pathComponent, isDirectory: isDirectory) {
-            return URL(reference: result)
+            return result
         } else {
             return self
         }
@@ -253,7 +253,7 @@ public struct URL : ReferenceConvertible, Equatable {
     /// - parameter pathComponent: The path component to add.
     public func appendingPathComponent(_ pathComponent: String) -> URL {
         if let result = _url.appendingPathComponent(pathComponent) {
-            return URL(reference: result)
+            return result
         } else {
             return self
         }
@@ -266,7 +266,7 @@ public struct URL : ReferenceConvertible, Equatable {
     /// If the URL has an empty path (e.g., `http://www.example.com`), then this function will return the URL unchanged.
     public func deletingLastPathComponent() -> URL {
         // This is a slight behavior change from NSURL, but better than returning "http://www.example.com../".
-        guard !path.isEmpty, let result = _url.deletingLastPathComponent().map({ URL(reference: $0) }) else { return self }
+        guard !path.isEmpty, let result = _url.deletingLastPathComponent() else { return self }
         return result
     }
 
@@ -275,14 +275,14 @@ public struct URL : ReferenceConvertible, Equatable {
     /// If the URL has an empty path (e.g., `http://www.example.com`), then this function will return the URL unchanged.
     public func appendingPathExtension(_ pathExtension: String) -> URL {
         guard !path.isEmpty, let result = _url.appendingPathExtension(pathExtension) else { return self }
-        return URL(reference: result)
+        return result
     }
 
     /// Returns a URL constructed by removing any path extension.
     ///
     /// If the URL has an empty path (e.g., `http://www.example.com`), then this function will return the URL unchanged.
     public func deletingPathExtension() -> URL {
-        guard !path.isEmpty, let result = _url.deletingPathExtension().map({ URL(reference: $0) }) else { return self }
+        guard !path.isEmpty, let result = _url.deletingPathExtension() else { return self }
         return result
     }
 
@@ -324,7 +324,7 @@ public struct URL : ReferenceConvertible, Equatable {
 
     /// Returns a `URL` with any instances of ".." or "." removed from its path.
     public var standardized : URL {
-        guard let result = _url.standardized().map({ URL(reference: $0) }) else { return self }
+        guard let result = _url.standardized() else { return self }
         return result
     }
 

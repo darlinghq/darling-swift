@@ -169,20 +169,20 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
     /// The locale of the calendar.
     public var locale : Locale? {
         get {
-            return _ns.locale().map { Locale._unconditionallyBridgeFromObjectiveC($0) }
+            return _ns.locale()
         }
         set {
-            _applyMutation { $0.setLocale(newValue?._bridgeToObjectiveC()) }
+            _applyMutation { $0.setLocale(newValue) }
         }
     }
 
     /// The time zone of the calendar.
     public var timeZone : TimeZone {
         get {
-            return _ns.timeZone().map { TimeZone._unconditionallyBridgeFromObjectiveC($0) } ?? TimeZone.current
+            return _ns.timeZone() ?? TimeZone.current
         }
         set {
-            _applyMutation { $0.setTimeZone(newValue._bridgeToObjectiveC()) }
+            _applyMutation { $0.setTimeZone(newValue) }
         }
     }
 
@@ -214,7 +214,7 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
         // assignments rather than setX(_:) calls. _ns.locale() stays a method call because
         // NSCalendar's accessors are still method pairs; if those are ever converted too, the
         // getter here has to become _ns.locale as well, since a Swift property cannot be called.
-        formatter.calendar = _ns
+        formatter.calendar = self
         if let locale = _ns.locale() {
             formatter.locale = locale
         }
@@ -353,7 +353,7 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
             default: return nil
             }
         }
-        if let range = Calendar._range(_ns.range(of: Calendar._toCalendarUnit([smaller]), in: Calendar._toCalendarUnit([larger]), for: date._bridgeToObjectiveC())) {
+        if let range = Calendar._range(_ns.range(of: Calendar._toCalendarUnit([smaller]), in: Calendar._toCalendarUnit([larger]), for: date)) {
             return range
         }
         // Darling's CoreFoundation only knows the deprecated week unit, so compute the common week-based ranges.
@@ -398,8 +398,8 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
         }
         var nsDate : NSDate?
         var ti : TimeInterval = 0
-        if _ns.range(of: Calendar._toCalendarUnit([component]), start: &nsDate, interval: &ti, for: date._bridgeToObjectiveC()), let startDate = nsDate {
-            start = Date._unconditionallyBridgeFromObjectiveC(startDate)
+        if _ns.range(of: Calendar._toCalendarUnit([component]), start: &nsDate, interval: &ti, for: date), let startDate = nsDate {
+            start = startDate as Date
             interval = ti
             return true
         } else {
@@ -439,7 +439,7 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
             default: return nil
             }
         }
-        let result = _ns.ordinality(of: Calendar._toCalendarUnit([smaller]), in: Calendar._toCalendarUnit([larger]), for: date._bridgeToObjectiveC())
+        let result = _ns.ordinality(of: Calendar._toCalendarUnit([smaller]), in: Calendar._toCalendarUnit([larger]), for: date)
         // Darling's CoreFoundation reports kCFNotFound (-1) rather than NSNotFound.
         if result == NSNotFound || result < 0 { return nil }
         return result
@@ -461,8 +461,7 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
             components.month = (components.month ?? 0) + 3 * quarter
             components.quarter = nil
         }
-        let result = _ns.date(byAdding: components._bridgeToObjectiveC(), to: date._bridgeToObjectiveC(), options: wrappingComponents ? 1 /* NSCalendarWrapComponents */ : 0)
-        return result.map { Date._unconditionallyBridgeFromObjectiveC($0) }
+        return _ns.date(byAdding: components._bridgeToObjectiveC(), to: date, options: wrappingComponents ? 1 /* NSCalendarWrapComponents */ : 0)
     }
 
     /// Returns a new `Date` representing the date calculated by adding an amount of a specific component to a given date.
@@ -489,7 +488,7 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
         if let timeZone = components.timeZone, timeZone != self.timeZone {
             calendar.timeZone = timeZone
         }
-        return calendar._ns.date(from: components._bridgeToObjectiveC()).map { Date._unconditionallyBridgeFromObjectiveC($0) }
+        return calendar._ns.date(from: components._bridgeToObjectiveC())
     }
 
     /// Returns all the date components of a date, using the calendar time zone.
@@ -505,7 +504,7 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
             units.insert(.month)
         }
         let flags = Int(bitPattern: Calendar._toCalendarUnit(units).rawValue)
-        var result = DateComponents._unconditionallyBridgeFromObjectiveC(_ns.components(flags, from: date._bridgeToObjectiveC()))
+        var result = DateComponents._unconditionallyBridgeFromObjectiveC(_ns.components(flags, from: date))
         if components.contains(.quarter) {
             result.quarter = result.month.map { ($0 - 1) / 3 + 1 }
             if !components.contains(.month) {
@@ -542,7 +541,7 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
             units.insert(.month)
         }
         let flags = Int(bitPattern: Calendar._toCalendarUnit(units).rawValue)
-        var result = DateComponents._unconditionallyBridgeFromObjectiveC(_ns.components(flags, from: start._bridgeToObjectiveC(), to: end._bridgeToObjectiveC(), options: 0))
+        var result = DateComponents._unconditionallyBridgeFromObjectiveC(_ns.components(flags, from: start, to: end, options: 0))
         if components.contains(.quarter), let months = result.month {
             result.quarter = months / 3
             result.month = components.contains(.month) ? months % 3 : nil

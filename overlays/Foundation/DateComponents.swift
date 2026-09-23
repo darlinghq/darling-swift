@@ -280,8 +280,8 @@ extension DateComponents : _ObjectiveCBridgeable {
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSDateComponents {
         let result = NSDateComponents()
-        if let calendar = calendar { result.setCalendar(calendar._bridgeToObjectiveC()) }
-        if let timeZone = timeZone { result.setTimeZone(timeZone._bridgeToObjectiveC()) }
+        if let calendar = calendar { result.setCalendar(calendar) }
+        if let timeZone = timeZone { result.setTimeZone(timeZone) }
         if let era = era { result.setEra(era) }
         if let year = year { result.setYear(year) }
         if let month = month { result.setMonth(month) }
@@ -308,8 +308,8 @@ extension DateComponents : _ObjectiveCBridgeable {
 
     public static func _conditionallyBridgeFromObjectiveC(_ dateComponents: NSDateComponents, result: inout DateComponents?) -> Bool {
         var components = DateComponents()
-        components.calendar = dateComponents.calendar().map { Calendar._unconditionallyBridgeFromObjectiveC($0) }
-        components.timeZone = dateComponents.timeZone().map { TimeZone._unconditionallyBridgeFromObjectiveC($0) }
+        components.calendar = dateComponents.calendar()
+        components.timeZone = dateComponents.timeZone()
         components.era = _fromReference(dateComponents.era())
         components.year = _fromReference(dateComponents.year())
         components.month = _fromReference(dateComponents.month())
