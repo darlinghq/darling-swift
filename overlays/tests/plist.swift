@@ -34,13 +34,13 @@ let record = Record(name: "Ada <&>", count: -42, ratio: 1.65, small: 1.1, enable
 
 // Round trips in both formats.
 let encoder = PropertyListEncoder()
-check(encoder.outputFormat == NSPropertyListBinaryFormat_v1_0, "default output format is binary")
+check(encoder.outputFormat == .binary, "default output format is binary")
 let binary = try? encoder.encode(record)
 check(binary.map { $0.starts(with: Array("bplist00".utf8)) } ?? false, "binary output starts with bplist00")
 let decoder = PropertyListDecoder()
 check((try? decoder.decode(Record.self, from: binary ?? Data())) == record, "binary round trip")
 
-encoder.outputFormat = NSPropertyListXMLFormat_v1_0
+encoder.outputFormat = .xml
 let xmlData = try? encoder.encode(record)
 let xml = text(xmlData)
 check(xml.hasPrefix("<?xml"), "XML output")
@@ -51,13 +51,13 @@ check(xml.contains("<string>$null</string>"), "nil in an unkeyed container writt
 check(!xml.contains("nickname"), "absent optional key omitted")
 check(xml.contains("<true/>") && xml.contains("<false/>"), "booleans written as <true/>/<false/>")
 check(xml.contains("<data>") && xml.contains("<date>2001-01-01T03:25:45Z</date>"), "Data and Date written natively")
-var format = NSPropertyListBinaryFormat_v1_0
+var format = PropertyListSerialization.PropertyListFormat.binary
 let fromXML = try? decoder.decode(Record.self, from: xmlData ?? Data(), format: &format)
 var wholeSeconds = record
 wholeSeconds.created = Date(timeIntervalSinceReferenceDate: 12345) // XML dates have no fractional seconds
 check(fromXML == wholeSeconds, "XML round trip")
 if fromXML != wholeSeconds { print("  decoded:", String(describing: fromXML)) }
-check(format == NSPropertyListXMLFormat_v1_0, "decode reports the XML format")
+check(format == .xml, "decode reports the XML format")
 
 // Data written by hand, as another program would.
 let handWritten = """
@@ -134,9 +134,9 @@ struct Widths : Codable, Equatable {
 }
 let widths = Widths(i8: .min, u8: .max, i16: .min, u16: .max, i32: .min, u32: .max, u: .max, i: .min)
 check((try? decoder.decode(Widths.self, from: encoder.encode(widths))) == widths, "fixed-width integer limits round trip (XML)")
-encoder.outputFormat = NSPropertyListBinaryFormat_v1_0
+encoder.outputFormat = .binary
 check((try? decoder.decode(Widths.self, from: encoder.encode(widths))) == widths, "fixed-width integer limits round trip (binary)")
-encoder.outputFormat = NSPropertyListXMLFormat_v1_0
+encoder.outputFormat = .xml
 check(decodingError { _ = try decoder.decode([String : UInt8].self, from: numbers) } == "dataCorrupted", "300 does not fit in UInt8")
 check(decodingError { _ = try decoder.decode([UInt32].self, from: encoder.encode([UInt64(UInt32.max) + 1])) } == "dataCorrupted", "2^32 does not fit in UInt32")
 let fractions = (try? encoder.encode([1.5, 2.0])) ?? Data()
@@ -148,7 +148,7 @@ check(decodingError { _ = try decoder.decode([Bool].self, from: (try? encoder.en
 check(decodingError { _ = try decoder.decode([String : String].self, from: numbers) } == "typeMismatch", "number is not a String")
 check(decodingError { _ = try decoder.decode(Record.self, from: numbers) } == "keyNotFound", "missing key")
 check((try? decoder.decode([UInt64].self, from: encoder.encode([UInt64.max, 0]))) == [UInt64.max, 0], "UInt64.max round trip (XML)")
-encoder.outputFormat = NSPropertyListBinaryFormat_v1_0
+encoder.outputFormat = .binary
 check((try? decoder.decode([UInt64].self, from: encoder.encode([UInt64.max, 1 << 63]))) == [UInt64.max, 1 << 63], "UInt64 above Int64.max round trip (binary)")
 check(decodingError { _ = try decoder.decode([Int64].self, from: encoder.encode([UInt64.max])) } == "dataCorrupted", "UInt64.max does not fit in Int64")
 

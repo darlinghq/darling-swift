@@ -12,8 +12,7 @@
 
 // PropertyListEncoder and PropertyListDecoder, from release/5.4 stdlib/public/Darwin/Foundation/PlistEncoder.swift.
 // Darling:
-// - Property lists are written and read by NSPropertyListSerialization (CoreFoundation); the format type is
-//   Darling's NSPropertyListFormat.
+// - Property lists are written and read by Darling's PropertyListSerialization (CoreFoundation).
 // - NSNumber is created with Darling's init(integer:)... initializers, booleans are the kCFBooleanTrue/False
 //   singletons, and integer unboxing checks exact representability (_exactly in Codable.swift).
 // - UInt64 values above Int64.max are stored as CoreFoundation's 128-bit integers, as macOS does.
@@ -36,14 +35,14 @@ open class PropertyListEncoder {
     // MARK: - Options
 
     /// The output format to write the property list data in. Defaults to `.binary`.
-    open var outputFormat: NSPropertyListFormat = .binaryFormat_v1_0
+    open var outputFormat: PropertyListSerialization.PropertyListFormat = .binary
 
     /// Contextual user-provided information for use during encoding.
     open var userInfo: [CodingUserInfoKey : Any] = [:]
 
     /// Options set on the top-level encoder to pass down the encoding hierarchy.
     fileprivate struct _Options {
-        let outputFormat: NSPropertyListFormat
+        let outputFormat: PropertyListSerialization.PropertyListFormat
         let userInfo: [CodingUserInfoKey : Any]
     }
 
@@ -82,7 +81,7 @@ open class PropertyListEncoder {
       }
       
       do {
-          return try NSPropertyListSerialization.data(withPropertyList: topLevel, format: self.outputFormat, options: 0) as Data
+          return try PropertyListSerialization.data(fromPropertyList: topLevel, format: self.outputFormat, options: 0)
       } catch {
           throw EncodingError.invalidValue(value, 
                                            EncodingError.Context(codingPath: [], debugDescription: "Unable to encode the given top-level value as a property list", underlyingError: error))
@@ -672,7 +671,7 @@ open class PropertyListDecoder {
     /// - throws: `DecodingError.dataCorrupted` if values requested from the payload are corrupted, or if the given data is not a valid property list.
     /// - throws: An error if any value throws an error during decoding.
     open func decode<T : Decodable>(_ type: T.Type, from data: Data) throws -> T {
-        var format: NSPropertyListFormat = .binaryFormat_v1_0
+        var format: PropertyListSerialization.PropertyListFormat = .binary
         return try decode(type, from: data, format: &format)
     }
 
@@ -684,10 +683,10 @@ open class PropertyListDecoder {
     /// - returns: A value of the requested type along with the detected format of the property list.
     /// - throws: `DecodingError.dataCorrupted` if values requested from the payload are corrupted, or if the given data is not a valid property list.
     /// - throws: An error if any value throws an error during decoding.
-    open func decode<T : Decodable>(_ type: T.Type, from data: Data, format: inout NSPropertyListFormat) throws -> T {
+    open func decode<T : Decodable>(_ type: T.Type, from data: Data, format: inout PropertyListSerialization.PropertyListFormat) throws -> T {
         let topLevel: Any
         do {
-            topLevel = try NSPropertyListSerialization.propertyList(with: data, options: 0, format: &format)
+            topLevel = try PropertyListSerialization.propertyList(from: data, options: [], format: &format)
         } catch {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "The given data was not a valid property list.", underlyingError: error))
         }

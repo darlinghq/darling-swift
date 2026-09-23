@@ -14,6 +14,8 @@ check("a,b,,c".components(separatedBy: ",") == ["a", "b", "", "c"], "components(
 check("a b\tc".components(separatedBy: .whitespaces) == ["a", "b", "c"], "components(separatedBy: CharacterSet)")
 check("one two one".replacingOccurrences(of: "one", with: "1") == "1 two 1", "replacingOccurrences")
 check("Hello".replacingOccurrences(of: "l", with: "L", options: NSStringCompareOptions(rawValue: 0), range: nil) == "HeLLo", "replacingOccurrences with options")
+check("Color".range(of: "color", options: .caseInsensitive) != nil && "Color".range(of: "color") == nil, "range(of:options: .caseInsensitive)")
+check("a10".compare("a9", options: .numeric) == .orderedDescending, "compare(_:options: .numeric)")
 check(trimmed.contains("Wörld") && !trimmed.contains("world") && !trimmed.contains(""), "contains")
 check(trimmed.localizedCaseInsensitiveContains("wörld"), "localizedCaseInsensitiveContains")
 check(trimmed.localizedStandardContains("world"), "localizedStandardContains (diacritic insensitive)")
