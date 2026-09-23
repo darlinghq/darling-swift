@@ -103,6 +103,33 @@ extension String {
     self = String._unconditionallyBridgeFromObjectiveC(s)
   }
 
+  /// Produces a string containing the bytes in a given C array,
+  /// interpreted according to a given encoding.
+  public init?(cString: UnsafePointer<CChar>, encoding enc: Encoding) {
+    if enc == .utf8, let str = String(validatingCString: cString) {
+      self = str
+      return
+    }
+    guard let ns = NSString(cString: cString, encoding: enc.rawValue) else { return nil }
+    self = String._unconditionallyBridgeFromObjectiveC(ns)
+  }
+
+  /// Returns a `String` object initialized by using a given
+  /// format string as a template into which the remaining argument
+  /// values are substituted according to given locale information.
+  public init(format: __shared String, locale: __shared Locale?, _ args: CVarArg...) {
+    self = String(format: format, locale: locale, arguments: args)
+  }
+
+  /// Returns a `String` object initialized by using a given
+  /// format string as a template into which the remaining argument
+  /// values are substituted according to given locale information.
+  public init(format: __shared String, locale: __shared Locale?, arguments: __shared [CVarArg]) {
+    self = withVaList(arguments) {
+      NSString(format: format, locale: locale, arguments: $0) as String
+    }
+  }
+
   /// Returns a `Data` containing a representation of
   /// the `String` encoded using a given encoding.
   public func data(using encoding: Encoding, allowLossyConversion: Bool = false) -> Data? {
@@ -184,6 +211,17 @@ extension StringProtocol {
   /// locale.
   public func uppercased(with locale: Locale?) -> String {
     return _ns.uppercaseString(with: locale)
+  }
+
+  /// Returns a capitalized representation of the string using the specified locale.
+  public func capitalized(with locale: Locale?) -> String {
+    return _ns.capitalizedString(with: locale)
+  }
+
+  /// Returns a version of the string with all letters converted to lowercase, taking into account the specified
+  /// locale.
+  public func lowercased(with locale: Locale?) -> String {
+    return _ns.lowercaseString(with: locale)
   }
 
   //===--- Comparison -------------------------------------------------------===//
