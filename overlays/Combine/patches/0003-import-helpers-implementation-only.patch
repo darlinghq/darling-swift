@@ -1,0 +1,54 @@
+Import COpenCombineHelpers as implementation-only
+
+The C helpers are an implementation detail, as they are in Apple's Combine,
+which has no C module dependency. With a plain import, Combine.swiftmodule
+records COpenCombineHelpers as a required module, so every client that imports
+Combine (or Foundation, whose KVO publisher imports Combine) would fail with
+"missing required module 'COpenCombineHelpers'" unless it also passes the
+fetched checkout's module map. No helper type appears in a public or
+@usableFromInline declaration, so no mangled name changes.
+
+--- a/CombineIdentifier.swift
++++ b/CombineIdentifier.swift
+@@ -6,7 +6,7 @@
+ //
+ 
+ #if canImport(COpenCombineHelpers)
+-import COpenCombineHelpers
++@_implementationOnly import COpenCombineHelpers
+ #endif
+ 
+ #if WASI
+--- a/Helpers/Locking.swift
++++ b/Helpers/Locking.swift
+@@ -6,7 +6,7 @@
+ //
+ 
+ #if canImport(COpenCombineHelpers)
+-import COpenCombineHelpers
++@_implementationOnly import COpenCombineHelpers
+ #endif
+ 
+ #if WASI
+--- a/Publishers/Publishers.Breakpoint.swift
++++ b/Publishers/Publishers.Breakpoint.swift
+@@ -8,7 +8,7 @@
+ #if !WASI
+ 
+ #if canImport(COpenCombineHelpers)
+-import COpenCombineHelpers
++@_implementationOnly import COpenCombineHelpers
+ #endif
+ 
+ extension Publisher {
+--- a/Publishers/Publishers.Zip.swift
++++ b/Publishers/Publishers.Zip.swift
+@@ -7,7 +7,7 @@
+ // swiftlint:disable large_tuple
+ 
+ #if canImport(COpenCombineHelpers)
+-import COpenCombineHelpers
++@_implementationOnly import COpenCombineHelpers
+ #endif
+ 
+ extension Publishers {
