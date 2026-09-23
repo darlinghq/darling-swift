@@ -22,13 +22,13 @@ extension FileManager {
     public func enumerator(at url: URL, includingPropertiesForKeys keys: [URLResourceKey]?,
                            options mask: NSDirectoryEnumerationOptions = NSDirectoryEnumerationOptions(rawValue: 0),
                            errorHandler handler: ((URL, Error) -> Bool)? = nil) -> NSDirectoryEnumerator? {
-        return enumerator(at: url._bridgeToObjectiveC(), includingPropertiesForKeys: keys.map { $0.map { $0.rawValue } },
-                          options: mask, errorHandler: { (url: NSURL?, error: NSError?) -> Bool in
+        return enumerator(at: url, includingPropertiesForKeys: keys.map { $0.map { $0.rawValue } },
+                          options: mask, errorHandler: { (url: URL?, error: Error?) -> Bool in
             guard let h = handler else { return true }
             guard let url = url, let error = error else {
                 fatalError("FileManager.enumerator(at:) error handler called without a URL or an error")
             }
-            return h(URL._unconditionallyBridgeFromObjectiveC(url), error as Error)
+            return h(url, error)
         })
     }
 }
