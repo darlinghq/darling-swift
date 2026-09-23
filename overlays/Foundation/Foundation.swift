@@ -13,8 +13,8 @@
 // NSLocalizedString, NSLog, NSNotFound, AnyHashable bridging and CVarArg for bridged types, from release/5.4
 // stdlib/public/Darwin/Foundation/Foundation.swift, plus String(format:) from NSStringAPI.swift and the CVarArg
 // conformances of the bridged collections.
-// Darling: NSBundle has no Swift name, so `bundle` is an NSBundle; NSNotFound is a computed global (apps import its
-// getter); the Locale-taking format initializers are omitted until there is a Locale overlay.
+// Darling: NSNotFound is a computed global (apps import its getter); the Locale-taking format
+// initializers are omitted until there is a Locale overlay.
 
 @_exported import Foundation // Clang module
 @_spi(Foundation) import Swift
@@ -24,7 +24,7 @@ public var NSNotFound: Int { return .max }
 public
 func NSLocalizedString(_ key: String,
                        tableName: String? = nil,
-                       bundle: NSBundle = NSBundle.main(),
+                       bundle: Bundle = Bundle.main,
                        value: String = "",
                        comment: String) -> String {
   return bundle.localizedString(forKey: key, value: value, table: tableName)

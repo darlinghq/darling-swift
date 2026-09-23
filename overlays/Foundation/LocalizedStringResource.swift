@@ -113,15 +113,15 @@ extension String {
         }
     }
 
-    public init(localized keyAndValue: LocalizationValue, table: String? = nil, bundle: NSBundle? = nil, locale: Locale = .current, comment: StaticString? = nil) {
-        let bundle = bundle ?? NSBundle.main()
-        let format = bundle?.localizedString(forKey: keyAndValue._key, value: keyAndValue._key, table: table) ?? keyAndValue._key
+    public init(localized keyAndValue: LocalizationValue, table: String? = nil, bundle: Bundle? = nil, locale: Locale = .current, comment: StaticString? = nil) {
+        let bundle = bundle ?? Bundle.main
+        let format = bundle.localizedString(forKey: keyAndValue._key, value: keyAndValue._key, table: table)
         self = keyAndValue._formatted(format, locale: locale)
     }
 
-    public init(localized key: StaticString, defaultValue: LocalizationValue, table: String? = nil, bundle: NSBundle? = nil, locale: Locale = .current, comment: StaticString? = nil) {
-        let bundle = bundle ?? NSBundle.main()
-        let format = bundle?.localizedString(forKey: key.description, value: defaultValue._key, table: table) ?? defaultValue._key
+    public init(localized key: StaticString, defaultValue: LocalizationValue, table: String? = nil, bundle: Bundle? = nil, locale: Locale = .current, comment: StaticString? = nil) {
+        let bundle = bundle ?? Bundle.main
+        let format = bundle.localizedString(forKey: key.description, value: defaultValue._key, table: table)
         self = defaultValue._formatted(format, locale: locale)
     }
 
@@ -180,11 +180,11 @@ public struct LocalizedStringResource : ExpressibleByStringInterpolation, Custom
         return self
     }
 
-    internal var _bundle: NSBundle? {
+    internal var _bundle: Bundle? {
         switch bundle {
-        case .main: return NSBundle.main()
-        case .forClass(let cls): return NSBundle(for: cls)
-        case .atURL(let url): return NSBundle(url: url as NSURL)
+        case .main: return Bundle.main
+        case .forClass(let cls): return Bundle(for: cls)
+        case .atURL(let url): return Bundle(url: url as NSURL)
         }
     }
 }
