@@ -14,7 +14,7 @@
 @preconcurrency import Glibc
 #endif
 
-// Darling: Locale.Components is excluded. Its icuIdentifier needs Calendar.Identifier.cldrIdentifier,
+// Darling: Locale.Components is excluded. Its icuIdentifier needs
 // Calendar.Identifier.legacyKeywordKey and TimeZone.legacyKeywordKey, and its Codable conformance needs a
 // Codable Calendar.Identifier; none of those exist in this overlay's Calendar and TimeZone, which come from
 // the Swift 5.4 SDK overlay rather than swift-foundation. Without icuIdentifier the type cannot produce the
