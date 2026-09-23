@@ -228,6 +228,16 @@ extension Logger {
 
 // From FoundationEssentials/String/String+Internals.swift.
 extension String {
+    func _trimmingWhitespace() -> String {
+        if self.isEmpty {
+            return ""
+        }
+
+        return String(unicodeScalars._trimmingCharacters {
+            $0.properties.isWhitespace
+        })
+    }
+
     init?(_utf16 input: UnsafeBufferPointer<UInt16>) {
         // Allocate input.count * 3 code points since one UTF16 code point may require up to three UTF8 code points when transcoded
         let str = withUnsafeTemporaryAllocation(of: UTF8.CodeUnit.self, capacity: input.count * 3) { contents in
@@ -262,24 +272,6 @@ extension String {
             return nil
         }
         self = str
-    }
-}
-
-extension FormatStyleCapitalizationContext {
-    // From NumberFormatStyleConfiguration.swift; FormatStyleCapitalizationContext.swift omits it.
-    var icuContext: UDisplayContext {
-        switch self.option {
-        case .unknown:
-            return .unknown
-        case .standalone:
-            return .standalone
-        case .listItem:
-            return .listItem
-        case .beginningOfSentence:
-            return .beginningOfSentence
-        case .middleOfSentence:
-            return .middleOfSentence
-        }
     }
 }
 
