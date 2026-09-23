@@ -39,6 +39,8 @@ extension AttributeScopes {
         @available(FoundationPreview 6.2, *)
         public let writingDirection: WritingDirectionAttribute
 
+        public let inlinePresentationIntent: InlinePresentationIntentAttribute
+
 #if FOUNDATION_FRAMEWORK
         @available(macOS 14, iOS 17, tvOS 17, watchOS 10, *)
         public let agreementConcept: AgreementConceptAttribute
@@ -50,7 +52,6 @@ extension AttributeScopes {
         public let localizedNumberFormat: LocalizedNumberFormatAttribute
         
         // TODO: Support AttributedString markdown in FoundationPreview: https://github.com/apple/swift-foundation/issues/44
-        public let inlinePresentationIntent: InlinePresentationIntentAttribute
         public let presentationIntent: PresentationIntentAttribute
         @available(macOS 13, iOS 16, tvOS 16, watchOS 9, *)
         public let markdownSourcePosition: MarkdownSourcePositionAttribute
@@ -409,22 +410,6 @@ extension AttributeScopes.FoundationAttributes {
         }
     }
     
-	@frozen
-    @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-    public enum InlinePresentationIntentAttribute : CodableAttributedStringKey, ObjectiveCConvertibleAttributedStringKey {
-        public typealias Value = InlinePresentationIntent
-        public typealias ObjectiveCValue = NSNumber
-        public static let name = NSAttributedString.Key.inlinePresentationIntent.rawValue
-        
-        public static func objectiveCValue(for value: InlinePresentationIntent) throws -> NSNumber {
-            NSNumber(value: value.rawValue)
-        }
-        
-        public static func value(for object: NSNumber) throws -> InlinePresentationIntent {
-            InlinePresentationIntent(rawValue: object.uintValue)
-        }
-    }
-    
     @frozen
     @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
     public enum PresentationIntentAttribute : CodableAttributedStringKey {
@@ -478,6 +463,13 @@ extension AttributeScopes.FoundationAttributes {
     }
     
 #endif // FOUNDATION_FRAMEWORK
+    
+	@frozen
+    @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+    public enum InlinePresentationIntentAttribute : CodableAttributedStringKey {
+        public typealias Value = InlinePresentationIntent
+        public static let name = NSAttributedString.Key.inlinePresentationIntent.rawValue
+    }
     
     @frozen
     @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
@@ -725,6 +717,17 @@ extension AttributeScopes.FoundationAttributes.DurationFieldAttribute : Sendable
 @available(*, unavailable)
 extension AttributeScopes.FoundationAttributes.WritingDirectionAttribute: Sendable {}
 
+@available(macOS, unavailable, introduced: 12.0)
+@available(iOS, unavailable, introduced: 15.0)
+@available(tvOS, unavailable, introduced: 15.0)
+@available(watchOS, unavailable, introduced: 8.0)
+@available(*, unavailable)
+extension AttributeScopes.FoundationAttributes.InlinePresentationIntentAttribute : Sendable {}
+
+// Apple documents InlinePresentationIntent as Hashable and Codable; RawRepresentable implements both.
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension InlinePresentationIntent : Hashable, Codable {}
+
 #if FOUNDATION_FRAMEWORK
 
 @available(macOS, unavailable, introduced: 14.0)
@@ -783,13 +786,6 @@ extension AttributeScopes.FoundationAttributes.LocalizedNumberFormatAttribute : 
 @available(watchOS, unavailable, introduced: 8.0)
 @available(*, unavailable)
 extension AttributeScopes.FoundationAttributes.InflectionAlternativeAttribute : Sendable {}
-
-@available(macOS, unavailable, introduced: 12.0)
-@available(iOS, unavailable, introduced: 15.0)
-@available(tvOS, unavailable, introduced: 15.0)
-@available(watchOS, unavailable, introduced: 8.0)
-@available(*, unavailable)
-extension AttributeScopes.FoundationAttributes.InlinePresentationIntentAttribute : Sendable {}
 
 @available(macOS, unavailable, introduced: 12.0)
 @available(iOS, unavailable, introduced: 15.0)
