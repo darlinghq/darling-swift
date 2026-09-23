@@ -115,13 +115,13 @@ extension String {
 
     public init(localized keyAndValue: LocalizationValue, table: String? = nil, bundle: Bundle? = nil, locale: Locale = .current, comment: StaticString? = nil) {
         let bundle = bundle ?? Bundle.main
-        let format = bundle.localizedString(forKey: keyAndValue._key, value: keyAndValue._key, table: table)
+        let format = bundle.localizedString(forKey: keyAndValue._key, value: keyAndValue._key, table: table) ?? keyAndValue._key
         self = keyAndValue._formatted(format, locale: locale)
     }
 
     public init(localized key: StaticString, defaultValue: LocalizationValue, table: String? = nil, bundle: Bundle? = nil, locale: Locale = .current, comment: StaticString? = nil) {
         let bundle = bundle ?? Bundle.main
-        let format = bundle.localizedString(forKey: key.description, value: defaultValue._key, table: table)
+        let format = bundle.localizedString(forKey: key.description, value: defaultValue._key, table: table) ?? defaultValue._key
         self = defaultValue._formatted(format, locale: locale)
     }
 
