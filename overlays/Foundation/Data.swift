@@ -500,7 +500,7 @@ internal final class __DataStorage {
     @usableFromInline // This is not @inlinable as a non-convience initializer.
     init(immutableReference: NSData, offset: Int) {
         _offset = offset
-        _bytes = UnsafeMutableRawPointer(mutating: immutableReference.bytes())
+        _bytes = UnsafeMutableRawPointer(mutating: immutableReference.bytes)
         _capacity = 0
         _needToZero = false
         _length = immutableReference.length()
@@ -524,7 +524,7 @@ internal final class __DataStorage {
     @usableFromInline // This is not @inlinable as a non-convience initializer.
     init(customReference: NSData, offset: Int) {
         _offset = offset
-        _bytes = UnsafeMutableRawPointer(mutating: customReference.bytes())
+        _bytes = UnsafeMutableRawPointer(mutating: customReference.bytes)
         _capacity = 0
         _needToZero = false
         _length = customReference.length()
@@ -589,7 +589,7 @@ internal class __NSSwiftData : NSData {
         return _range.upperBound - _range.lowerBound
     }
 
-    @objc override func bytes() -> UnsafeRawPointer? {
+    @objc override var bytes: UnsafeRawPointer? {
         // NSData's byte pointer methods are not annotated for nullability correctly
         // (but assume non-null by the wrapping macro guards). This placeholder value
         // is to work-around this bug. Any indirection to the underlying bytes of an NSData
@@ -609,7 +609,7 @@ internal class __NSSwiftData : NSData {
     }
 
     @objc override func mutableCopy(with zone: NSZone? = nil) -> Any {
-        return NSMutableData(bytes: bytes(), length: length())!
+        return NSMutableData(bytes: bytes, length: length())!
     }
 
 
