@@ -50,6 +50,7 @@ extension AttributeScopes {
         public let referentConcept: ReferentConceptAttribute
         @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
         public let localizedNumberFormat: LocalizedNumberFormatAttribute
+#endif // FOUNDATION_FRAMEWORK
         
         // TODO: Support AttributedString markdown in FoundationPreview: https://github.com/apple/swift-foundation/issues/44
         public let presentationIntent: PresentationIntentAttribute
@@ -58,6 +59,7 @@ extension AttributeScopes {
         @available(FoundationPreview 6.2, *)
         public let listItemDelimiter: ListItemDelimiterAttribute
         
+#if FOUNDATION_FRAMEWORK
         @available(macOS 13, iOS 16, tvOS 16, watchOS 9, *)
         public let localizedStringArgumentAttributes: LocalizedStringArgumentAttributes
         
@@ -410,39 +412,27 @@ extension AttributeScopes.FoundationAttributes {
         }
     }
     
+#endif // FOUNDATION_FRAMEWORK
+    
     @frozen
     @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
     public enum PresentationIntentAttribute : CodableAttributedStringKey {
         public typealias Value = PresentationIntent
-        public static let name = NSAttributedString.Key.presentationIntentAttributeName.rawValue
+        public static let name = "NSPresentationIntent"
     }
     
     @frozen
     @available(macOS 13, iOS 16, tvOS 16, watchOS 9, *)
     public enum MarkdownSourcePositionAttribute: CodableAttributedStringKey {
-        public static let name = NSAttributedString.Key.markdownSourcePosition.rawValue
+        public static let name = "NSMarkdownSourcePosition"
         public typealias Value = AttributedString.MarkdownSourcePosition
     }
     
     @frozen
     @available(FoundationPreview 6.2, *)
-    public enum ListItemDelimiterAttribute : CodableAttributedStringKey, ObjectiveCConvertibleAttributedStringKey {
+    public enum ListItemDelimiterAttribute : CodableAttributedStringKey {
         public typealias Value = Character
-        public typealias ObjectiveCValue = NSString
-        
-        public static let name = NSAttributedString.Key.listItemDelimiter.rawValue
-        
-        public static func objectiveCValue(for value: Character) throws -> NSString {
-            String(value) as NSString
-        }
-        
-        public static func value(for object: NSString) throws -> Character {
-            let stringValue = object as String
-            guard stringValue.count == 1 else {
-                throw CocoaError(.coderInvalidValue)
-            }
-            return stringValue[stringValue.startIndex]
-        }
+        public static let name = "NSListItemDelimiter"
         
         public static func encode(_ value: Character, to encoder: any Encoder) throws {
             var container = encoder.singleValueContainer()
@@ -461,8 +451,6 @@ extension AttributeScopes.FoundationAttributes {
             return text[text.startIndex]
         }
     }
-    
-#endif // FOUNDATION_FRAMEWORK
     
 	@frozen
     @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
@@ -787,6 +775,8 @@ extension AttributeScopes.FoundationAttributes.LocalizedNumberFormatAttribute : 
 @available(*, unavailable)
 extension AttributeScopes.FoundationAttributes.InflectionAlternativeAttribute : Sendable {}
 
+#endif // FOUNDATION_FRAMEWORK
+
 @available(macOS, unavailable, introduced: 12.0)
 @available(iOS, unavailable, introduced: 15.0)
 @available(tvOS, unavailable, introduced: 15.0)
@@ -800,6 +790,8 @@ extension AttributeScopes.FoundationAttributes.PresentationIntentAttribute : Sen
 @available(watchOS, unavailable, introduced: 9.0)
 @available(*, unavailable)
 extension AttributeScopes.FoundationAttributes.MarkdownSourcePositionAttribute : Sendable {}
+
+#if FOUNDATION_FRAMEWORK
 
 @available(macOS, unavailable, introduced: 13.0)
 @available(iOS, unavailable, introduced: 16.0)
