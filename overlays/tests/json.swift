@@ -137,8 +137,8 @@ custom.dateDecodingStrategy = .custom { decoder in
 }
 check((try? custom.decode([Date].self, from: Data(#"["1626350400"]"#.utf8))) == [summer], "custom date strategy")
 let dayFormatter = DateFormatter()
-dayFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
-dayFormatter.timeZone = NSTimeZone(name: "UTC")
+dayFormatter.locale = Locale(identifier: "en_US_POSIX")
+dayFormatter.timeZone = TimeZone(identifier: "UTC")
 dayFormatter.dateFormat = "yyyy-MM-dd HH:mm"
 let formattedEncoder = JSONEncoder()
 formattedEncoder.dateEncodingStrategy = .formatted(dayFormatter)

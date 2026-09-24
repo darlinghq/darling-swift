@@ -673,6 +673,6 @@ extension NSNumber {
     /// Box a Core Graphics floating-point value as a number.
     @nonobjc
     public convenience init(value: CGFloat) {
-        self.init(double: Double(value))
+        self.init(value: Double(value))
     }
 }

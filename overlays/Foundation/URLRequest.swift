@@ -38,10 +38,10 @@ public struct URLRequest : ReferenceConvertible, Equatable, Hashable {
 
     /// Creates and initializes a URLRequest with the given URL and cache policy.
     /// - parameter: url The URL for the request.
-    /// - parameter: cachePolicy The cache policy for the request. Defaults to `NSURLRequestUseProtocolCachePolicy`.
+    /// - parameter: cachePolicy The cache policy for the request. Defaults to `.useProtocolCachePolicy`.
     /// - parameter: timeoutInterval The timeout interval for the request. See the commentary for the `timeoutInterval` for more information on timeout intervals. Defaults to 60.0
-    public init(url: URL, cachePolicy: CachePolicy = NSURLRequestUseProtocolCachePolicy, timeoutInterval: TimeInterval = 60.0) {
-        let request = NSMutableURLRequest(url: url._bridgeToObjectiveC(), cachePolicy: cachePolicy, timeoutInterval: timeoutInterval)!
+    public init(url: URL, cachePolicy: CachePolicy = .useProtocolCachePolicy, timeoutInterval: TimeInterval = 60.0) {
+        let request = NSMutableURLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeoutInterval)!
         _handle = _MutableHandle(adoptingReference: request)
     }
 
@@ -52,10 +52,10 @@ public struct URLRequest : ReferenceConvertible, Equatable, Hashable {
     /// The URL of the receiver.
     public var url: URL? {
         get {
-            return _handle.map { $0.url().map(URL._unconditionallyBridgeFromObjectiveC) }
+            return _handle.map { $0.url() }
         }
         set {
-            _applyMutation { $0.setURL(newValue?._bridgeToObjectiveC()) }
+            _applyMutation { $0.setURL(newValue) }
         }
     }
 
@@ -94,10 +94,10 @@ public struct URLRequest : ReferenceConvertible, Equatable, Hashable {
     /// document" policy.
     public var mainDocumentURL: URL? {
         get {
-            return _handle.map { $0.mainDocumentURL().map(URL._unconditionallyBridgeFromObjectiveC) }
+            return _handle.map { $0.mainDocumentURL() }
         }
         set {
-            _applyMutation { $0.setMainDocumentURL(newValue?._bridgeToObjectiveC()) }
+            _applyMutation { $0.setMainDocumentURL(newValue) }
         }
     }
 
@@ -188,10 +188,10 @@ public struct URLRequest : ReferenceConvertible, Equatable, Hashable {
     /// in done in an HTTP POST request.
     public var httpBody: Data? {
         get {
-            return _handle.map { $0.httpBody().map(Data._unconditionallyBridgeFromObjectiveC) }
+            return _handle.map { $0.httpBody() }
         }
         set {
-            _applyMutation { $0.setHTTPBody(newValue?._bridgeToObjectiveC()) }
+            _applyMutation { $0.setHTTPBody(newValue) }
         }
     }
 

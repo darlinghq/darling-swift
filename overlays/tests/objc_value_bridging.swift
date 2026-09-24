@@ -13,11 +13,11 @@ let utc = TimeZone(identifier: "UTC")!
 var gregorian = Calendar(identifier: .gregorian)
 gregorian.timeZone = utc
 
-let formatter = NSDateFormatter()
+let formatter = DateFormatter()
 formatter.locale = Locale(identifier: "en_US_POSIX")
 formatter.timeZone = utc
 formatter.calendar = gregorian
-formatter.setDateFormat("yyyy-MM-dd HH:mm")
+formatter.dateFormat = "yyyy-MM-dd HH:mm"
 let formatted: String? = formatter.string(from: date)
 check(formatted == "2021-01-15 12:00", "string(from: Date) (\(String(describing: formatted)))")
 let parsed: Date? = formatter.date(from: "2021-01-15 12:00")

@@ -69,7 +69,7 @@ extension StringProtocol {
     ) else {
       return nil
     }
-    return Data(referencing: encoded)
+    return encoded
   }
 }
 
