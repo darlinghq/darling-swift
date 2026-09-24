@@ -20,8 +20,6 @@
 //
 // Upstream is taken as-is. Where Darling's C CoreGraphics disagrees with it, see DARLING-CHANGES.md.
 
-import _DarlingCoreGraphicsShims
-
 extension CGPoint {
     public static var zero: CGPoint {
         return CGPoint(x: CGFloat(0), y: CGFloat(0))

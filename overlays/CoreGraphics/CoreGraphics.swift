@@ -7,7 +7,6 @@
 // Swift, even though Darling's headers declare them all.
 @_exported import CoreGraphics
 @_exported import CoreFoundation
-import _DarlingCoreGraphicsShims
 
 // The CGContext methods below are from release/5.2 stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift
 // (Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors, Apache License v2.0 with Runtime Library

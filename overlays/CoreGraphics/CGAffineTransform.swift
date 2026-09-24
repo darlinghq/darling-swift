@@ -21,8 +21,6 @@
 // anywhere in swiftlang/swift. They are written here over the same C functions, which Darling's
 // CGAffineTransform.h declares and CoreGraphics.framework exports.
 
-import _DarlingCoreGraphicsShims
-
 extension CGAffineTransform: Equatable {
   public static func ==(lhs: CGAffineTransform,
                         rhs: CGAffineTransform) -> Bool {
