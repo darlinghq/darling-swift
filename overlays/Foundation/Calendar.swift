@@ -488,6 +488,16 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
         if let timeZone = components.timeZone, timeZone != self.timeZone {
             calendar.timeZone = timeZone
         }
+        // NSDateComponents has no day of year: resolve it from January 1st, with swift-foundation's precedence.
+        if let dayOfYear = components.dayOfYear, components.day == nil,
+           components.weekday == nil || (components.weekdayOrdinal == nil && components.weekOfYear == nil && components.weekOfMonth == nil) {
+            let startOfYear = DateComponents(calendar: components.calendar, timeZone: components.timeZone, era: components.era,
+                                             year: components.year ?? components.yearForWeekOfYear, month: 1, day: 1,
+                                             hour: components.hour, minute: components.minute, second: components.second,
+                                             nanosecond: components.nanosecond)
+            guard let start = calendar.date(from: startOfYear) else { return nil }
+            return calendar.date(byAdding: .day, value: dayOfYear - 1, to: start)
+        }
         return calendar._ns.date(from: components._bridgeToObjectiveC())
     }
 
@@ -1028,7 +1038,13 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible {
             }
         }
         // Darling's CoreFoundation has no such calendar: fall back to the Gregorian one rather than crash.
-        return NSCalendar(calendarIdentifier: _toNSCalendarIdentifier(.gregorian)) ?? (NSCalendar.currentCalendar() as! NSCalendar)
+        let gregorian = NSCalendar(calendarIdentifier: _toNSCalendarIdentifier(.gregorian))
+        if identifier == .iso8601, let gregorian {
+            // swift-foundation's ISO 8601 calendar is Gregorian with ISO weeks: Monday first, 4 days in week 1.
+            gregorian.setFirstWeekday(2)
+            gregorian.setMinimumDaysInFirstWeek(4)
+        }
+        return gregorian ?? (NSCalendar.currentCalendar() as! NSCalendar)
     }
 
     /// Copies a calendar with its settings; Darling's -copyWithZone: only keeps the identifier.

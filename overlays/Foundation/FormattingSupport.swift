@@ -4,17 +4,6 @@
 internal import _FoundationICU
 internal import os
 
-// From FormatParsingUtilities.swift; the rest of that file needs BufferView.
-func parseError(_ value: String, exampleFormattedString: String?, extendedDescription: String? = nil) -> CocoaError {
-    let errorStr: String
-    if let exampleFormattedString = exampleFormattedString {
-        errorStr = "Cannot parse \(value)\(extendedDescription.map({ ": \($0)." }) ?? ".") String should adhere to the preferred format of the locale, such as \(exampleFormattedString)."
-    } else {
-        errorStr = "Cannot parse \(value)\(extendedDescription.map({ ": \($0)." }) ?? ".")"
-    }
-    return CocoaError(CocoaError.formatting, userInfo: [ NSDebugDescriptionErrorKey: errorStr ])
-}
-
 extension Locale {
     // Darling's Locale has no per-user preference overrides to capture or force.
     var identifierCapturingPreferences: String { identifier }
@@ -131,6 +120,34 @@ extension Calendar {
             if contains(.timeZone) { result.insert(.timeZone) }
             return result
         }
+    }
+}
+
+extension Calendar {
+    // Calendar.dateComponents(_:from:) with a ComponentSet, which is how swift-foundation carries dayOfYear.
+    func _dateComponents(_ components: ComponentSet, from date: Date) -> DateComponents {
+        var result = dateComponents(components.set, from: date)
+        if components.contains(.dayOfYear) {
+            result.dayOfYear = ordinality(of: .day, in: .year, for: date)
+        }
+        return result
+    }
+}
+
+extension DateComponents {
+    // From FoundationEssentials/Calendar/DateComponents.swift; Darling's fields are plain optionals,
+    // so there is no NSDateComponentUndefined conversion to skip.
+    init(calendar: Calendar?, timeZone: TimeZone?, rawEra: Int?, rawYear: Int?, rawMonth: Int?, rawDay: Int?, rawHour: Int?, rawMinute: Int?, rawSecond: Int?, rawNanosecond: Int?, rawWeekday: Int?, rawWeekdayOrdinal: Int?, rawQuarter: Int?, rawWeekOfMonth: Int?, rawWeekOfYear: Int?, rawYearForWeekOfYear: Int?, rawDayOfYear: Int?) {
+        self.init(calendar: calendar, timeZone: timeZone, era: rawEra, year: rawYear, month: rawMonth, day: rawDay, hour: rawHour, minute: rawMinute, second: rawSecond, nanosecond: rawNanosecond, weekday: rawWeekday, weekdayOrdinal: rawWeekdayOrdinal, quarter: rawQuarter, weekOfMonth: rawWeekOfMonth, weekOfYear: rawWeekOfYear, yearForWeekOfYear: rawYearForWeekOfYear)
+        dayOfYear = rawDayOfYear
+    }
+}
+
+extension TimeZone {
+    // swift-foundation's GMT-offset zones are the fixed ones. Darling's are named GMT, GMT+hhmm or GMT-hhmm.
+    var fixedOffsetFromGMT: Int? {
+        guard identifier == "GMT" || identifier.hasPrefix("GMT+") || identifier.hasPrefix("GMT-") else { return nil }
+        return secondsFromGMT()
     }
 }
 
