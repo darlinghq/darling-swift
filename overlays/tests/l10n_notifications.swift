@@ -51,21 +51,21 @@ if let bundle = Bundle(url: URL(fileURLWithPath: bundleDirectory)) {
 func describe<T : CustomStringConvertible>(_ value: T) -> String { return value.description }
 check(describe(NSObject()).hasPrefix("<NSObject: "), "NSObject is CustomStringConvertible (\(describe(NSObject())))")
 
-let center = NotificationCenter.defaultCenter() as! NotificationCenter
+let center = NotificationCenter.default
 let notificationName = NSNotificationName(rawValue: "org.darling.async-notification")
 let sender = NSObject()
 let notifications = center.notifications(named: notificationName, object: sender)
 var iterator = notifications.makeAsyncIterator()
-center.postNotificationName("org.darling.other", object: sender)
-center.postNotificationName(notificationName.rawValue, object: NSObject())
-center.postNotificationName(notificationName.rawValue, object: sender)
-center.postNotificationName(notificationName.rawValue, object: sender)
+center.post(name: Notification.Name("org.darling.other"), object: sender)
+center.post(name: notificationName, object: NSObject())
+center.post(name: notificationName, object: sender)
+center.post(name: notificationName, object: sender)
 let first = await iterator.next()
 check(first?.name == notificationName && first?.object as AnyObject? === sender, "notifications(named:object:) delivers a matching notification")
 let second = await iterator.next()
 check(second?.name == notificationName, "notifications are buffered in order")
 DispatchQueue.global().async {
-    center.postNotificationName(notificationName.rawValue, object: sender)
+    center.post(name: notificationName, object: sender)
 }
 let third = await iterator.next()
 check(third?.name == notificationName, "a notification posted from another thread is delivered")

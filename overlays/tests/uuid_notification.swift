@@ -31,19 +31,16 @@ let note = Notification(name: name, object: sender, userInfo: ["count": 3])
 check(note.name == name, "Notification name")
 check((note.userInfo?["count"] as? Int) == 3, "Notification userInfo")
 let nsNote = note as NSNotification
-check(nsNote.name() == "org.darling.probe", "Notification bridges to NSNotification")
+check(nsNote.name() == name, "Notification bridges to NSNotification")
 check((nsNote.userInfo()?["count"] as? Int) == 3, "NSNotification userInfo from Swift")
 let back = nsNote as Notification
 check(back.name == name && (back.object as AnyObject?) === sender, "NSNotification bridges back")
 check(back == note, "Notification equality after a round trip")
 
-// Darling's +defaultCenter returns id, and NSNotification has no SwiftBridge entry, so convert explicitly.
 var received: Notification?
-let center = NotificationCenter.defaultCenter() as! NotificationCenter
-let token = center.addObserver(forName: name.rawValue, object: nil as Any?, queue: nil as OperationQueue?) { (n: NSNotification?) in
-    received = n.map { $0 as Notification }
-}
-center.post(Notification(name: name, userInfo: ["k": "v"]) as NSNotification)
+let center = NotificationCenter.default
+let token = center.addObserver(forName: name, object: nil, queue: nil) { received = $0 }
+center.post(Notification(name: name, userInfo: ["k": "v"]))
 check((received?.userInfo?["k"] as? String) == "v", "notification delivered to a Swift block observer")
 center.removeObserver(token)
 

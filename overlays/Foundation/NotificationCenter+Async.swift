@@ -24,10 +24,8 @@ extension NotificationCenter {
             stream = AsyncStream(bufferingPolicy: .unbounded) { continuation = $0 }
             self.center = center
             let yield = continuation!
-            observer = center.addObserver(forName: name.rawValue, object: object, queue: nil) { notification in
-                if let notification = notification {
-                    yield.yield(notification as Notification)
-                }
+            observer = center.addObserver(forName: name, object: object, queue: nil) { notification in
+                yield.yield(notification)
             }
         }
 

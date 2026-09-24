@@ -120,7 +120,7 @@ extension Notification : _ObjectiveCBridgeable {
 
     @_semantics("convertToObjectiveC")
     public func _bridgeToObjectiveC() -> NSNotification {
-        return NSNotification(name: name.rawValue, object: object, userInfo: userInfo)
+        return NSNotification(name: name, object: object, userInfo: userInfo)
     }
 
     public static func _forceBridgeFromObjectiveC(_ x: NSNotification, result: inout Notification?) {
@@ -130,14 +130,14 @@ extension Notification : _ObjectiveCBridgeable {
     }
 
     public static func _conditionallyBridgeFromObjectiveC(_ x: NSNotification, result: inout Notification?) -> Bool {
-        result = Notification(name: Name(rawValue: x.name()), object: x.object(), userInfo: x.userInfo())
+        result = Notification(name: x.name(), object: x.object(), userInfo: x.userInfo())
         return true
     }
 
     @_effects(readonly)
     public static func _unconditionallyBridgeFromObjectiveC(_ source: NSNotification?) -> Notification {
         guard let src = source else { return Notification(name: Name(rawValue: "")) }
-        return Notification(name: Name(rawValue: src.name()), object: src.object(), userInfo: src.userInfo())
+        return Notification(name: src.name(), object: src.object(), userInfo: src.userInfo())
     }
 }
 
