@@ -3,7 +3,7 @@
 // Darling's Objective-C UTType, which holds the type table, conformances and tag lookups; every member here
 // forwards to it. Built with library evolution, so apps reach UTType only through these symbols.
 //
-// Not included: the URL, URLResourceValues, String and NSItemProvider extensions, macOS 26's referenceAccessoryURL
+// Not included: the URL, String and NSItemProvider extensions, macOS 26's referenceAccessoryURL
 // and setDefaultHandler(to:completionHandler:), and the static types whose Objective-C constants Darling does not
 // export yet (css, heics, exr, dng, jpegxl, tarArchive, ahap, geoJSON, linkPresentationMetadata).
 
@@ -136,6 +136,12 @@ extension UTType: Codable {
 			throw DecodingError.dataCorruptedError(in: container, debugDescription: "\(identifier) is not a valid type identifier")
 		}
 		self = type
+	}
+}
+
+extension URLResourceValues {
+	public var contentType: UTType? {
+		(allValues[.contentTypeKey] as? UTTypeReference).map { UTType(_reference: $0) }
 	}
 }
 
