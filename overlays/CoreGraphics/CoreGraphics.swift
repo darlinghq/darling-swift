@@ -145,3 +145,32 @@ extension CGPath {
 
   public func mutableCopy() -> CGMutablePath? { return CGPathCreateMutableCopy(self) }
 }
+
+// Apple spells these with a defaulted `transform:` argument, which a C swift_name cannot express.
+// Written over the C entry points, which take the transform by pointer.
+extension CGMutablePath {
+  public func move(to point: CGPoint, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathMoveToPoint(self, $0, point.x, point.y) }
+  }
+
+  public func addLine(to point: CGPoint, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddLineToPoint(self, $0, point.x, point.y) }
+  }
+
+  public func addPath(_ path: CGPath, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddPath(self, $0, path) }
+  }
+
+  public func addQuadCurve(to end: CGPoint, control: CGPoint, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) {
+      CGPathAddQuadCurveToPoint(self, $0, control.x, control.y, end.x, end.y)
+    }
+  }
+
+  public func addCurve(to end: CGPoint, control1: CGPoint, control2: CGPoint,
+                       transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) {
+      CGPathAddCurveToPoint(self, $0, control1.x, control1.y, control2.x, control2.y, end.x, end.y)
+    }
+  }
+}
