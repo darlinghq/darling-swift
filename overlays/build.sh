@@ -79,8 +79,9 @@ corefoundation="$DARLING_ROOT/System/Library/Frameworks/CoreFoundation.framework
 build_module Darwin "$here"/Darwin/*.swift
 build_module ObjectiveC "$here/ObjectiveC/ObjectiveC.swift" -- -disable-objc-attr-requires-foundation-module --link -lswiftDarwin
 build_module CoreFoundation "$here"/CoreFoundation/*.swift --link "$corefoundation" -lswiftDarwin
+# OS_OBJECT_SWIFT3 makes the dispatch headers declare the OS_dispatch_source_* protocols, as when Swift imports them.
 "$SWIFT_TOOLCHAIN/bin/clang++" -target "$target" -isysroot "$DARLING_SDK" -I "$here/Dispatch/include" \
-	-std=c++17 -fobjc-arc -O2 -c "$here/Dispatch/Dispatch.mm" -o "$out/obj/Dispatch.mm.o"
+	-std=c++17 -fobjc-arc -O2 -DOS_OBJECT_SWIFT3=1 -c "$here/Dispatch/Dispatch.mm" -o "$out/obj/Dispatch.mm.o"
 build_module Dispatch "$here"/Dispatch/*.swift --link "$out/obj/Dispatch.mm.o" -lswiftObjectiveC -lswiftDarwin
 build_module os "$here/os/os.swift" -- -Xcc -fmodule-map-file="$here/os/shims/module.modulemap" --link -lswiftDarwin -lswiftObjectiveC -lswiftDispatch
 build_module XPC "$here/XPC/XPC.swift" -- -Xcc -fmodule-map-file="$here/XPC/shims/module.modulemap" --link -lswiftDarwin -lswiftObjectiveC -lswiftDispatch
