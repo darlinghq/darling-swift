@@ -26,6 +26,11 @@ public struct URLResourceValues {
         _values = values
     }
 
+    /// All of the resource values, keyed by resource key.
+    public var allValues: [URLResourceKey: Any] {
+        return _values
+    }
+
     private func _get<T>(_ key : URLResourceKey) -> T? {
         return _values[key] as? T
     }
