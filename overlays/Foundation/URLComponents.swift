@@ -192,25 +192,96 @@ public struct URLComponents : Hashable, Equatable {
     /// A URL string created from the components, or nil if the components can't form a valid URL (an authority with
     /// a path that doesn't start with "/", or no authority with a path starting with "//").
     public var string: String? {
+        return _layout()?.string
+    }
+
+    /// The string built from the components together with the offsets (in UTF-8 bytes) of each present component.
+    private struct _Layout {
+        var string = ""
+        var scheme: Range<Int>?
+        var user: Range<Int>?
+        var password: Range<Int>?
+        var host: Range<Int>?
+        var port: Range<Int>?
+        var path: Range<Int>?
+        var query: Range<Int>?
+        var fragment: Range<Int>?
+    }
+
+    private func _layout() -> _Layout? {
         if _hasAuthority && !_path.isEmpty && !_path.hasPrefix("/") { return nil }
         if !_hasAuthority && _path.hasPrefix("//") { return nil }
-        var result = ""
-        if let scheme = _scheme { result += scheme + ":" }
-        if _hasAuthority {
-            result += "//"
-            if _user != nil || _password != nil {
-                result += _user ?? ""
-                if let password = _password { result += ":" + password }
-                result += "@"
-            }
-            result += _host ?? ""
-            if let port = _port { result += ":" + String(port) }
+        var layout = _Layout()
+        var offset = 0
+        func append(_ text: String) -> Range<Int> {
+            let range = offset..<(offset + text.utf8.count)
+            layout.string += text
+            offset = range.upperBound
+            return range
         }
-        result += _path
-        if let query = _query { result += "?" + query }
-        if let fragment = _fragment { result += "#" + fragment }
-        return result
+        if let scheme = _scheme {
+            layout.scheme = append(scheme)
+            _ = append(":")
+        }
+        if _hasAuthority {
+            _ = append("//")
+            if _user != nil || _password != nil {
+                layout.user = append(_user ?? "")
+                if let password = _password {
+                    _ = append(":")
+                    layout.password = append(password)
+                }
+                _ = append("@")
+            }
+            layout.host = append(_host ?? "")
+            if let port = _port {
+                _ = append(":")
+                layout.port = append(String(port))
+            }
+        }
+        layout.path = append(_path)
+        if let query = _query {
+            _ = append("?")
+            layout.query = append(query)
+        }
+        if let fragment = _fragment {
+            _ = append("#")
+            layout.fragment = append(fragment)
+        }
+        return layout
     }
+
+    private func _range(_ select: (_Layout) -> Range<Int>?) -> Range<String.Index>? {
+        guard let layout = _layout(), let r = select(layout) else { return nil }
+        let utf8 = layout.string.utf8
+        let lower = utf8.index(utf8.startIndex, offsetBy: r.lowerBound)
+        let upper = utf8.index(utf8.startIndex, offsetBy: r.upperBound)
+        return lower..<upper
+    }
+
+    /// The range of the scheme in `string`, or nil if there is no scheme.
+    public var rangeOfScheme: Range<String.Index>? { return _range { $0.scheme } }
+
+    /// The range of the user in `string`, or nil if there is no user.
+    public var rangeOfUser: Range<String.Index>? { return _range { $0.user } }
+
+    /// The range of the password in `string`, or nil if there is no password.
+    public var rangeOfPassword: Range<String.Index>? { return _range { $0.password } }
+
+    /// The range of the host in `string`, or nil if there is no authority.
+    public var rangeOfHost: Range<String.Index>? { return _range { $0.host } }
+
+    /// The range of the port in `string`, or nil if there is no port.
+    public var rangeOfPort: Range<String.Index>? { return _range { $0.port } }
+
+    /// The range of the path in `string` (empty when the path is empty).
+    public var rangeOfPath: Range<String.Index>? { return _range { $0.path } }
+
+    /// The range of the query in `string`, or nil if there is no query.
+    public var rangeOfQuery: Range<String.Index>? { return _range { $0.query } }
+
+    /// The range of the fragment in `string`, or nil if there is no fragment.
+    public var rangeOfFragment: Range<String.Index>? { return _range { $0.fragment } }
 
     /// A URL created from the components, or nil if they can't form a valid URL.
     public var url: URL? {

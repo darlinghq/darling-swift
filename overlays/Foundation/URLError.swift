@@ -10,9 +10,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-// Adapted from swift-corelibs-foundation's Darwin Foundation overlay.
-// Keep URL error codes aligned with Foundation's NSURLError domain.
-@_exported import Foundation
+// From release/5.4 (apple/swift 845205b4407c) stdlib/public/Darwin/Foundation/NSError.swift, URLError and its error codes.
+
+@_exported import Foundation // Clang module
+import CoreFoundation
 
 public struct URLError : _BridgedStoredNSError {
   public let _nsError: NSError
@@ -202,6 +203,75 @@ extension URLError.Code {
     return URLError.Code(rawValue: -997)
   }
 }
+
+extension URLError {
+  /// Reasons used by URLError to indicate why a background URLSessionTask was cancelled.
+  @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+  public enum BackgroundTaskCancelledReason : Int {
+    case userForceQuitApplication
+    case backgroundUpdatesDisabled
+    case insufficientSystemResources
+  }
+}
+
+extension URLError {
+  /// Reasons used by URLError to indicate that a URLSessionTask failed because of unsatisfiable network constraints.
+  @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+  public enum NetworkUnavailableReason : Int {
+    case cellular
+    case expensive
+    case constrained
+  }
+}
+
+// Darling's Foundation headers do not declare the two user-info keys below yet; they are the documented NSError
+// user-info key names.
+private let _NSURLErrorBackgroundTaskCancelledReasonKey = "NSURLErrorBackgroundTaskCancelledReasonKey"
+private let _NSURLErrorNetworkUnavailableReasonKey = "NSURLErrorNetworkUnavailableReasonKey"
+
+extension URLError {
+  private var _nsUserInfo: [AnyHashable : Any] {
+    return (self as NSError).userInfo() ?? [:]
+  }
+
+  /// The URL which caused a load to fail.
+  public var failingURL: URL? {
+    return _nsUserInfo[NSURLErrorFailingURLErrorKey as NSString] as? URL
+  }
+
+  /// The string for the URL which caused a load to fail. 
+  public var failureURLString: String? {
+    return _nsUserInfo[NSURLErrorFailingURLStringErrorKey as NSString] as? String
+  }
+
+  /// The state of a failed SSL handshake.
+  public var failureURLPeerTrust: SecTrust? {
+    if let secTrust = _nsUserInfo[NSURLErrorFailingURLPeerTrustErrorKey as NSString] {
+      return (secTrust as! SecTrust)
+    }
+
+    return nil
+  }
+
+  /// The reason why a background URLSessionTask was cancelled.
+  @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+  public var backgroundTaskCancelledReason: BackgroundTaskCancelledReason? {
+    return (_nsUserInfo[_NSURLErrorBackgroundTaskCancelledReasonKey] as? Int).flatMap(BackgroundTaskCancelledReason.init(rawValue:))
+  }
+
+  /// The reason why the network is unavailable when the task failed due to unsatisfiable network constraints.
+  @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+  public var networkUnavailableReason: NetworkUnavailableReason? {
+    return (_nsUserInfo[_NSURLErrorNetworkUnavailableReasonKey] as? Int).flatMap(NetworkUnavailableReason.init(rawValue:))
+  }
+
+  /// An opaque data blob to resume a failed download task.
+  @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+  public var downloadTaskResumeData: Data? {
+    return _nsUserInfo[NSURLSessionDownloadTaskResumeData] as? Data
+  }
+}
+
 extension URLError {
   public static var unknown: URLError.Code {
     return .unknown
@@ -404,3 +474,247 @@ extension URLError {
     return .backgroundSessionWasDisconnected
   }
 }
+
+extension URLError {
+  @available(*, unavailable, renamed: "unknown")
+  public static var Unknown: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cancelled")
+  public static var Cancelled: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "badURL")
+  public static var BadURL: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "timedOut")
+  public static var TimedOut: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "unsupportedURL")
+  public static var UnsupportedURL: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotFindHost")
+  public static var CannotFindHost: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotConnectToHost")
+  public static var CannotConnectToHost: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "networkConnectionLost")
+  public static var NetworkConnectionLost: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "dnsLookupFailed")
+  public static var DNSLookupFailed: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "httpTooManyRedirects")
+  public static var HTTPTooManyRedirects: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "resourceUnavailable")
+  public static var ResourceUnavailable: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "notConnectedToInternet")
+  public static var NotConnectedToInternet: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "redirectToNonExistentLocation")
+  public static var RedirectToNonExistentLocation: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "badServerResponse")
+  public static var BadServerResponse: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "userCancelledAuthentication")
+  public static var UserCancelledAuthentication: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "userAuthenticationRequired")
+  public static var UserAuthenticationRequired: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "zeroByteResource")
+  public static var ZeroByteResource: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotDecodeRawData")
+  public static var CannotDecodeRawData: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotDecodeContentData")
+  public static var CannotDecodeContentData: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotParseResponse")
+  public static var CannotParseResponse: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "appTransportSecurityRequiresSecureConnection")
+  public static var AppTransportSecurityRequiresSecureConnection: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "fileDoesNotExist")
+  public static var FileDoesNotExist: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "fileIsDirectory")
+  public static var FileIsDirectory: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "noPermissionsToReadFile")
+  public static var NoPermissionsToReadFile: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "dataLengthExceedsMaximum")
+  public static var DataLengthExceedsMaximum: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "secureConnectionFailed")
+  public static var SecureConnectionFailed: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "serverCertificateHasBadDate")
+  public static var ServerCertificateHasBadDate: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "serverCertificateUntrusted")
+  public static var ServerCertificateUntrusted: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "serverCertificateHasUnknownRoot")
+  public static var ServerCertificateHasUnknownRoot: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "serverCertificateNotYetValid")
+  public static var ServerCertificateNotYetValid: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "clientCertificateRejected")
+  public static var ClientCertificateRejected: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "clientCertificateRequired")
+  public static var ClientCertificateRequired: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotLoadFromNetwork")
+  public static var CannotLoadFromNetwork: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotCreateFile")
+  public static var CannotCreateFile: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotOpenFile")
+  public static var CannotOpenFile: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotCloseFile")
+  public static var CannotCloseFile: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotWriteToFile")
+  public static var CannotWriteToFile: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotRemoveFile")
+  public static var CannotRemoveFile: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "cannotMoveFile")
+  public static var CannotMoveFile: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "downloadDecodingFailedMidStream")
+  public static var DownloadDecodingFailedMidStream: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "downloadDecodingFailedToComplete")
+  public static var DownloadDecodingFailedToComplete: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "internationalRoamingOff")
+  public static var InternationalRoamingOff: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "callIsActive")
+  public static var CallIsActive: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "dataNotAllowed")
+  public static var DataNotAllowed: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "requestBodyStreamExhausted")
+  public static var RequestBodyStreamExhausted: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "backgroundSessionRequiresSharedContainer")
+  public static var BackgroundSessionRequiresSharedContainer: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "backgroundSessionInUseByAnotherProcess")
+  public static var BackgroundSessionInUseByAnotherProcess: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+
+  @available(*, unavailable, renamed: "backgroundSessionWasDisconnected")
+  public static var BackgroundSessionWasDisconnected: URLError.Code {
+    fatalError("unavailable accessor can't be called")
+  }
+}
+
+/// Describes an error in the POSIX error domain.
