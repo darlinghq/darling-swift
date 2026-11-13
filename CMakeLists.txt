@@ -48,6 +48,27 @@ if (SWIFT_TOOLCHAIN_FOUND)
 		SOURCES "${OVERLAYS}/XPC/XPC.swift"
 		MODULES Dispatch ObjectiveC Darwin
 		FLAGS ${overlay_shims} -Xcc -fmodule-map-file=${OVERLAYS}/XPC/shims/module.modulemap)
+
+	# Foundation. AttributedString keeps its text in swift-collections' BigString, so two of that project's modules
+	# (overlays/Collections) are compiled without library evolution and linked into libswiftFoundation.dylib, which
+	# keeps their symbols out of its export table.
+	file(GLOB_RECURSE ROPE_SOURCES "${OVERLAYS}/Collections/RopeModule/*.swift")
+	file(GLOB_RECURSE COLLECTIONS_UTILITIES_SOURCES "${OVERLAYS}/Collections/InternalCollectionsUtilities/*.swift")
+	add_darling_swift_object(InternalCollectionsUtilities SOURCES ${COLLECTIONS_UTILITIES_SOURCES})
+	add_darling_swift_object(_RopeModule SOURCES ${ROPE_SOURCES} MODULES InternalCollectionsUtilities)
+	file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/foundation-unexported.txt"
+		"_$s*11_RopeModule*\n_$s*28InternalCollectionsUtilities*\n")
+	file(GLOB FOUNDATION_SOURCES "${OVERLAYS}/Foundation/*.swift")
+	add_darling_swift_library(Foundation
+		SOURCES ${FOUNDATION_SOURCES}
+		MODULES _RopeModule InternalCollectionsUtilities os XPC CoreFoundation Dispatch ObjectiveC Darwin
+		FLAGS ${overlay_shims} -package-name swift-foundation
+			# Foundation's NSAppleEventDescriptor.h includes <AE/AE.h>, which the SDK does not expose by itself yet.
+			-Xcc -I${DARLING_TOP_DIRECTORY}/src/frameworks/CoreServices/include
+		OBJECTS "${_RopeModule_OBJECT}" "${InternalCollectionsUtilities_OBJECT}"
+		LINK_FLAGS -Wl,-unexported_symbols_list,${CMAKE_CURRENT_BINARY_DIR}/foundation-unexported.txt
+		LIBRARIES Foundation CoreFoundation icucore)
+	set_property(TARGET swiftFoundation APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/foundation-unexported.txt")
 endif()
 
 # Newer SDKs split parts of the Darwin overlay out of libswiftDarwin.dylib into

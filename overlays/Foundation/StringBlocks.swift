@@ -1,0 +1,208 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2023 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+//
+//===----------------------------------------------------------------------===//
+
+extension String {
+    struct _BlockSearchingOptions : OptionSet {
+        let rawValue: Int
+        
+        static let findStart = Self(rawValue: 1 << 0)
+        static let findEnd = Self(rawValue: 1 << 1)
+        static let findContentsEnd = Self(rawValue: 1 << 2)
+        static let stopAtLineSeparators = Self(rawValue: 1 << 3)
+    }
+    
+    static let paragraphSeparators : [[UTF8.CodeUnit]] = [
+        [0xE2, 0x80, 0xA9] // U+2029 Paragraph Separator
+    ]
+    
+    static let lineSeparators : [[UTF8.CodeUnit]] = paragraphSeparators + [
+        [0xE2, 0x80, 0xA8], // U+2028 Line Separator
+        [0xC2, 0x85] // U+0085 <Next Line> (NEL)
+    ]
+}
+
+struct _StringBlock<Index> {
+    let start: Index?
+    let end: Index?
+    let contentsEnd: Index?
+}
+
+extension BidirectionalCollection where Element == UTF8.CodeUnit {
+
+    // Returns the index range the separator if a match is found. This always rewinds the start index to that of "\r" in the case where "\r\n" is present.
+    private func _matchesSeparators(_ separators: [[UTF8.CodeUnit]], from start: Index, reverse: Bool = false) -> Range<Index>? {
+        let startingCharacter = self[start]
+
+        // Special case when startingCharacter is "\r" or "\n" in "\r\n"
+        if startingCharacter == .carriageReturn {
+            let next = index(after: start)
+            if next < endIndex && self[next] == .newline {
+                return start..<index(after: next)
+            } else {
+                return start..<index(after: start)
+            }
+        } else if startingCharacter == .newline {
+            if start > startIndex {
+                let idxBefore = index(before: start)
+                if self[idxBefore] == .carriageReturn {
+                    return idxBefore..<index(after: start)
+                } else {
+                    return start..<index(after: start)
+                }
+            } else {
+                return start..<index(after: start)
+            }
+        }
+        if reverse {
+            if startingCharacter < 0x85 || startingCharacter > 0xA9 {
+                return nil
+            }
+        } else {
+            if startingCharacter < 0xC2 || startingCharacter > 0xE2 {
+                return nil
+            }
+        }
+        for separator in separators {
+            var strIdx = start
+            var separatorIdx = reverse ? separator.count - 1 : 0
+            let offset = reverse ? -1 : 1
+            let strLimit = reverse ? startIndex : index(before: endIndex)
+            let sepLimit = reverse ? 0 : separator.count - 1
+            while separator[separatorIdx] == self[strIdx] {
+                if !separator.formIndex(&separatorIdx, offsetBy: offset, limitedBy: sepLimit) {
+                    // We've fully matched the separator, return the appropriate range
+                    return (reverse ? strIdx ... start : start ... strIdx).relative(to: self)
+                }
+                
+                if !formIndex(&strIdx, offsetBy: offset, limitedBy: strLimit) {
+                    // We've run off the end of the string and haven't finished the separator, break out
+                    break
+                }
+            }
+        }
+        return nil
+    }
+
+    // Based on -[NSString _getBlockStart:end:contentsEnd:forRange:]
+    func _getBlock(
+        for options: String._BlockSearchingOptions,
+        in inputRangeExpr: some RangeExpression<Index>
+    ) -> _StringBlock<Index> {
+        let range = inputRangeExpr.relative(to: self)
+        return _getBlock(for: options, in: range)
+    }
+
+    func _getBlock(
+        for options: String._BlockSearchingOptions,
+        in range: Range<Index>
+    ) -> _StringBlock<Index> {
+        let fullStringRange = startIndex ..< endIndex
+
+        guard !(range == fullStringRange && !options.contains(.findContentsEnd)) else {
+            return _StringBlock(start: startIndex, end: endIndex, contentsEnd: nil)
+        }
+
+        guard range.lowerBound >= startIndex && range.upperBound <= endIndex else {
+            return _StringBlock(start: startIndex, end: endIndex, contentsEnd: endIndex)
+        }
+
+        let separatorCharacters = options.contains(.stopAtLineSeparators) ? String.lineSeparators : String.paragraphSeparators
+        
+        var start: Index? = nil
+        if options.contains(.findStart) {
+            if range.lowerBound == startIndex {
+                start = startIndex
+            } else {
+                var idx = index(before: range.lowerBound)
+
+                // Special case where start is between \r and \n
+                if range.lowerBound < endIndex && self[range.lowerBound] == .newline && self[idx] == .carriageReturn {
+                    if idx > startIndex {
+                        idx = index(before: idx)
+                    } else {
+                        start = startIndex
+                    }
+                }
+
+                while start == nil, idx >= startIndex, idx < endIndex {
+                    if let _ = _matchesSeparators(separatorCharacters, from: idx, reverse: true) {
+                        start = index(after: idx)
+                        break
+                    }
+                    if idx > startIndex {
+                        idx = index(before: idx)
+                    } else {
+                        start = startIndex
+                        break
+                    }
+                }
+
+                if start == nil {
+                    start = idx
+                }
+            }
+        }
+        
+        var end: Index? = nil
+        var contentsEnd: Index? = nil
+        if options.contains(.findEnd) || options.contains(.findContentsEnd) {
+            var idx = range.upperBound
+            if !range.isEmpty {
+                idx = index(before: idx)
+            }
+
+            if idx < endIndex, let separatorR = _matchesSeparators(separatorCharacters, from: idx, reverse: true) {
+                // When range.upperBound falls on the end of a multi-code-unit separator, walk backwards to find the start of the separator
+                end = separatorR.upperBound
+                contentsEnd = separatorR.lowerBound
+            } else {
+                while idx < endIndex {
+                    if let separatorR = _matchesSeparators(separatorCharacters, from: idx) {
+                        contentsEnd = separatorR.lowerBound
+                        end = separatorR.upperBound
+                        break
+                    }
+                    idx = index(after: idx)
+                }
+
+                if idx == endIndex {
+                    contentsEnd = idx
+                    end = idx
+                }
+            }
+        }
+
+        return _StringBlock(start: start, end: end, contentsEnd: contentsEnd)
+    }
+}
+
+extension Substring.UTF8View {
+    // Note: we could have these defined on BidirectionalCollection<UInt8>, like _getBlock.
+    // However, all current call sites are funneling through Substring.UTF8View, and it makes
+    // sense to avoid dealing with generics unless we're forced to. Feel free to convert these
+    // utilities to generic functions if needed.
+
+    internal func _lineBounds(
+        around range: Range<Index>
+    ) -> (start: Index, end: Index, contentsEnd: Index) {
+        let result = _getBlock(
+            for: [.findStart, .findEnd, .findContentsEnd, .stopAtLineSeparators], in: range)
+        return (result.start!, result.end!, result.contentsEnd!)
+    }
+
+    internal func _paragraphBounds(
+        around range: Range<Index>
+    ) -> (start: Index, end: Index, contentsEnd: Index) {
+        let result = _getBlock(
+            for: [.findStart, .findEnd, .findContentsEnd], in: range)
+        return (result.start!, result.end!, result.contentsEnd!)
+    }
+}
