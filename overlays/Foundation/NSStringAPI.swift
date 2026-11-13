@@ -420,7 +420,8 @@ extension StringProtocol {
 extension StringProtocol {
   fileprivate func _nsRange<R : RangeExpression>(_ r: R) -> NSRange where R.Bound == String.Index {
     let bounds = (self as? Substring).map { r.relative(to: $0) } ?? r.relative(to: String(self))
-    return _nsRange(bounds)
+    // A plain Range would resolve to this generic overload again; pass it as an Optional to reach the converter.
+    return _nsRange(Optional(bounds))
   }
 
   public func _toRelativeNSRange(_ r: Range<String.Index>) -> NSRange {
