@@ -4,9 +4,6 @@ module _SwiftObjectiveCOverlayShims {
 module _SwiftDispatchOverlayShims {
   header "DispatchOverlayShims.h"
 }
-module _SwiftOSOverlayShims {
-  header "OSOverlayShims.h"
-}
 module _SwiftXPCOverlayShims {
   header "XPCOverlayShims.h"
 }

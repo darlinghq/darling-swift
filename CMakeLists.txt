@@ -4,6 +4,52 @@ include(darling_lib)
 
 set(DARLING_LIB_64BIT_ONLY TRUE)
 
+# The Swift overlays that are built from source need the Swift toolchain (see cmake/swift_toolchain.cmake in the
+# main repository); without one they are skipped.
+set(DARLING_SWIFT_STDLIB_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/stdlib-modules")
+set(DARLING_SWIFT_RUNTIME_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
+if (SWIFT_TOOLCHAIN_FOUND)
+	set(OVERLAYS "${CMAKE_CURRENT_SOURCE_DIR}/overlays")
+	set(overlay_shims -Xcc -fmodule-map-file=${OVERLAYS}/shims/overlay-shims.modulemap)
+
+	file(GLOB DARWIN_SOURCES "${OVERLAYS}/Darwin/*.swift")
+	add_darling_swift_library(Darwin
+		SOURCES ${DARWIN_SOURCES}
+		FLAGS ${overlay_shims})
+
+	add_darling_swift_library(ObjectiveC
+		SOURCES "${OVERLAYS}/ObjectiveC/ObjectiveC.swift"
+		MODULES Darwin
+		FLAGS ${overlay_shims} -disable-objc-attr-requires-foundation-module)
+
+	file(GLOB COREFOUNDATION_SOURCES "${OVERLAYS}/CoreFoundation/*.swift")
+	add_darling_swift_library(CoreFoundation
+		SOURCES ${COREFOUNDATION_SOURCES}
+		MODULES Darwin
+		FLAGS ${overlay_shims}
+		LIBRARIES CoreFoundation)
+
+	# OS_OBJECT_SWIFT3 makes the dispatch headers declare the OS_dispatch_source_* protocols, as when Swift imports them.
+	file(GLOB DISPATCH_SOURCES "${OVERLAYS}/Dispatch/*.swift")
+	add_darling_swift_library(Dispatch
+		SOURCES ${DISPATCH_SOURCES}
+		MODULES ObjectiveC Darwin
+		FLAGS ${overlay_shims}
+		NATIVE_SOURCES "${OVERLAYS}/Dispatch/Dispatch.mm"
+		NATIVE_FLAGS -std=c++17 -fobjc-arc -DOS_OBJECT_SWIFT3=1 -I${OVERLAYS}/Dispatch/include)
+
+	add_darling_swift_library(os
+		SOURCES "${OVERLAYS}/os/os.swift"
+		MODULES Dispatch ObjectiveC Darwin
+		FLAGS ${overlay_shims} -Xcc -fmodule-map-file=${OVERLAYS}/os/shims/module.modulemap)
+
+	add_darling_swift_library(XPC
+		SOURCES "${OVERLAYS}/XPC/XPC.swift"
+		MODULES Dispatch ObjectiveC Darwin
+		FLAGS ${overlay_shims} -Xcc -fmodule-map-file=${OVERLAYS}/XPC/shims/module.modulemap)
+endif()
+
 # Newer SDKs split parts of the Darwin overlay out of libswiftDarwin.dylib into
 # further dylibs, and binaries built against those SDKs bind the symbols to the
 # split libraries by library ordinal. This tree keeps the whole overlay in
@@ -16,17 +62,18 @@ function(add_swift_darwin_reexport name source)
 		LINKER_LANGUAGE C
 		OUTPUT_NAME "${name}"
 	)
-	set_property(TARGET ${name} APPEND_STRING PROPERTY
-		LINK_FLAGS " -Wl,-reexport_library,${CMAKE_CURRENT_SOURCE_DIR}/libswiftDarwin.dylib")
+	reexport(${name} swiftDarwin "${CMAKE_CURRENT_BINARY_DIR}/libswiftDarwin.dylib")
 	install(TARGETS ${name} DESTINATION libexec/darling/usr/lib/swift)
 endfunction()
 
-add_swift_darwin_reexport(swift_errno swift_errno.S)
-foreach(split
-	swift_DarwinFoundation1 swift_DarwinFoundation2 swift_DarwinFoundation3
-	swift_math swift_signal swift_stdio swift_time swiftsys_time swiftunistd)
-	add_swift_darwin_reexport(${split} swift_darwin_split.S)
-endforeach()
+if (SWIFT_TOOLCHAIN_FOUND)
+	add_swift_darwin_reexport(swift_errno swift_errno.S)
+	foreach(split
+		swift_DarwinFoundation1 swift_DarwinFoundation2 swift_DarwinFoundation3
+		swift_math swift_signal swift_stdio swift_time swiftsys_time swiftunistd)
+		add_swift_darwin_reexport(${split} swift_darwin_split.S)
+	endforeach()
+endif()
 
 set(DYLIB_INSTALL_NAME "/usr/lib/swift/libswiftWebKit.dylib")
 add_darling_library(swiftWebKit SHARED
