@@ -1,0 +1,2419 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.3.3 (swift-6.3.3-RELEASE)
+// swift-module-flags: -disable-objc-attr-requires-foundation-module -target x86_64-apple-macosx13.0 -enable-objc-interop -enable-library-evolution -module-link-name swift_Differentiation -parse-stdlib -swift-version 5 -O -library-level api -enforce-exclusivity=unchecked -target-min-inlining-version min -enable-experimental-feature NoncopyableGenerics2 -enable-experimental-feature SuppressedAssociatedTypes -enable-experimental-feature SE427NoInferenceOnExtension -enable-experimental-feature NonescapableTypes -enable-experimental-feature LifetimeDependence -enable-experimental-feature InoutLifetimeDependence -enable-experimental-feature LifetimeDependenceMutableAccessors -enable-upcoming-feature MemberImportVisibility -module-name _Differentiation
+// swift-module-flags-ignorable: -enable-lexical-lifetimes=false -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.3
+import Swift
+import SwiftShims
+import tgmath_h
+public protocol Differentiable {
+  associatedtype TangentVector : Swift.AdditiveArithmetic, _Differentiation.Differentiable where Self.TangentVector == Self.TangentVector.TangentVector
+  mutating func move(by offset: Self.TangentVector)
+}
+extension _Differentiation.Differentiable where Self == Self.TangentVector {
+  @_alwaysEmitIntoClient @inlinable public mutating func move(by offset: Self.TangentVector) {
+    self += offset
+  }
+}
+@inlinable public func valueWithDifferential<T, R>(at x: T, of f: @differentiable(reverse) (T) -> R) -> (value: R, differential: (T.TangentVector) -> R.TangentVector) where T : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return Builtin.applyDerivative_jvp(f, x)
+}
+@inlinable public func valueWithDifferential<T, U, R>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) -> R) -> (value: R, differential: (T.TangentVector, U.TangentVector) -> R.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return Builtin.applyDerivative_jvp_arity2(f, x, y)
+}
+@inlinable public func valueWithDifferential<T, U, V, R>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) -> R) -> (value: R, differential: (T.TangentVector, U.TangentVector, V.TangentVector) -> R.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return Builtin.applyDerivative_jvp_arity3(f, x, y, z)
+}
+@inlinable public func valueWithDifferential<T, R, E>(at x: T, of f: @differentiable(reverse) (T) throws(E) -> R) throws(E) -> (value: R, differential: (T.TangentVector) -> R.TangentVector) where T : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try Builtin.applyDerivative_jvp_throws(f, x)
+}
+@inlinable public func valueWithDifferential<T, U, R, E>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) throws(E) -> R) throws(E) -> (value: R, differential: (T.TangentVector, U.TangentVector) -> R.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try Builtin.applyDerivative_jvp_arity2_throws(f, x, y)
+}
+@inlinable public func valueWithDifferential<T, U, V, R, E>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) throws(E) -> R) throws(E) -> (value: R, differential: (T.TangentVector, U.TangentVector, V.TangentVector) -> R.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try Builtin.applyDerivative_jvp_arity3_throws(f, x, y, z)
+}
+@inlinable public func valueWithPullback<T, R>(at x: T, of f: @differentiable(reverse) (T) -> R) -> (value: R, pullback: (R.TangentVector) -> T.TangentVector) where T : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return Builtin.applyDerivative_vjp(f, x)
+}
+@inlinable public func valueWithPullback<T, U, R>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) -> R) -> (value: R, pullback: (R.TangentVector) -> (T.TangentVector, U.TangentVector)) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return Builtin.applyDerivative_vjp_arity2(f, x, y)
+}
+@inlinable public func valueWithPullback<T, U, V, R>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) -> R) -> (value: R, pullback: (R.TangentVector) -> (T.TangentVector, U.TangentVector, V.TangentVector)) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return Builtin.applyDerivative_vjp_arity3(f, x, y, z)
+}
+@inlinable public func valueWithPullback<T, R, E>(at x: T, of f: @differentiable(reverse) (T) throws(E) -> R) throws(E) -> (value: R, pullback: (R.TangentVector) -> T.TangentVector) where T : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try Builtin.applyDerivative_vjp_throws(f, x)
+}
+@inlinable public func valueWithPullback<T, U, R, E>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) throws(E) -> R) throws(E) -> (value: R, pullback: (R.TangentVector) -> (T.TangentVector, U.TangentVector)) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try Builtin.applyDerivative_vjp_arity2_throws(f, x, y)
+}
+@inlinable public func valueWithPullback<T, U, V, R, E>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) throws(E) -> R) throws(E) -> (value: R, pullback: (R.TangentVector) -> (T.TangentVector, U.TangentVector, V.TangentVector)) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try Builtin.applyDerivative_vjp_arity3_throws(f, x, y, z)
+}
+@inlinable public func differential<T, R>(at x: T, of f: @differentiable(reverse) (T) -> R) -> (T.TangentVector) -> R.TangentVector where T : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return valueWithDifferential(at: x, of: f).1
+}
+@inlinable public func differential<T, U, R>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) -> R) -> (T.TangentVector, U.TangentVector) -> R.TangentVector where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return valueWithDifferential(at: x, y, of: f).1
+}
+@inlinable public func differential<T, U, V, R>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) -> R) -> (T.TangentVector, U.TangentVector, V.TangentVector) -> R.TangentVector where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return valueWithDifferential(at: x, y, z, of: f).1
+}
+@inlinable public func differential<T, R, E>(at x: T, of f: @differentiable(reverse) (T) throws(E) -> R) throws(E) -> (T.TangentVector) -> R.TangentVector where T : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try valueWithDifferential(at: x, of: f).1
+}
+@inlinable public func differential<T, U, R, E>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) throws(E) -> R) throws(E) -> (T.TangentVector, U.TangentVector) -> R.TangentVector where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try valueWithDifferential(at: x, y, of: f).1
+}
+@inlinable public func differential<T, U, V, R, E>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) throws(E) -> R) throws(E) -> (T.TangentVector, U.TangentVector, V.TangentVector) -> R.TangentVector where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try valueWithDifferential(at: x, y, z, of: f).1
+}
+@inlinable public func pullback<T, R>(at x: T, of f: @differentiable(reverse) (T) -> R) -> (R.TangentVector) -> T.TangentVector where T : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return Builtin.applyDerivative_vjp(f, x).1
+}
+@inlinable public func pullback<T, U, R>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) -> R) -> (R.TangentVector) -> (T.TangentVector, U.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return Builtin.applyDerivative_vjp_arity2(f, x, y).1
+}
+@inlinable public func pullback<T, U, V, R>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) -> R) -> (R.TangentVector) -> (T.TangentVector, U.TangentVector, V.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : _Differentiation.Differentiable {
+  return Builtin.applyDerivative_vjp_arity3(f, x, y, z).1
+}
+@inlinable public func pullback<T, R, E>(at x: T, of f: @differentiable(reverse) (T) throws(E) -> R) throws(E) -> (R.TangentVector) -> T.TangentVector where T : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try Builtin.applyDerivative_vjp_throws(f, x).1
+}
+@inlinable public func pullback<T, U, R, E>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) throws(E) -> R) throws(E) -> (R.TangentVector) -> (T.TangentVector, U.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try Builtin.applyDerivative_vjp_arity2_throws(f, x, y).1
+}
+@inlinable public func pullback<T, U, V, R, E>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) throws(E) -> R) throws(E) -> (R.TangentVector) -> (T.TangentVector, U.TangentVector, V.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try Builtin.applyDerivative_vjp_arity3_throws(f, x, y, z).1
+}
+@inlinable public func derivative<T, R>(at x: T, of f: @differentiable(reverse) (T) -> R) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, R : _Differentiation.Differentiable {
+  return differential(at: x, of: f)(T(1))
+}
+@inlinable public func derivative<T, U, R>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) -> R) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, R : _Differentiation.Differentiable {
+  return differential(at: x, y, of: f)(T(1), U(1))
+}
+@inlinable public func derivative<T, U, V, R>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) -> R) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, V : Swift.FloatingPoint, V : _Differentiation.Differentiable, V == V.TangentVector, R : _Differentiation.Differentiable {
+  return differential(at: x, y, z, of: f)(T(1), U(1), V(1))
+}
+@inlinable public func derivative<T, R, E>(at x: T, of f: @differentiable(reverse) (T) throws(E) -> R) throws(E) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try differential(at: x, of: f)(T(1))
+}
+@inlinable public func derivative<T, U, R, E>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) throws(E) -> R) throws(E) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try differential(at: x, y, of: f)(T(1), U(1))
+}
+@inlinable public func derivative<T, U, V, R, E>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) throws(E) -> R) throws(E) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, V : Swift.FloatingPoint, V : _Differentiation.Differentiable, V == V.TangentVector, R : _Differentiation.Differentiable, E : Swift.Error {
+  return try differential(at: x, y, z, of: f)(T(1), U(1), V(1))
+}
+@inlinable public func gradient<T, R>(at x: T, of f: @differentiable(reverse) (T) -> R) -> T.TangentVector where T : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector {
+  return pullback(at: x, of: f)(R(1))
+}
+@inlinable public func gradient<T, U, R>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) -> R) -> (T.TangentVector, U.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector {
+  return pullback(at: x, y, of: f)(R(1))
+}
+@inlinable public func gradient<T, U, V, R>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) -> R) -> (T.TangentVector, U.TangentVector, V.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector {
+  return pullback(at: x, y, z, of: f)(R(1))
+}
+@inlinable public func gradient<T, R, E>(at x: T, of f: @differentiable(reverse) (T) throws(E) -> R) throws(E) -> T.TangentVector where T : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector, E : Swift.Error {
+  return try pullback(at: x, of: f)(R(1))
+}
+@inlinable public func gradient<T, U, R, E>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) throws(E) -> R) throws(E) -> (T.TangentVector, U.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector, E : Swift.Error {
+  return try pullback(at: x, y, of: f)(R(1))
+}
+@inlinable public func gradient<T, U, V, R, E>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) throws(E) -> R) throws(E) -> (T.TangentVector, U.TangentVector, V.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector, E : Swift.Error {
+  return try pullback(at: x, y, z, of: f)(R(1))
+}
+@inlinable public func valueWithDerivative<T, R>(at x: T, of f: @escaping @differentiable(reverse) (T) -> R) -> (value: R, derivative: R.TangentVector) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, R : _Differentiation.Differentiable {
+  let (y, differential) = valueWithDifferential(at: x, of: f)
+  return (y, differential(T(1)))
+}
+@inlinable public func valueWithDerivative<T, U, R>(at x: T, _ y: U, of f: @escaping @differentiable(reverse) (T, U) -> R) -> (value: R, derivative: R.TangentVector) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, R : _Differentiation.Differentiable {
+  let (y, differential) = valueWithDifferential(at: x, y, of: f)
+  return (y, differential(T(1), U(1)))
+}
+@inlinable public func valueWithDerivative<T, U, V, R>(at x: T, _ y: U, _ z: V, of f: @escaping @differentiable(reverse) (T, U, V) -> R) -> (value: R, derivative: R.TangentVector) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, V : Swift.FloatingPoint, V : _Differentiation.Differentiable, V == V.TangentVector, R : _Differentiation.Differentiable {
+  let (y, differential) = valueWithDifferential(at: x, y, z, of: f)
+  return (y, differential(T(1), U(1), V(1)))
+}
+@inlinable public func valueWithDerivative<T, R, E>(at x: T, of f: @escaping @differentiable(reverse) (T) throws(E) -> R) throws(E) -> (value: R, derivative: R.TangentVector) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, R : _Differentiation.Differentiable, E : Swift.Error {
+  let (y, differential) = try valueWithDifferential(at: x, of: f)
+  return (y, differential(T(1)))
+}
+@inlinable public func valueWithDerivative<T, U, R, E>(at x: T, _ y: U, of f: @escaping @differentiable(reverse) (T, U) throws(E) -> R) throws(E) -> (value: R, derivative: R.TangentVector) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, R : _Differentiation.Differentiable, E : Swift.Error {
+  let (y, differential) = try valueWithDifferential(at: x, y, of: f)
+  return (y, differential(T(1), U(1)))
+}
+@inlinable public func valueWithDerivative<T, U, V, R, E>(at x: T, _ y: U, _ z: V, of f: @escaping @differentiable(reverse) (T, U, V) throws(E) -> R) throws(E) -> (value: R, derivative: R.TangentVector) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, V : Swift.FloatingPoint, V : _Differentiation.Differentiable, V == V.TangentVector, R : _Differentiation.Differentiable, E : Swift.Error {
+  let (y, differential) = try valueWithDifferential(at: x, y, z, of: f)
+  return (y, differential(T(1), U(1), V(1)))
+}
+@inlinable public func valueWithGradient<T, R>(at x: T, of f: @differentiable(reverse) (T) -> R) -> (value: R, gradient: T.TangentVector) where T : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector {
+  let (y, pullback) = valueWithPullback(at: x, of: f)
+  return (y, pullback(R(1)))
+}
+@inlinable public func valueWithGradient<T, U, R>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) -> R) -> (value: R, gradient: (T.TangentVector, U.TangentVector)) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector {
+  let (y, pullback) = valueWithPullback(at: x, y, of: f)
+  return (y, pullback(R(1)))
+}
+@inlinable public func valueWithGradient<T, U, V, R>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) -> R) -> (value: R, gradient: (T.TangentVector, U.TangentVector, V.TangentVector)) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector {
+  let (y, pullback) = valueWithPullback(at: x, y, z, of: f)
+  return (y, pullback(R(1)))
+}
+@inlinable public func valueWithGradient<T, R, E>(at x: T, of f: @differentiable(reverse) (T) throws(E) -> R) throws(E) -> (value: R, gradient: T.TangentVector) where T : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector, E : Swift.Error {
+  let (y, pullback) = try valueWithPullback(at: x, of: f)
+  return (y, pullback(R(1)))
+}
+@inlinable public func valueWithGradient<T, U, R, E>(at x: T, _ y: U, of f: @differentiable(reverse) (T, U) throws(E) -> R) throws(E) -> (value: R, gradient: (T.TangentVector, U.TangentVector)) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector, E : Swift.Error {
+  let (y, pullback) = try valueWithPullback(at: x, y, of: f)
+  return (y, pullback(R(1)))
+}
+@inlinable public func valueWithGradient<T, U, V, R, E>(at x: T, _ y: U, _ z: V, of f: @differentiable(reverse) (T, U, V) throws(E) -> R) throws(E) -> (value: R, gradient: (T.TangentVector, U.TangentVector, V.TangentVector)) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector, E : Swift.Error {
+  let (y, pullback) = try valueWithPullback(at: x, y, z, of: f)
+  return (y, pullback(R(1)))
+}
+@inlinable public func derivative<T, R>(of f: @escaping @differentiable(reverse) (T) -> R) -> (T) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, R : _Differentiation.Differentiable {
+  return { x in derivative(at: x, of: f) }
+}
+@inlinable public func derivative<T, U, R>(of f: @escaping @differentiable(reverse) (T, U) -> R) -> (T, U) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, R : _Differentiation.Differentiable {
+  return { (x, y) in derivative(at: x, y, of: f) }
+}
+@inlinable public func derivative<T, U, V, R>(of f: @escaping @differentiable(reverse) (T, U, V) -> R) -> (T, U, V) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, V : Swift.FloatingPoint, V : _Differentiation.Differentiable, V == V.TangentVector, R : _Differentiation.Differentiable {
+  return { (x, y, z) in derivative(at: x, y, z, of: f) }
+}
+@inlinable public func derivative<T, R, E>(of f: @escaping @differentiable(reverse) (T) throws(E) -> R) -> (T) throws(E) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, R : _Differentiation.Differentiable, E : Swift.Error {
+  return { x in try derivative(at: x, of: f) }
+}
+@inlinable public func derivative<T, U, R, E>(of f: @escaping @differentiable(reverse) (T, U) throws(E) -> R) -> (T, U) throws(E) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, R : _Differentiation.Differentiable, E : Swift.Error {
+  return { (x, y) in try derivative(at: x, y, of: f) }
+}
+@inlinable public func derivative<T, U, V, R, E>(of f: @escaping @differentiable(reverse) (T, U, V) throws(E) -> R) -> (T, U, V) throws(E) -> R.TangentVector where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector, U : Swift.FloatingPoint, U : _Differentiation.Differentiable, U == U.TangentVector, V : Swift.FloatingPoint, V : _Differentiation.Differentiable, V == V.TangentVector, R : _Differentiation.Differentiable, E : Swift.Error {
+  return { (x, y, z) in try derivative(at: x, y, z, of: f) }
+}
+@inlinable public func gradient<T, R>(of f: @escaping @differentiable(reverse) (T) -> R) -> (T) -> T.TangentVector where T : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector {
+  return { x in gradient(at: x, of: f) }
+}
+@inlinable public func gradient<T, U, R>(of f: @escaping @differentiable(reverse) (T, U) -> R) -> (T, U) -> (T.TangentVector, U.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector {
+  return { x, y in gradient(at: x, y, of: f) }
+}
+@inlinable public func gradient<T, U, V, R>(of f: @escaping @differentiable(reverse) (T, U, V) -> R) -> (T, U, V) -> (T.TangentVector, U.TangentVector, V.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector {
+  return { x, y, z in gradient(at: x, y, z, of: f) }
+}
+@inlinable public func gradient<T, R, E>(of f: @escaping @differentiable(reverse) (T) throws(E) -> R) -> (T) throws(E) -> T.TangentVector where T : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector, E : Swift.Error {
+  return { x in try gradient(at: x, of: f) }
+}
+@inlinable public func gradient<T, U, R, E>(of f: @escaping @differentiable(reverse) (T, U) throws(E) -> R) -> (T, U) throws(E) -> (T.TangentVector, U.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector, E : Swift.Error {
+  return { x, y in try gradient(at: x, y, of: f) }
+}
+@inlinable public func gradient<T, U, V, R, E>(of f: @escaping @differentiable(reverse) (T, U, V) throws(E) -> R) -> (T, U, V) throws(E) -> (T.TangentVector, U.TangentVector, V.TangentVector) where T : _Differentiation.Differentiable, U : _Differentiation.Differentiable, V : _Differentiation.Differentiable, R : Swift.FloatingPoint, R : _Differentiation.Differentiable, R == R.TangentVector, E : Swift.Error {
+  return { x, y, z in try gradient(at: x, y, z, of: f) }
+}
+@inlinable @inline(__always) @_semantics("autodiff.nonvarying") public func withoutDerivative<T>(at x: T) -> T {
+  x
+}
+@_silgen_name("_fatalErrorForwardModeDifferentiationDisabled")
+public func _fatalErrorForwardModeDifferentiationDisabled() -> Swift.Never
+public struct AnyDifferentiable : _Differentiation.Differentiable {
+  public var base: Any {
+    get
+  }
+  @differentiable(reverse, wrt: base)
+  public init<T>(_ base: T) where T : _Differentiation.Differentiable
+  @derivative(of: init, wrt: base)
+  @inlinable internal static func _vjpInit<T>(_ base: T) -> (value: _Differentiation.AnyDifferentiable, pullback: (_Differentiation.AnyDerivative) -> T.TangentVector) where T : _Differentiation.Differentiable {
+    return (AnyDifferentiable(base), { v in v.base as! T.TangentVector })
+  }
+  @derivative(of: init, wrt: base)
+  @inlinable internal static func _jvpInit<T>(_ base: T) -> (value: _Differentiation.AnyDifferentiable, differential: (T.TangentVector) -> _Differentiation.AnyDerivative) where T : _Differentiation.Differentiable {
+    return (AnyDifferentiable(base), { dbase in AnyDerivative(dbase) })
+  }
+  public typealias TangentVector = _Differentiation.AnyDerivative
+  public mutating func move(by offset: _Differentiation.AnyDifferentiable.TangentVector)
+}
+extension _Differentiation.AnyDifferentiable : Swift.CustomReflectable {
+  public var customMirror: Swift.Mirror {
+    get
+  }
+}
+@usableFromInline
+internal protocol _AnyDerivativeBox {
+  func _isEqual(to other: any _Differentiation._AnyDerivativeBox) -> Swift.Bool
+  func _isNotEqual(to other: any _Differentiation._AnyDerivativeBox) -> Swift.Bool
+  static var _zero: any _Differentiation._AnyDerivativeBox { get }
+  func _adding(_ x: any _Differentiation._AnyDerivativeBox) -> any _Differentiation._AnyDerivativeBox
+  func _subtracting(_ x: any _Differentiation._AnyDerivativeBox) -> any _Differentiation._AnyDerivativeBox
+  mutating func _move(by offset: any _Differentiation._AnyDerivativeBox)
+  var _typeErasedBase: Any { get }
+  func _unboxed<U>(to type: U.Type) -> U? where U : _Differentiation.Differentiable, U == U.TangentVector
+}
+extension _Differentiation._AnyDerivativeBox {
+  @inlinable internal func _isOpaqueZero() -> Swift.Bool {
+    return _unboxed(to: AnyDerivative.OpaqueZero.self) != nil
+  }
+}
+@usableFromInline
+@frozen internal struct _ConcreteDerivativeBox<T> : _Differentiation._AnyDerivativeBox where T : _Differentiation.Differentiable, T == T.TangentVector {
+  @usableFromInline
+  internal var _base: T
+  @inlinable internal init(_ base: T) {
+    self._base = base
+  }
+  @inlinable internal var _typeErasedBase: Any {
+    get {
+    return _base
+  }
+  }
+  @inlinable internal func _unboxed<U>(to type: U.Type) -> U? where U : _Differentiation.Differentiable, U == U.TangentVector {
+    return (self as? _ConcreteDerivativeBox<U>)?._base
+  }
+  @inlinable internal func _isEqual(to other: any _Differentiation._AnyDerivativeBox) -> Swift.Bool {
+    return _base == other._unboxed(to: T.self)
+  }
+  @inlinable internal func _isNotEqual(to other: any _Differentiation._AnyDerivativeBox) -> Swift.Bool {
+    return _base != other._unboxed(to: T.self)
+  }
+  @inlinable internal static var _zero: any _Differentiation._AnyDerivativeBox {
+    get {
+    return _ConcreteDerivativeBox(T.zero)
+  }
+  }
+  @inlinable internal func _adding(_ x: any _Differentiation._AnyDerivativeBox) -> any _Differentiation._AnyDerivativeBox {
+     
+    if _isOpaqueZero() {
+      return x
+    }
+     
+    if x._isOpaqueZero() {
+      return self
+    }
+    guard let xBase = x._unboxed(to: T.self) else {
+      _derivativeTypeMismatch(T.self, type(of: x._typeErasedBase))
+    }
+    return _ConcreteDerivativeBox(_base + xBase)
+  }
+  @inlinable internal func _subtracting(_ x: any _Differentiation._AnyDerivativeBox) -> any _Differentiation._AnyDerivativeBox {
+     
+    if x._isOpaqueZero() {
+      return self
+    }
+     
+    if _isOpaqueZero() {
+      return type(of: x)._zero._subtracting(x)
+    }
+    guard let xBase = x._unboxed(to: T.self) else {
+      _derivativeTypeMismatch(T.self, type(of: x._typeErasedBase))
+    }
+    return _ConcreteDerivativeBox(_base - xBase)
+  }
+  @inlinable internal mutating func _move(by offset: any _Differentiation._AnyDerivativeBox) {
+    if offset._isOpaqueZero() {
+      return
+    }
+     
+     
+    guard let offsetBase = offset._unboxed(to: T.TangentVector.self) else {
+      _derivativeTypeMismatch(T.self, type(of: offset._typeErasedBase))
+    }
+    _base.move(by: offsetBase)
+  }
+}
+@frozen public struct AnyDerivative : Swift.AdditiveArithmetic & _Differentiation.Differentiable {
+  @usableFromInline
+  internal var _box: any _Differentiation._AnyDerivativeBox
+  @inlinable internal init(_box: any _Differentiation._AnyDerivativeBox) {
+    self._box = _box
+  }
+  @inlinable public var base: Any {
+    get {
+    return _box._typeErasedBase
+  }
+  }
+  @differentiable(reverse, wrt: base)
+  @inlinable public init<T>(_ base: T) where T : _Differentiation.Differentiable, T == T.TangentVector {
+    self._box = _ConcreteDerivativeBox<T>(base)
+  }
+  @derivative(of: init, wrt: base)
+  @inlinable internal static func _vjpInit<T>(_ base: T) -> (value: _Differentiation.AnyDerivative, pullback: (_Differentiation.AnyDerivative) -> T.TangentVector) where T : _Differentiation.Differentiable, T == T.TangentVector {
+    return (AnyDerivative(base), { v in v.base as! T.TangentVector })
+  }
+  @derivative(of: init, wrt: base)
+  @inlinable internal static func _jvpInit<T>(_ base: T) -> (value: _Differentiation.AnyDerivative, differential: (T.TangentVector) -> _Differentiation.AnyDerivative) where T : _Differentiation.Differentiable, T == T.TangentVector {
+    return (AnyDerivative(base), { dbase in AnyDerivative(dbase) })
+  }
+  public typealias TangentVector = _Differentiation.AnyDerivative
+  @inlinable public static func == (lhs: _Differentiation.AnyDerivative, rhs: _Differentiation.AnyDerivative) -> Swift.Bool {
+    return lhs._box._isEqual(to: rhs._box)
+  }
+  @inlinable public static func != (lhs: _Differentiation.AnyDerivative, rhs: _Differentiation.AnyDerivative) -> Swift.Bool {
+    return lhs._box._isNotEqual(to: rhs._box)
+  }
+  @usableFromInline
+  @frozen internal struct OpaqueZero : Swift.AdditiveArithmetic & _Differentiation.Differentiable {
+    @usableFromInline
+    internal static func + (lhs: _Differentiation.AnyDerivative.OpaqueZero, rhs: _Differentiation.AnyDerivative.OpaqueZero) -> _Differentiation.AnyDerivative.OpaqueZero
+    @usableFromInline
+    internal static func - (lhs: _Differentiation.AnyDerivative.OpaqueZero, rhs: _Differentiation.AnyDerivative.OpaqueZero) -> _Differentiation.AnyDerivative.OpaqueZero
+    @usableFromInline
+    internal static func == (a: _Differentiation.AnyDerivative.OpaqueZero, b: _Differentiation.AnyDerivative.OpaqueZero) -> Swift.Bool
+    @usableFromInline
+    internal typealias TangentVector = _Differentiation.AnyDerivative.OpaqueZero
+    @usableFromInline
+    internal static var zero: _Differentiation.AnyDerivative.OpaqueZero {
+      @usableFromInline
+      get
+    }
+  }
+  @inlinable public static var zero: _Differentiation.AnyDerivative {
+    get {
+    return AnyDerivative(
+      _box: _ConcreteDerivativeBox<OpaqueZero>(OpaqueZero.zero))
+  }
+  }
+  @inlinable public static func + (lhs: _Differentiation.AnyDerivative, rhs: _Differentiation.AnyDerivative) -> _Differentiation.AnyDerivative {
+    return AnyDerivative(_box: lhs._box._adding(rhs._box))
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpAdd(lhs: _Differentiation.AnyDerivative, rhs: _Differentiation.AnyDerivative) -> (value: _Differentiation.AnyDerivative, pullback: (_Differentiation.AnyDerivative) -> (_Differentiation.AnyDerivative, _Differentiation.AnyDerivative)) {
+    return (lhs + rhs, { v in (v, v) })
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpAdd(lhs: _Differentiation.AnyDerivative, rhs: _Differentiation.AnyDerivative) -> (value: _Differentiation.AnyDerivative, differential: (_Differentiation.AnyDerivative, _Differentiation.AnyDerivative) -> _Differentiation.AnyDerivative) {
+    return (lhs + rhs, { (dlhs, drhs) in dlhs + drhs })
+  }
+  @inlinable public static func - (lhs: _Differentiation.AnyDerivative, rhs: _Differentiation.AnyDerivative) -> _Differentiation.AnyDerivative {
+    return AnyDerivative(_box: lhs._box._subtracting(rhs._box))
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpSubtract(lhs: _Differentiation.AnyDerivative, rhs: _Differentiation.AnyDerivative) -> (value: _Differentiation.AnyDerivative, pullback: (_Differentiation.AnyDerivative) -> (_Differentiation.AnyDerivative, _Differentiation.AnyDerivative)) {
+    return (lhs - rhs, { v in (v, .zero - v) })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpSubtract(lhs: _Differentiation.AnyDerivative, rhs: _Differentiation.AnyDerivative) -> (value: _Differentiation.AnyDerivative, differential: (_Differentiation.AnyDerivative, _Differentiation.AnyDerivative) -> _Differentiation.AnyDerivative) {
+    return (lhs - rhs, { (dlhs, drhs) in dlhs - drhs })
+  }
+  @inlinable public mutating func move(by offset: _Differentiation.AnyDerivative.TangentVector) {
+    if _box._isOpaqueZero() {
+      _box = offset._box
+      return
+    }
+    _box._move(by: offset._box)
+  }
+}
+extension _Differentiation.AnyDerivative : Swift.CustomReflectable {
+  public var customMirror: Swift.Mirror {
+    get
+  }
+}
+@usableFromInline
+@inline(never) internal func _derivativeTypeMismatch(_ x: any Any.Type, _ y: any Any.Type, file: Swift.StaticString = #file, line: Swift.UInt = #line) -> Swift.Never
+extension Swift.Array where Element : _Differentiation.Differentiable {
+  @frozen public struct DifferentiableView {
+    @usableFromInline
+    internal var _base: [Element]
+  }
+}
+extension Swift.Array.DifferentiableView : _Differentiation.Differentiable {
+  @inlinable public var base: [Element] {
+    get { _base }
+    _modify { yield &_base }
+  }
+  @derivative(of: base, wrt: self)
+  @inlinable internal func _vjpBase() -> (value: [Element], pullback: (Swift.Array<Element>.TangentVector) -> Swift.Array<Element>.DifferentiableView.TangentVector) {
+    return (base, { $0 })
+  }
+  @derivative(of: base, wrt: self)
+  @inlinable internal func _jvpBase() -> (value: [Element], differential: (Swift.Array<Element>.TangentVector) -> Swift.Array<Element>.DifferentiableView.TangentVector) {
+    return (base, { $0 })
+  }
+  @inlinable public init(_ base: [Element]) { self._base = base }
+  @derivative(of: init(_:), wrt: base)
+  @inlinable internal static func _vjpInit(_ base: [Element]) -> (value: Swift.Array<Element>.DifferentiableView, pullback: (Swift.Array<Element>.DifferentiableView.TangentVector) -> Swift.Array<Element>.DifferentiableView.TangentVector) {
+    return (Array.DifferentiableView(base), { $0 })
+  }
+  @derivative(of: init(_:), wrt: base)
+  @inlinable internal static func _jvpInit(_ base: [Element]) -> (value: Swift.Array<Element>.DifferentiableView, differential: (Swift.Array<Element>.DifferentiableView.TangentVector) -> Swift.Array<Element>.DifferentiableView.TangentVector) {
+    return (Array.DifferentiableView(base), { $0 })
+  }
+  public typealias TangentVector = Swift.Array<Element.TangentVector>.DifferentiableView
+  @inlinable public mutating func move(by offset: Swift.Array<Element>.DifferentiableView.TangentVector) {
+    if offset.base.isEmpty {
+      return
+    }
+    precondition(
+      base.count == offset.base.count, """
+        Count mismatch: \(base.count) ('self') and \(offset.base.count) \
+        ('direction')
+        """)
+    for i in offset.base.indices {
+      base[i].move(by: offset.base[i])
+    }
+  }
+}
+extension Swift.Array.DifferentiableView : Swift.Equatable where Element : Swift.Equatable {
+  @inlinable public static func == (lhs: Swift.Array<Element>.DifferentiableView, rhs: Swift.Array<Element>.DifferentiableView) -> Swift.Bool {
+    return lhs.base == rhs.base
+  }
+}
+extension Swift.Array.DifferentiableView : Swift.ExpressibleByArrayLiteral {
+  @inlinable public init(arrayLiteral elements: Element...) {
+    self.init(elements)
+  }
+  public typealias ArrayLiteralElement = Element
+}
+extension Swift.Array.DifferentiableView : Swift.CustomStringConvertible {
+  public var description: Swift.String {
+    get
+  }
+}
+extension Swift.Array.DifferentiableView : Swift.CustomReflectable {
+  public var customMirror: Swift.Mirror {
+    get
+  }
+}
+extension Swift.Array.DifferentiableView : Swift.AdditiveArithmetic where Element : Swift.AdditiveArithmetic {
+  @inlinable public static var zero: Swift.Array<Element>.DifferentiableView {
+    get {
+    return Array.DifferentiableView([])
+  }
+  }
+  @inlinable public static func + (lhs: Swift.Array<Element>.DifferentiableView, rhs: Swift.Array<Element>.DifferentiableView) -> Swift.Array<Element>.DifferentiableView {
+    if lhs.base.count == 0 {
+      return rhs
+    }
+    if rhs.base.count == 0 {
+      return lhs
+    }
+    precondition(
+      lhs.base.count == rhs.base.count,
+      "Count mismatch: \(lhs.base.count) and \(rhs.base.count)")
+    return Array.DifferentiableView(zip(lhs.base, rhs.base).map(+))
+  }
+  @inlinable public static func - (lhs: Swift.Array<Element>.DifferentiableView, rhs: Swift.Array<Element>.DifferentiableView) -> Swift.Array<Element>.DifferentiableView {
+    if lhs.base.count == 0 {
+      return Array.DifferentiableView(rhs.base.map { .zero - $0 })
+    }
+    if rhs.base.count == 0 {
+      return lhs
+    }
+    precondition(
+      lhs.base.count == rhs.base.count,
+      "Count mismatch: \(lhs.base.count) and \(rhs.base.count)")
+    return Array.DifferentiableView(zip(lhs.base, rhs.base).map(-))
+  }
+  @inlinable public subscript(index: Swift.Int) -> Element {
+    get {
+    if index < base.count {
+      return base[index]
+    } else {
+      return Element.zero
+    }
+  }
+  }
+}
+extension Swift.Array : _Differentiation.Differentiable where Element : _Differentiation.Differentiable {
+  public typealias TangentVector = Swift.Array<Element.TangentVector>.DifferentiableView
+  @inlinable public mutating func move(by offset: Swift.Array<Element>.TangentVector) {
+    var view = DifferentiableView(self)
+    view.move(by: offset)
+    self = view.base
+  }
+}
+extension Swift.Array where Element : _Differentiation.Differentiable {
+  @derivative(of: subscript, wrt: self)
+  @inlinable internal func _vjpSubscript(index: Swift.Int) -> (value: Element, pullback: (Element.TangentVector) -> Swift.Array<Element>.TangentVector) {
+    func pullback(_ v: Element.TangentVector) -> TangentVector {
+      var dSelf = [Element.TangentVector](
+        repeating: .zero,
+        count: count)
+      dSelf[index] = v
+      return TangentVector(dSelf)
+    }
+    return (self[index], pullback)
+  }
+  @derivative(of: subscript, wrt: self)
+  @inlinable internal func _jvpSubscript(index: Swift.Int) -> (value: Element, differential: (Swift.Array<Element>.TangentVector) -> Element.TangentVector) {
+    func differential(_ v: TangentVector) -> Element.TangentVector {
+      return v[index]
+    }
+    return (self[index], differential)
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpConcatenate(_ lhs: Swift.Array<Element>, _ rhs: Swift.Array<Element>) -> (value: Swift.Array<Element>, pullback: (Swift.Array<Element>.TangentVector) -> (Swift.Array<Element>.TangentVector, Swift.Array<Element>.TangentVector)) {
+    func pullback(_ v: TangentVector) -> (TangentVector, TangentVector) {
+      if v.base.isEmpty {
+        return (.zero, .zero)
+      }
+      precondition(
+        v.base.count == lhs.count + rhs.count, """
+          Tangent vector with invalid count \(v.base.count); expected to \
+          equal the sum of operand counts \(lhs.count) and \(rhs.count)
+          """)
+      return (
+        TangentVector([Element.TangentVector](v.base[0..<lhs.count])),
+        TangentVector([Element.TangentVector](v.base[lhs.count...]))
+      )
+    }
+    return (lhs + rhs, pullback)
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpConcatenate(_ lhs: Swift.Array<Element>, _ rhs: Swift.Array<Element>) -> (value: Swift.Array<Element>, differential: (Swift.Array<Element>.TangentVector, Swift.Array<Element>.TangentVector) -> Swift.Array<Element>.TangentVector) {
+    func differential(_ l: TangentVector, _ r: TangentVector) -> TangentVector {
+      precondition(
+        l.base.count == lhs.count && r.base.count == rhs.count, """
+          Tangent vectors with invalid count; expected to equal the \
+          operand counts \(lhs.count) and \(rhs.count)
+          """)
+      return .init(l.base + r.base)
+    }
+    return (lhs + rhs, differential)
+  }
+}
+extension Swift.Array where Element : _Differentiation.Differentiable {
+  @derivative(of: append, wrt: (self, element))
+  @inlinable internal mutating func _vjpAppend(_ element: Element) -> (value: Swift.Void, pullback: (inout Swift.Array<Element>.TangentVector) -> Element.TangentVector) {
+    let appendedElementIndex = count
+    append(element)
+    return ((), { v in
+      defer { v.base.removeLast() }
+      return v.base[appendedElementIndex]
+    })
+  }
+  @derivative(of: append, wrt: (self, element))
+  @inlinable internal mutating func _jvpAppend(_ element: Element) -> (value: Swift.Void, differential: (inout Swift.Array<Element>.TangentVector, Element.TangentVector) -> Swift.Void) {
+    append(element)
+    return ((), { $0.base.append($1) })
+  }
+}
+extension Swift.Array where Element : _Differentiation.Differentiable {
+  @derivative(of: +=, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpAppend(_ lhs: inout Swift.Array<Element>, _ rhs: Swift.Array<Element>) -> (value: Swift.Void, pullback: (inout Swift.Array<Element>.TangentVector) -> Swift.Array<Element>.TangentVector) {
+    let lhsCount = lhs.count
+    lhs += rhs
+    return ((), { v in
+      let drhs =
+        TangentVector(.init(v.base.dropFirst(lhsCount)))
+      let rhsCount = drhs.base.count
+      v.base.removeLast(rhsCount)
+      return drhs
+    })
+  }
+  @derivative(of: +=, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpAppend(_ lhs: inout Swift.Array<Element>, _ rhs: Swift.Array<Element>) -> (value: Swift.Void, differential: (inout Swift.Array<Element>.TangentVector, Swift.Array<Element>.TangentVector) -> Swift.Void) {
+    lhs += rhs
+    return ((), { $0.base += $1.base })
+  }
+}
+extension Swift.Array where Element : _Differentiation.Differentiable {
+  @derivative(of: init(repeating:count:), wrt: repeatedValue)
+  @inlinable internal static func _vjpInit(repeating repeatedValue: Element, count: Swift.Int) -> (value: Swift.Array<Element>, pullback: (Swift.Array<Element>.TangentVector) -> Element.TangentVector) {
+    (
+      value: Self(repeating: repeatedValue, count: count),
+      pullback: { v in
+        v.base.reduce(.zero, +)
+      }
+    )
+  }
+  @derivative(of: init(repeating:count:), wrt: repeatedValue)
+  @inlinable internal static func _jvpInit(repeating repeatedValue: Element, count: Swift.Int) -> (value: Swift.Array<Element>, differential: (Element.TangentVector) -> Swift.Array<Element>.TangentVector) {
+    (
+      value: Self(repeating: repeatedValue, count: count),
+      differential: { v in TangentVector(.init(repeating: v, count: count)) }
+    )
+  }
+}
+extension Swift.Array where Element : _Differentiation.Differentiable {
+  @differentiable(reverse, wrt: self)
+  @inlinable public func differentiableMap<Result>(_ body: @differentiable(reverse) (Element) -> Result) -> [Result] where Result : _Differentiation.Differentiable {
+    map(body)
+  }
+  @derivative(of: differentiableMap, wrt: self)
+  @inlinable internal func _vjpDifferentiableMap<Result>(_ body: @differentiable(reverse) (Element) -> Result) -> (value: [Result], pullback: (Swift.Array<Result>.TangentVector) -> Swift.Array<Element>.TangentVector) where Result : _Differentiation.Differentiable {
+    let count = self.count
+    var values: [Result] = []
+    var pullbacks: [(Result.TangentVector) -> Element.TangentVector] = []
+    values.reserveCapacity(count)
+    pullbacks.reserveCapacity(count)
+    for x in self {
+      let (y, pb) = valueWithPullback(at: x, of: body)
+      values.append(y)
+      pullbacks.append(pb)
+    }
+    func pullback(_ tans: Array<Result>.TangentVector) -> Array.TangentVector {
+      .init(zip(tans.base, pullbacks).map { tan, pb in pb(tan) })
+    }
+    return (value: values, pullback: pullback)
+  }
+  @derivative(of: differentiableMap, wrt: self)
+  @inlinable internal func _jvpDifferentiableMap<Result>(_ body: @differentiable(reverse) (Element) -> Result) -> (value: [Result], differential: (Swift.Array<Element>.TangentVector) -> Swift.Array<Result>.TangentVector) where Result : _Differentiation.Differentiable {
+    var values: [Result] = []
+    var differentials: [(Element.TangentVector) -> Result.TangentVector] = []
+    for x in self {
+      let (y, df) = valueWithDifferential(at: x, of: body)
+      values.append(y)
+      differentials.append(df)
+    }
+    func differential(_ tans: Array.TangentVector) -> Array<Result>.TangentVector {
+      .init(zip(tans.base, differentials).map { tan, df in df(tan) })
+    }
+    return (value: values, differential: differential)
+  }
+}
+extension Swift.Array where Element : _Differentiation.Differentiable {
+  @differentiable(reverse, wrt: (self, initialResult))
+  @inlinable public func differentiableReduce<Result>(_ initialResult: Result, _ nextPartialResult: @differentiable(reverse) (Result, Element) -> Result) -> Result where Result : _Differentiation.Differentiable {
+    reduce(initialResult, nextPartialResult)
+  }
+  @derivative(of: differentiableReduce, wrt: (self, initialResult))
+  @inlinable internal func _vjpDifferentiableReduce<Result>(_ initialResult: Result, _ nextPartialResult: @differentiable(reverse) (Result, Element) -> Result) -> (value: Result, pullback: (Result.TangentVector) -> (Swift.Array<Element>.TangentVector, Result.TangentVector)) where Result : _Differentiation.Differentiable {
+    var pullbacks:
+      [(Result.TangentVector) -> (Result.TangentVector, Element.TangentVector)] =
+        []
+    let count = self.count
+    pullbacks.reserveCapacity(count)
+    var result = initialResult
+    for element in self {
+      let (y, pb) =
+        valueWithPullback(at: result, element, of: nextPartialResult)
+      result = y
+      pullbacks.append(pb)
+    }
+    return (
+      value: result,
+      pullback: { tangent in
+        var resultTangent = tangent
+        var elementTangents = TangentVector([])
+        elementTangents.base.reserveCapacity(count)
+        for pullback in pullbacks.reversed() {
+          let (newResultTangent, elementTangent) = pullback(resultTangent)
+          resultTangent = newResultTangent
+          elementTangents.base.append(elementTangent)
+        }
+        return (TangentVector(elementTangents.base.reversed()), resultTangent)
+      }
+    )
+  }
+  @derivative(of: differentiableReduce, wrt: (self, initialResult))
+  @inlinable internal func _jvpDifferentiableReduce<Result>(_ initialResult: Result, _ nextPartialResult: @differentiable(reverse) (Result, Element) -> Result) -> (value: Result, differential: (Swift.Array<Element>.TangentVector, Result.TangentVector) -> Result.TangentVector) where Result : _Differentiation.Differentiable {
+    var differentials:
+      [(Result.TangentVector, Element.TangentVector) -> Result.TangentVector]
+        = []
+    let count = self.count
+    differentials.reserveCapacity(count)
+    var result = initialResult
+    for element in self {
+      let (y, df) =
+        valueWithDifferential(at: result, element, of: nextPartialResult)
+      result = y
+      differentials.append(df)
+    }
+    return (value: result, differential: { dSelf, dInitial in
+      var dResult = dInitial
+      for (dElement, df) in zip(dSelf.base, differentials) {
+        dResult = df(dResult, dElement)
+      }
+      return dResult
+    })
+  }
+}
+extension Swift.Optional : _Differentiation.Differentiable where Wrapped : _Differentiation.Differentiable {
+  @frozen public struct TangentVector : _Differentiation.Differentiable, Swift.AdditiveArithmetic {
+    public typealias TangentVector = Swift.Optional<Wrapped>.TangentVector
+    public var value: Wrapped.TangentVector?
+    @inlinable public init(_ value: Wrapped.TangentVector?) {
+      self.value = value
+    }
+    @inlinable public static var zero: Swift.Optional<Wrapped>.TangentVector {
+      get {
+      return Self(.zero)
+    }
+    }
+    @inlinable public static func + (lhs: Swift.Optional<Wrapped>.TangentVector, rhs: Swift.Optional<Wrapped>.TangentVector) -> Swift.Optional<Wrapped>.TangentVector {
+      switch (lhs.value, rhs.value) {
+      case (nil, nil): return Self(nil)
+      case let (x?, nil): return Self(x)
+      case let (nil, y?): return Self(y)
+      case let (x?, y?): return Self(x + y)
+      }
+    }
+    @inlinable public static func - (lhs: Swift.Optional<Wrapped>.TangentVector, rhs: Swift.Optional<Wrapped>.TangentVector) -> Swift.Optional<Wrapped>.TangentVector {
+      switch (lhs.value, rhs.value) {
+      case (nil, nil): return Self(nil)
+      case let (x?, nil): return Self(x)
+      case let (nil, y?): return Self(.zero - y)
+      case let (x?, y?): return Self(x - y)
+      }
+    }
+    @inlinable public mutating func move(by offset: Swift.Optional<Wrapped>.TangentVector.TangentVector) {
+      if let value = offset.value {
+        self.value?.move(by: value)
+      }
+    }
+    public static func == (a: Swift.Optional<Wrapped>.TangentVector, b: Swift.Optional<Wrapped>.TangentVector) -> Swift.Bool
+  }
+  @inlinable public mutating func move(by offset: Swift.Optional<Wrapped>.TangentVector) {
+    if let value = offset.value {
+      self?.move(by: value)
+    }
+  }
+}
+extension Swift.Optional.TangentVector : Swift.CustomReflectable {
+  public var customMirror: Swift.Mirror {
+    get
+  }
+}
+@derivative(of: ??, wrt: optional)
+@_transparent @_alwaysEmitIntoClient internal func _vjpNilCoalescing<T>(optional: T?, defaultValue: @autoclosure () throws -> T) rethrows -> (value: T, pullback: (T.TangentVector) -> Swift.Optional<T>.TangentVector) where T : _Differentiation.Differentiable {
+  let hasValue = optional != nil
+  let value = try optional ?? defaultValue()
+  func pullback(_ v: T.TangentVector) -> Optional<T>.TangentVector {
+    return hasValue ? .init(v) : .zero
+  }
+  return (value, pullback)
+}
+extension Swift.Float : _Differentiation.Differentiable {
+  public typealias TangentVector = Swift.Float
+  @inlinable public mutating func move(by offset: Swift.Float.TangentVector) {
+    self += offset
+  }
+}
+extension Swift.Float {
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _vjpInit(x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+    return (value: Float(x), pullback: { v in Float(v) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _jvpInit(x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+    return (value: Float(x), differential: { dx in Float(dx) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _vjpInit(x: Swift.Double) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Double) {
+    return (value: Float(x), pullback: { v in Double(v) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _jvpInit(x: Swift.Double) -> (value: Swift.Float, differential: (Swift.Double) -> Swift.Float) {
+    return (value: Float(x), differential: { dx in Float(dx) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _vjpInit(x: Swift.Float80) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float80) {
+    return (value: Float(x), pullback: { v in Float80(v) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _jvpInit(x: Swift.Float80) -> (value: Swift.Float, differential: (Swift.Float80) -> Swift.Float) {
+    return (value: Float(x), differential: { dx in Float(dx) })
+  }
+}
+extension Swift.Float {
+  @derivative(of: -, wrt: x)
+  @inlinable @_transparent internal static func _vjpNegate(x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+    return (-x, { v in -v })
+  }
+  @derivative(of: -, wrt: x)
+  @inlinable @_transparent internal static func _jvpNegate(x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+    return (-x, { dx in -dx })
+  }
+}
+extension Swift.Float {
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpAdd(lhs: Swift.Float, rhs: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> (Swift.Float, Swift.Float)) {
+    return (lhs + rhs, { v in (v, v) })
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpAdd(lhs: Swift.Float, rhs: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float, Swift.Float) -> Swift.Float) {
+    return (lhs + rhs, { (dlhs, drhs) in dlhs + drhs })
+  }
+  @derivative(of: +=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpAddAssign(_ lhs: inout Swift.Float, _ rhs: Swift.Float) -> (value: Swift.Void, pullback: (inout Swift.Float) -> Swift.Float) {
+    lhs += rhs
+    return ((), { v in v })
+  }
+  @derivative(of: +=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpAddAssign(_ lhs: inout Swift.Float, _ rhs: Swift.Float) -> (value: Swift.Void, differential: (inout Swift.Float, Swift.Float) -> Swift.Void) {
+    lhs += rhs
+    return ((), { $0 += $1 })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpSubtract(lhs: Swift.Float, rhs: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> (Swift.Float, Swift.Float)) {
+    return (lhs - rhs, { v in (v, -v) })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpSubtract(lhs: Swift.Float, rhs: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float, Swift.Float) -> Swift.Float) {
+    return (lhs - rhs, { (dlhs, drhs) in dlhs - drhs })
+  }
+  @derivative(of: -=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpSubtractAssign(_ lhs: inout Swift.Float, _ rhs: Swift.Float) -> (value: Swift.Void, pullback: (inout Swift.Float) -> Swift.Float) {
+    lhs -= rhs
+    return ((), { v in -v })
+  }
+  @derivative(of: -=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpSubtractAssign(_ lhs: inout Swift.Float, _ rhs: Swift.Float) -> (value: Swift.Void, differential: (inout Swift.Float, Swift.Float) -> Swift.Void) {
+    lhs -= rhs
+    return ((), { $0 -= $1 })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpMultiply(lhs: Swift.Float, rhs: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> (Swift.Float, Swift.Float)) {
+    return (lhs * rhs, { v in (rhs * v, lhs * v) })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpMultiply(lhs: Swift.Float, rhs: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float, Swift.Float) -> Swift.Float) {
+    return (lhs * rhs, { (dlhs, drhs) in lhs * drhs + rhs * dlhs })
+  }
+  @derivative(of: *=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpMultiplyAssign(_ lhs: inout Swift.Float, _ rhs: Swift.Float) -> (value: Swift.Void, pullback: (inout Swift.Float) -> Swift.Float) {
+    defer { lhs *= rhs }
+    return ((), { [lhs = lhs] v in
+      let drhs = lhs * v
+      v *= rhs
+      return drhs
+    })
+  }
+  @derivative(of: *=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpMultiplyAssign(_ lhs: inout Swift.Float, _ rhs: Swift.Float) -> (value: Swift.Void, differential: (inout Swift.Float, Swift.Float) -> Swift.Void) {
+    let oldLhs = lhs
+    lhs *= rhs
+    return ((), { $0 = $0 * rhs + oldLhs * $1 })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpDivide(lhs: Swift.Float, rhs: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> (Swift.Float, Swift.Float)) {
+    return (lhs / rhs, { v in (v / rhs, -lhs / (rhs * rhs) * v) })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpDivide(lhs: Swift.Float, rhs: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float, Swift.Float) -> Swift.Float) {
+    return (lhs / rhs, { (dlhs, drhs) in dlhs / rhs - lhs / (rhs * rhs) * drhs })
+  }
+  @derivative(of: /=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpDivideAssign(_ lhs: inout Swift.Float, _ rhs: Swift.Float) -> (value: Swift.Void, pullback: (inout Swift.Float) -> Swift.Float) {
+    defer { lhs /= rhs }
+    return ((), { [lhs = lhs] v in
+      let drhs = -lhs / (rhs * rhs) * v
+      v /= rhs
+      return drhs
+    })
+  }
+  @derivative(of: /=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpDivideAssign(_ lhs: inout Swift.Float, _ rhs: Swift.Float) -> (value: Swift.Void, differential: (inout Swift.Float, Swift.Float) -> Swift.Void) {
+    let oldLhs = lhs
+    lhs /= rhs
+    return ((), { $0 = ($0 * rhs - oldLhs * $1) / (rhs * rhs)  })
+  }
+}
+extension Swift.Double : _Differentiation.Differentiable {
+  public typealias TangentVector = Swift.Double
+  @inlinable public mutating func move(by offset: Swift.Double.TangentVector) {
+    self += offset
+  }
+}
+extension Swift.Double {
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _vjpInit(x: Swift.Float) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Float) {
+    return (value: Double(x), pullback: { v in Float(v) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _jvpInit(x: Swift.Float) -> (value: Swift.Double, differential: (Swift.Float) -> Swift.Double) {
+    return (value: Double(x), differential: { dx in Double(dx) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _vjpInit(x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+    return (value: Double(x), pullback: { v in Double(v) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _jvpInit(x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+    return (value: Double(x), differential: { dx in Double(dx) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _vjpInit(x: Swift.Float80) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Float80) {
+    return (value: Double(x), pullback: { v in Float80(v) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _jvpInit(x: Swift.Float80) -> (value: Swift.Double, differential: (Swift.Float80) -> Swift.Double) {
+    return (value: Double(x), differential: { dx in Double(dx) })
+  }
+}
+extension Swift.Double {
+  @derivative(of: -, wrt: x)
+  @inlinable @_transparent internal static func _vjpNegate(x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+    return (-x, { v in -v })
+  }
+  @derivative(of: -, wrt: x)
+  @inlinable @_transparent internal static func _jvpNegate(x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+    return (-x, { dx in -dx })
+  }
+}
+extension Swift.Double {
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpAdd(lhs: Swift.Double, rhs: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> (Swift.Double, Swift.Double)) {
+    return (lhs + rhs, { v in (v, v) })
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpAdd(lhs: Swift.Double, rhs: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double, Swift.Double) -> Swift.Double) {
+    return (lhs + rhs, { (dlhs, drhs) in dlhs + drhs })
+  }
+  @derivative(of: +=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpAddAssign(_ lhs: inout Swift.Double, _ rhs: Swift.Double) -> (value: Swift.Void, pullback: (inout Swift.Double) -> Swift.Double) {
+    lhs += rhs
+    return ((), { v in v })
+  }
+  @derivative(of: +=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpAddAssign(_ lhs: inout Swift.Double, _ rhs: Swift.Double) -> (value: Swift.Void, differential: (inout Swift.Double, Swift.Double) -> Swift.Void) {
+    lhs += rhs
+    return ((), { $0 += $1 })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpSubtract(lhs: Swift.Double, rhs: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> (Swift.Double, Swift.Double)) {
+    return (lhs - rhs, { v in (v, -v) })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpSubtract(lhs: Swift.Double, rhs: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double, Swift.Double) -> Swift.Double) {
+    return (lhs - rhs, { (dlhs, drhs) in dlhs - drhs })
+  }
+  @derivative(of: -=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpSubtractAssign(_ lhs: inout Swift.Double, _ rhs: Swift.Double) -> (value: Swift.Void, pullback: (inout Swift.Double) -> Swift.Double) {
+    lhs -= rhs
+    return ((), { v in -v })
+  }
+  @derivative(of: -=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpSubtractAssign(_ lhs: inout Swift.Double, _ rhs: Swift.Double) -> (value: Swift.Void, differential: (inout Swift.Double, Swift.Double) -> Swift.Void) {
+    lhs -= rhs
+    return ((), { $0 -= $1 })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpMultiply(lhs: Swift.Double, rhs: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> (Swift.Double, Swift.Double)) {
+    return (lhs * rhs, { v in (rhs * v, lhs * v) })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpMultiply(lhs: Swift.Double, rhs: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double, Swift.Double) -> Swift.Double) {
+    return (lhs * rhs, { (dlhs, drhs) in lhs * drhs + rhs * dlhs })
+  }
+  @derivative(of: *=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpMultiplyAssign(_ lhs: inout Swift.Double, _ rhs: Swift.Double) -> (value: Swift.Void, pullback: (inout Swift.Double) -> Swift.Double) {
+    defer { lhs *= rhs }
+    return ((), { [lhs = lhs] v in
+      let drhs = lhs * v
+      v *= rhs
+      return drhs
+    })
+  }
+  @derivative(of: *=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpMultiplyAssign(_ lhs: inout Swift.Double, _ rhs: Swift.Double) -> (value: Swift.Void, differential: (inout Swift.Double, Swift.Double) -> Swift.Void) {
+    let oldLhs = lhs
+    lhs *= rhs
+    return ((), { $0 = $0 * rhs + oldLhs * $1 })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpDivide(lhs: Swift.Double, rhs: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> (Swift.Double, Swift.Double)) {
+    return (lhs / rhs, { v in (v / rhs, -lhs / (rhs * rhs) * v) })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpDivide(lhs: Swift.Double, rhs: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double, Swift.Double) -> Swift.Double) {
+    return (lhs / rhs, { (dlhs, drhs) in dlhs / rhs - lhs / (rhs * rhs) * drhs })
+  }
+  @derivative(of: /=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpDivideAssign(_ lhs: inout Swift.Double, _ rhs: Swift.Double) -> (value: Swift.Void, pullback: (inout Swift.Double) -> Swift.Double) {
+    defer { lhs /= rhs }
+    return ((), { [lhs = lhs] v in
+      let drhs = -lhs / (rhs * rhs) * v
+      v /= rhs
+      return drhs
+    })
+  }
+  @derivative(of: /=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpDivideAssign(_ lhs: inout Swift.Double, _ rhs: Swift.Double) -> (value: Swift.Void, differential: (inout Swift.Double, Swift.Double) -> Swift.Void) {
+    let oldLhs = lhs
+    lhs /= rhs
+    return ((), { $0 = ($0 * rhs - oldLhs * $1) / (rhs * rhs)  })
+  }
+}
+extension Swift.Float80 : _Differentiation.Differentiable {
+  public typealias TangentVector = Swift.Float80
+  @inlinable public mutating func move(by offset: Swift.Float80.TangentVector) {
+    self += offset
+  }
+}
+extension Swift.Float80 {
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _vjpInit(x: Swift.Float) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float) {
+    return (value: Float80(x), pullback: { v in Float(v) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _jvpInit(x: Swift.Float) -> (value: Swift.Float80, differential: (Swift.Float) -> Swift.Float80) {
+    return (value: Float80(x), differential: { dx in Float80(dx) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _vjpInit(x: Swift.Double) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Double) {
+    return (value: Float80(x), pullback: { v in Double(v) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _jvpInit(x: Swift.Double) -> (value: Swift.Float80, differential: (Swift.Double) -> Swift.Float80) {
+    return (value: Float80(x), differential: { dx in Float80(dx) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _vjpInit(x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+    return (value: Float80(x), pullback: { v in Float80(v) })
+  }
+  @derivative(of: init(_:), wrt: x)
+  @inlinable @_transparent internal static func _jvpInit(x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+    return (value: Float80(x), differential: { dx in Float80(dx) })
+  }
+}
+extension Swift.Float80 {
+  @derivative(of: -, wrt: x)
+  @inlinable @_transparent internal static func _vjpNegate(x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+    return (-x, { v in -v })
+  }
+  @derivative(of: -, wrt: x)
+  @inlinable @_transparent internal static func _jvpNegate(x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+    return (-x, { dx in -dx })
+  }
+}
+extension Swift.Float80 {
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpAdd(lhs: Swift.Float80, rhs: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> (Swift.Float80, Swift.Float80)) {
+    return (lhs + rhs, { v in (v, v) })
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpAdd(lhs: Swift.Float80, rhs: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80, Swift.Float80) -> Swift.Float80) {
+    return (lhs + rhs, { (dlhs, drhs) in dlhs + drhs })
+  }
+  @derivative(of: +=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpAddAssign(_ lhs: inout Swift.Float80, _ rhs: Swift.Float80) -> (value: Swift.Void, pullback: (inout Swift.Float80) -> Swift.Float80) {
+    lhs += rhs
+    return ((), { v in v })
+  }
+  @derivative(of: +=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpAddAssign(_ lhs: inout Swift.Float80, _ rhs: Swift.Float80) -> (value: Swift.Void, differential: (inout Swift.Float80, Swift.Float80) -> Swift.Void) {
+    lhs += rhs
+    return ((), { $0 += $1 })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpSubtract(lhs: Swift.Float80, rhs: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> (Swift.Float80, Swift.Float80)) {
+    return (lhs - rhs, { v in (v, -v) })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpSubtract(lhs: Swift.Float80, rhs: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80, Swift.Float80) -> Swift.Float80) {
+    return (lhs - rhs, { (dlhs, drhs) in dlhs - drhs })
+  }
+  @derivative(of: -=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpSubtractAssign(_ lhs: inout Swift.Float80, _ rhs: Swift.Float80) -> (value: Swift.Void, pullback: (inout Swift.Float80) -> Swift.Float80) {
+    lhs -= rhs
+    return ((), { v in -v })
+  }
+  @derivative(of: -=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpSubtractAssign(_ lhs: inout Swift.Float80, _ rhs: Swift.Float80) -> (value: Swift.Void, differential: (inout Swift.Float80, Swift.Float80) -> Swift.Void) {
+    lhs -= rhs
+    return ((), { $0 -= $1 })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpMultiply(lhs: Swift.Float80, rhs: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> (Swift.Float80, Swift.Float80)) {
+    return (lhs * rhs, { v in (rhs * v, lhs * v) })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpMultiply(lhs: Swift.Float80, rhs: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80, Swift.Float80) -> Swift.Float80) {
+    return (lhs * rhs, { (dlhs, drhs) in lhs * drhs + rhs * dlhs })
+  }
+  @derivative(of: *=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpMultiplyAssign(_ lhs: inout Swift.Float80, _ rhs: Swift.Float80) -> (value: Swift.Void, pullback: (inout Swift.Float80) -> Swift.Float80) {
+    defer { lhs *= rhs }
+    return ((), { [lhs = lhs] v in
+      let drhs = lhs * v
+      v *= rhs
+      return drhs
+    })
+  }
+  @derivative(of: *=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpMultiplyAssign(_ lhs: inout Swift.Float80, _ rhs: Swift.Float80) -> (value: Swift.Void, differential: (inout Swift.Float80, Swift.Float80) -> Swift.Void) {
+    let oldLhs = lhs
+    lhs *= rhs
+    return ((), { $0 = $0 * rhs + oldLhs * $1 })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpDivide(lhs: Swift.Float80, rhs: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> (Swift.Float80, Swift.Float80)) {
+    return (lhs / rhs, { v in (v / rhs, -lhs / (rhs * rhs) * v) })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpDivide(lhs: Swift.Float80, rhs: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80, Swift.Float80) -> Swift.Float80) {
+    return (lhs / rhs, { (dlhs, drhs) in dlhs / rhs - lhs / (rhs * rhs) * drhs })
+  }
+  @derivative(of: /=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _vjpDivideAssign(_ lhs: inout Swift.Float80, _ rhs: Swift.Float80) -> (value: Swift.Void, pullback: (inout Swift.Float80) -> Swift.Float80) {
+    defer { lhs /= rhs }
+    return ((), { [lhs = lhs] v in
+      let drhs = -lhs / (rhs * rhs) * v
+      v /= rhs
+      return drhs
+    })
+  }
+  @derivative(of: /=, wrt: (lhs, rhs))
+  @inlinable @_transparent internal static func _jvpDivideAssign(_ lhs: inout Swift.Float80, _ rhs: Swift.Float80) -> (value: Swift.Void, differential: (inout Swift.Float80, Swift.Float80) -> Swift.Void) {
+    let oldLhs = lhs
+    lhs /= rhs
+    return ((), { $0 = ($0 * rhs - oldLhs * $1) / (rhs * rhs)  })
+  }
+}
+extension Swift.FloatingPoint where Self : _Differentiation.Differentiable, Self == Self.TangentVector {
+  @derivative(of: addingProduct, wrt: (self, lhs, rhs))
+  @inlinable internal func _vjpAddingProduct(_ lhs: Self, _ rhs: Self) -> (value: Self, pullback: (Self) -> (Self, Self, Self)) {
+    return (addingProduct(lhs, rhs), { v in (v, v * rhs, v * lhs) })
+  }
+  @derivative(of: squareRoot, wrt: self)
+  @inlinable internal func _vjpSquareRoot() -> (value: Self, pullback: (Self) -> Self) {
+    let y = squareRoot()
+    return (y, { v in v / (2 * y) })
+  }
+  @derivative(of: minimum, wrt: (x, y))
+  @inlinable internal static func _vjpMinimum(_ x: Self, _ y: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.TangentVector)) {
+    if x <= y || y.isNaN { return (x, { v in (v, .zero) }) }
+    return (y, { v in (.zero, v) })
+  }
+  @derivative(of: maximum, wrt: (x, y))
+  @inlinable internal static func _vjpMaximum(_ x: Self, _ y: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.TangentVector)) {
+    if x > y || y.isNaN { return (x, { v in (v, .zero) }) }
+    return (y, { v in (.zero, v) })
+  }
+}
+@derivative(of: fma, wrt: (x, y, z))
+@inlinable internal func _jvpFma<T>(_ x: T, _ y: T, _ z: T) -> (value: T, differential: (T, T, T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (fma(x, y, z), { (dx, dy, dz) in dx * y + dy * x + dz })
+}
+@derivative(of: fma, wrt: (x, y, z))
+@inlinable internal func _vjpFma<T>(_ x: T, _ y: T, _ z: T) -> (value: T, pullback: (T) -> (T, T, T)) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (fma(x, y, z), { v in (v * y, v * x, v) })
+}
+@derivative(of: remainder, wrt: (x, y))
+@inlinable internal func _jvpRemainder<T>(_ x: T, _ y: T) -> (value: T, differential: (T, T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  fatalError("""
+    Unimplemented JVP for 'remainder(_:)'. \
+    https://bugs.swift.org/browse/TF-1108 tracks this issue
+    """)
+}
+@derivative(of: remainder, wrt: (x, y))
+@inlinable internal func _vjpRemainder<T>(_ x: T, _ y: T) -> (value: T, pullback: (T) -> (T, T)) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (remainder(x, y), { v in (v, -v * ((x / y).rounded(.toNearestOrEven))) })
+}
+@derivative(of: fmod, wrt: (x, y))
+@inlinable internal func _jvpFmod<T>(_ x: T, _ y: T) -> (value: T, differential: (T, T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  fatalError("""
+    Unimplemented JVP for 'fmod(_:)'. \
+    https://bugs.swift.org/browse/TF-1108 tracks this issue
+    """)
+}
+@derivative(of: fmod, wrt: (x, y))
+@inlinable internal func _vjpFmod<T>(_ x: T, _ y: T) -> (value: T, pullback: (T) -> (T, T)) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (fmod(x, y), { v in (v, -v * ((x / y).rounded(.towardZero))) })
+}
+@derivative(of: sqrt, wrt: x)
+@inlinable internal func _jvpSqrt<T>(_ x: T) -> (value: T, differential: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  let value = sqrt(x)
+  return (value, { v in v / (2 * value) })
+}
+@derivative(of: ceil, wrt: x)
+@inlinable internal func _jvpCeil<T>(_ x: T) -> (value: T, differential: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (ceil(x), { v in 0 })
+}
+@derivative(of: floor, wrt: x)
+@inlinable internal func _jvpFloor<T>(_ x: T) -> (value: T, differential: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (floor(x), { v in 0 })
+}
+@derivative(of: round, wrt: x)
+@inlinable internal func _jvpRound<T>(_ x: T) -> (value: T, differential: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (round(x), { v in 0 })
+}
+@derivative(of: trunc, wrt: x)
+@inlinable internal func _jvpTrunc<T>(_ x: T) -> (value: T, differential: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (trunc(x), { v in 0 })
+}
+@derivative(of: sqrt, wrt: x)
+@inlinable internal func _vjpSqrt<T>(_ x: T) -> (value: T, pullback: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  let value = sqrt(x)
+  return (value, { v in v / (2 * value) })
+}
+@derivative(of: ceil, wrt: x)
+@inlinable internal func _vjpCeil<T>(_ x: T) -> (value: T, pullback: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (ceil(x), { v in 0 })
+}
+@derivative(of: floor, wrt: x)
+@inlinable internal func _vjpFloor<T>(_ x: T) -> (value: T, pullback: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (floor(x), { v in 0 })
+}
+@derivative(of: round, wrt: x)
+@inlinable internal func _vjpRound<T>(_ x: T) -> (value: T, pullback: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (round(x), { v in 0 })
+}
+@derivative(of: trunc, wrt: x)
+@inlinable internal func _vjpTrunc<T>(_ x: T) -> (value: T, pullback: (T) -> T) where T : Swift.FloatingPoint, T : _Differentiation.Differentiable, T == T.TangentVector {
+  return (trunc(x), { v in 0 })
+}
+@derivative(of: fma, wrt: (x, y, z))
+@inlinable internal func _jvpFma(_ x: Swift.Double, _ y: Swift.Double, _ z: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double, Swift.Double, Swift.Double) -> Swift.Double) {
+  return (fma(x, y, z), { (dx, dy, dz) in dx * y + dy * x + dz })
+}
+@derivative(of: fma, wrt: (x, y, z))
+@inlinable internal func _vjpFma(_ x: Swift.Double, _ y: Swift.Double, _ z: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> (Swift.Double, Swift.Double, Swift.Double)) {
+  return (fma(x, y, z), { v in (v * y, v * x, v) })
+}
+@derivative(of: remainder, wrt: (x, y))
+@inlinable internal func _jvpRemainder(_ x: Swift.Double, _ y: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double, Swift.Double) -> Swift.Double) {
+  fatalError("""
+    Unimplemented JVP for 'remainder(_:)'. \
+    https://bugs.swift.org/browse/TF-1108 tracks this issue
+    """)
+}
+@derivative(of: remainder, wrt: (x, y))
+@inlinable internal func _vjpRemainder(_ x: Swift.Double, _ y: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> (Swift.Double, Swift.Double)) {
+  return (remainder(x, y), { v in (v, -v * ((x / y).rounded(.toNearestOrEven))) })
+}
+@derivative(of: fmod, wrt: (x, y))
+@inlinable internal func _jvpFmod(_ x: Swift.Double, _ y: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double, Swift.Double) -> Swift.Double) {
+  fatalError("""
+    Unimplemented JVP for 'fmod(_:)'. \
+    https://bugs.swift.org/browse/TF-1108 tracks this issue
+    """)
+}
+@derivative(of: fmod, wrt: (x, y))
+@inlinable internal func _vjpFmod(_ x: Swift.Double, _ y: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> (Swift.Double, Swift.Double)) {
+  return (fmod(x, y), { v in (v, -v * ((x / y).rounded(.towardZero))) })
+}
+@derivative(of: sqrt, wrt: x)
+@inlinable internal func _jvpSqrt(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  let value = sqrt(x)
+  return (value, { v in v / (2 * value) })
+}
+@derivative(of: ceil, wrt: x)
+@inlinable internal func _jvpCeil(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (ceil(x), { v in 0 })
+}
+@derivative(of: floor, wrt: x)
+@inlinable internal func _jvpFloor(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (floor(x), { v in 0 })
+}
+@derivative(of: round, wrt: x)
+@inlinable internal func _jvpRound(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (round(x), { v in 0 })
+}
+@derivative(of: trunc, wrt: x)
+@inlinable internal func _jvpTrunc(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (trunc(x), { v in 0 })
+}
+@derivative(of: sqrt, wrt: x)
+@inlinable internal func _vjpSqrt(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  let value = sqrt(x)
+  return (value, { v in v / (2 * value) })
+}
+@derivative(of: ceil, wrt: x)
+@inlinable internal func _vjpCeil(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (ceil(x), { v in 0 })
+}
+@derivative(of: floor, wrt: x)
+@inlinable internal func _vjpFloor(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (floor(x), { v in 0 })
+}
+@derivative(of: round, wrt: x)
+@inlinable internal func _vjpRound(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (round(x), { v in 0 })
+}
+@derivative(of: trunc, wrt: x)
+@inlinable internal func _vjpTrunc(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (trunc(x), { v in 0 })
+}
+@derivative(of: exp, wrt: x)
+@inlinable internal func _jvpExp(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  let value = exp(x)
+  return (value, { v in value * v })
+}
+@derivative(of: exp2, wrt: x)
+@inlinable internal func _jvpExp2(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  let value = exp2(x)
+  return (value, { v in v * Float(M_LN2) * value })
+}
+@derivative(of: log, wrt: x)
+@inlinable internal func _jvpLog(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (log(x), { v in v / x })
+}
+@derivative(of: log10, wrt: x)
+@inlinable internal func _jvpLog10(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (log10(x), { v in v * Float(M_LOG10E) / x })
+}
+@derivative(of: log2, wrt: x)
+@inlinable internal func _jvpLog2(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (log2(x), { v in v / (Float(M_LN2) * x) })
+}
+@derivative(of: sin, wrt: x)
+@inlinable internal func _jvpSin(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (sin(x), { v in v * cos(x) })
+}
+@derivative(of: cos, wrt: x)
+@inlinable internal func _jvpCos(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (cos(x), { v in -v * sin(x) })
+}
+@derivative(of: tan, wrt: x)
+@inlinable internal func _jvpTan(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  let value = tan(x)
+  return (value, { v in v * (1 + value * value) })
+}
+@derivative(of: asin, wrt: x)
+@inlinable internal func _jvpAsin(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (asin(x), { v in v / sqrt(1 - x * x) })
+}
+@derivative(of: acos, wrt: x)
+@inlinable internal func _jvpAcos(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (acos(x), { v in -v / sqrt(1 - x * x) })
+}
+@derivative(of: atan, wrt: x)
+@inlinable internal func _jvpAtan(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (atan(x), { v in v / (1 + x * x) })
+}
+@derivative(of: sinh, wrt: x)
+@inlinable internal func _jvpSinh(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (sinh(x), { v in v * cosh(x) })
+}
+@derivative(of: cosh, wrt: x)
+@inlinable internal func _jvpCosh(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (cosh(x), { v in v * sinh(x) })
+}
+@derivative(of: tanh, wrt: x)
+@inlinable internal func _jvpTanh(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  let value = tanh(x)
+  return (value, { v in v * (1 - value * value) })
+}
+@derivative(of: asinh, wrt: x)
+@inlinable internal func _jvpAsinh(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (asinh(x), { v in v / sqrt(1 + x * x) })
+}
+@derivative(of: acosh, wrt: x)
+@inlinable internal func _jvpAcosh(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (acosh(x), { v in v / sqrt(x * x - 1) })
+}
+@derivative(of: atanh, wrt: x)
+@inlinable internal func _jvpAtanh(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (atanh(x), { v in v / (1 - x * x) })
+}
+@derivative(of: expm1, wrt: x)
+@inlinable internal func _jvpExpm1(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (expm1(x), { v in exp(x) * v })
+}
+@derivative(of: log1p, wrt: x)
+@inlinable internal func _jvpLog1p(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (log1p(x), { v in v / (x + 1) })
+}
+@derivative(of: erf, wrt: x)
+@inlinable internal func _jvpErf(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (erf(x), { v in v * Float(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: erfc, wrt: x)
+@inlinable internal func _jvpErfc(_ x: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float) -> Swift.Float) {
+  return (erfc(x), { v in v * -Float(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: exp, wrt: x)
+@inlinable internal func _jvpExp(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  let value = exp(x)
+  return (value, { v in value * v })
+}
+@derivative(of: exp2, wrt: x)
+@inlinable internal func _jvpExp2(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  let value = exp2(x)
+  return (value, { v in v * Double(M_LN2) * value })
+}
+@derivative(of: log, wrt: x)
+@inlinable internal func _jvpLog(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (log(x), { v in v / x })
+}
+@derivative(of: log10, wrt: x)
+@inlinable internal func _jvpLog10(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (log10(x), { v in v * Double(M_LOG10E) / x })
+}
+@derivative(of: log2, wrt: x)
+@inlinable internal func _jvpLog2(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (log2(x), { v in v / (Double(M_LN2) * x) })
+}
+@derivative(of: sin, wrt: x)
+@inlinable internal func _jvpSin(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (sin(x), { v in v * cos(x) })
+}
+@derivative(of: cos, wrt: x)
+@inlinable internal func _jvpCos(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (cos(x), { v in -v * sin(x) })
+}
+@derivative(of: tan, wrt: x)
+@inlinable internal func _jvpTan(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  let value = tan(x)
+  return (value, { v in v * (1 + value * value) })
+}
+@derivative(of: asin, wrt: x)
+@inlinable internal func _jvpAsin(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (asin(x), { v in v / sqrt(1 - x * x) })
+}
+@derivative(of: acos, wrt: x)
+@inlinable internal func _jvpAcos(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (acos(x), { v in -v / sqrt(1 - x * x) })
+}
+@derivative(of: atan, wrt: x)
+@inlinable internal func _jvpAtan(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (atan(x), { v in v / (1 + x * x) })
+}
+@derivative(of: sinh, wrt: x)
+@inlinable internal func _jvpSinh(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (sinh(x), { v in v * cosh(x) })
+}
+@derivative(of: cosh, wrt: x)
+@inlinable internal func _jvpCosh(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (cosh(x), { v in v * sinh(x) })
+}
+@derivative(of: tanh, wrt: x)
+@inlinable internal func _jvpTanh(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  let value = tanh(x)
+  return (value, { v in v * (1 - value * value) })
+}
+@derivative(of: asinh, wrt: x)
+@inlinable internal func _jvpAsinh(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (asinh(x), { v in v / sqrt(1 + x * x) })
+}
+@derivative(of: acosh, wrt: x)
+@inlinable internal func _jvpAcosh(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (acosh(x), { v in v / sqrt(x * x - 1) })
+}
+@derivative(of: atanh, wrt: x)
+@inlinable internal func _jvpAtanh(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (atanh(x), { v in v / (1 - x * x) })
+}
+@derivative(of: expm1, wrt: x)
+@inlinable internal func _jvpExpm1(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (expm1(x), { v in exp(x) * v })
+}
+@derivative(of: log1p, wrt: x)
+@inlinable internal func _jvpLog1p(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (log1p(x), { v in v / (x + 1) })
+}
+@derivative(of: erf, wrt: x)
+@inlinable internal func _jvpErf(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (erf(x), { v in v * Double(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: erfc, wrt: x)
+@inlinable internal func _jvpErfc(_ x: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double) -> Swift.Double) {
+  return (erfc(x), { v in v * -Double(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: exp, wrt: x)
+@inlinable internal func _jvpExp(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  let value = exp(x)
+  return (value, { v in value * v })
+}
+@derivative(of: exp2, wrt: x)
+@inlinable internal func _jvpExp2(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  let value = exp2(x)
+  return (value, { v in v * Float80(M_LN2) * value })
+}
+@derivative(of: log, wrt: x)
+@inlinable internal func _jvpLog(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (log(x), { v in v / x })
+}
+@derivative(of: log10, wrt: x)
+@inlinable internal func _jvpLog10(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (log10(x), { v in v * Float80(M_LOG10E) / x })
+}
+@derivative(of: log2, wrt: x)
+@inlinable internal func _jvpLog2(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (log2(x), { v in v / (Float80(M_LN2) * x) })
+}
+@derivative(of: sin, wrt: x)
+@inlinable internal func _jvpSin(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (sin(x), { v in v * cos(x) })
+}
+@derivative(of: cos, wrt: x)
+@inlinable internal func _jvpCos(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (cos(x), { v in -v * sin(x) })
+}
+@derivative(of: tan, wrt: x)
+@inlinable internal func _jvpTan(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  let value = tan(x)
+  return (value, { v in v * (1 + value * value) })
+}
+@derivative(of: asin, wrt: x)
+@inlinable internal func _jvpAsin(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (asin(x), { v in v / sqrt(1 - x * x) })
+}
+@derivative(of: acos, wrt: x)
+@inlinable internal func _jvpAcos(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (acos(x), { v in -v / sqrt(1 - x * x) })
+}
+@derivative(of: atan, wrt: x)
+@inlinable internal func _jvpAtan(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (atan(x), { v in v / (1 + x * x) })
+}
+@derivative(of: sinh, wrt: x)
+@inlinable internal func _jvpSinh(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (sinh(x), { v in v * cosh(x) })
+}
+@derivative(of: cosh, wrt: x)
+@inlinable internal func _jvpCosh(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (cosh(x), { v in v * sinh(x) })
+}
+@derivative(of: tanh, wrt: x)
+@inlinable internal func _jvpTanh(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  let value = tanh(x)
+  return (value, { v in v * (1 - value * value) })
+}
+@derivative(of: asinh, wrt: x)
+@inlinable internal func _jvpAsinh(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (asinh(x), { v in v / sqrt(1 + x * x) })
+}
+@derivative(of: acosh, wrt: x)
+@inlinable internal func _jvpAcosh(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (acosh(x), { v in v / sqrt(x * x - 1) })
+}
+@derivative(of: atanh, wrt: x)
+@inlinable internal func _jvpAtanh(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (atanh(x), { v in v / (1 - x * x) })
+}
+@derivative(of: expm1, wrt: x)
+@inlinable internal func _jvpExpm1(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (expm1(x), { v in exp(x) * v })
+}
+@derivative(of: log1p, wrt: x)
+@inlinable internal func _jvpLog1p(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (log1p(x), { v in v / (x + 1) })
+}
+@derivative(of: erf, wrt: x)
+@inlinable internal func _jvpErf(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (erf(x), { v in v * Float80(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: erfc, wrt: x)
+@inlinable internal func _jvpErfc(_ x: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80) -> Swift.Float80) {
+  return (erfc(x), { v in v * -Float80(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: exp, wrt: x)
+@inlinable internal func _vjpExp(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  let value = exp(x)
+  return (value, { v in value * v })
+}
+@derivative(of: exp2, wrt: x)
+@inlinable internal func _vjpExp2(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  let value = exp2(x)
+  return (value, { v in v * Float(M_LN2) * value })
+}
+@derivative(of: log, wrt: x)
+@inlinable internal func _vjpLog(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (log(x), { v in v / x })
+}
+@derivative(of: log10, wrt: x)
+@inlinable internal func _vjpLog10(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (log10(x), { v in v * Float(M_LOG10E) / x })
+}
+@derivative(of: log2, wrt: x)
+@inlinable internal func _vjpLog2(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (log2(x), { v in v / (Float(M_LN2) * x) })
+}
+@derivative(of: sin, wrt: x)
+@inlinable internal func _vjpSin(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (sin(x), { v in v * cos(x) })
+}
+@derivative(of: cos, wrt: x)
+@inlinable internal func _vjpCos(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (cos(x), { v in -v * sin(x) })
+}
+@derivative(of: tan, wrt: x)
+@inlinable internal func _vjpTan(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  let value = tan(x)
+  return (value, { v in v * (1 + value * value) })
+}
+@derivative(of: asin, wrt: x)
+@inlinable internal func _vjpAsin(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (asin(x), { v in v / sqrt(1 - x * x) })
+}
+@derivative(of: acos, wrt: x)
+@inlinable internal func _vjpAcos(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (acos(x), { v in -v / sqrt(1 - x * x) })
+}
+@derivative(of: atan, wrt: x)
+@inlinable internal func _vjpAtan(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (atan(x), { v in v / (1 + x * x) })
+}
+@derivative(of: sinh, wrt: x)
+@inlinable internal func _vjpSinh(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (sinh(x), { v in v * cosh(x) })
+}
+@derivative(of: cosh, wrt: x)
+@inlinable internal func _vjpCosh(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (cosh(x), { v in v * sinh(x) })
+}
+@derivative(of: tanh, wrt: x)
+@inlinable internal func _vjpTanh(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  let value = tanh(x)
+  return (value, { v in v * (1 - value * value) })
+}
+@derivative(of: asinh, wrt: x)
+@inlinable internal func _vjpAsinh(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (asinh(x), { v in v / sqrt(1 + x * x) })
+}
+@derivative(of: acosh, wrt: x)
+@inlinable internal func _vjpAcosh(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (acosh(x), { v in v / sqrt(x * x - 1) })
+}
+@derivative(of: atanh, wrt: x)
+@inlinable internal func _vjpAtanh(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (atanh(x), { v in v / (1 - x * x) })
+}
+@derivative(of: expm1, wrt: x)
+@inlinable internal func _vjpExpm1(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (expm1(x), { v in exp(x) * v })
+}
+@derivative(of: log1p, wrt: x)
+@inlinable internal func _vjpLog1p(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (log1p(x), { v in v / (x + 1) })
+}
+@derivative(of: erf, wrt: x)
+@inlinable internal func _vjpErf(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (erf(x), { v in v * Float(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: erfc, wrt: x)
+@inlinable internal func _vjpErfc(_ x: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> Swift.Float) {
+  return (erfc(x), { v in v * -Float(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: exp, wrt: x)
+@inlinable internal func _vjpExp(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  let value = exp(x)
+  return (value, { v in value * v })
+}
+@derivative(of: exp2, wrt: x)
+@inlinable internal func _vjpExp2(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  let value = exp2(x)
+  return (value, { v in v * Double(M_LN2) * value })
+}
+@derivative(of: log, wrt: x)
+@inlinable internal func _vjpLog(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (log(x), { v in v / x })
+}
+@derivative(of: log10, wrt: x)
+@inlinable internal func _vjpLog10(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (log10(x), { v in v * Double(M_LOG10E) / x })
+}
+@derivative(of: log2, wrt: x)
+@inlinable internal func _vjpLog2(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (log2(x), { v in v / (Double(M_LN2) * x) })
+}
+@derivative(of: sin, wrt: x)
+@inlinable internal func _vjpSin(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (sin(x), { v in v * cos(x) })
+}
+@derivative(of: cos, wrt: x)
+@inlinable internal func _vjpCos(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (cos(x), { v in -v * sin(x) })
+}
+@derivative(of: tan, wrt: x)
+@inlinable internal func _vjpTan(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  let value = tan(x)
+  return (value, { v in v * (1 + value * value) })
+}
+@derivative(of: asin, wrt: x)
+@inlinable internal func _vjpAsin(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (asin(x), { v in v / sqrt(1 - x * x) })
+}
+@derivative(of: acos, wrt: x)
+@inlinable internal func _vjpAcos(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (acos(x), { v in -v / sqrt(1 - x * x) })
+}
+@derivative(of: atan, wrt: x)
+@inlinable internal func _vjpAtan(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (atan(x), { v in v / (1 + x * x) })
+}
+@derivative(of: sinh, wrt: x)
+@inlinable internal func _vjpSinh(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (sinh(x), { v in v * cosh(x) })
+}
+@derivative(of: cosh, wrt: x)
+@inlinable internal func _vjpCosh(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (cosh(x), { v in v * sinh(x) })
+}
+@derivative(of: tanh, wrt: x)
+@inlinable internal func _vjpTanh(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  let value = tanh(x)
+  return (value, { v in v * (1 - value * value) })
+}
+@derivative(of: asinh, wrt: x)
+@inlinable internal func _vjpAsinh(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (asinh(x), { v in v / sqrt(1 + x * x) })
+}
+@derivative(of: acosh, wrt: x)
+@inlinable internal func _vjpAcosh(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (acosh(x), { v in v / sqrt(x * x - 1) })
+}
+@derivative(of: atanh, wrt: x)
+@inlinable internal func _vjpAtanh(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (atanh(x), { v in v / (1 - x * x) })
+}
+@derivative(of: expm1, wrt: x)
+@inlinable internal func _vjpExpm1(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (expm1(x), { v in exp(x) * v })
+}
+@derivative(of: log1p, wrt: x)
+@inlinable internal func _vjpLog1p(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (log1p(x), { v in v / (x + 1) })
+}
+@derivative(of: erf, wrt: x)
+@inlinable internal func _vjpErf(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (erf(x), { v in v * Double(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: erfc, wrt: x)
+@inlinable internal func _vjpErfc(_ x: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> Swift.Double) {
+  return (erfc(x), { v in v * -Double(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: exp, wrt: x)
+@inlinable internal func _vjpExp(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  let value = exp(x)
+  return (value, { v in value * v })
+}
+@derivative(of: exp2, wrt: x)
+@inlinable internal func _vjpExp2(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  let value = exp2(x)
+  return (value, { v in v * Float80(M_LN2) * value })
+}
+@derivative(of: log, wrt: x)
+@inlinable internal func _vjpLog(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (log(x), { v in v / x })
+}
+@derivative(of: log10, wrt: x)
+@inlinable internal func _vjpLog10(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (log10(x), { v in v * Float80(M_LOG10E) / x })
+}
+@derivative(of: log2, wrt: x)
+@inlinable internal func _vjpLog2(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (log2(x), { v in v / (Float80(M_LN2) * x) })
+}
+@derivative(of: sin, wrt: x)
+@inlinable internal func _vjpSin(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (sin(x), { v in v * cos(x) })
+}
+@derivative(of: cos, wrt: x)
+@inlinable internal func _vjpCos(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (cos(x), { v in -v * sin(x) })
+}
+@derivative(of: tan, wrt: x)
+@inlinable internal func _vjpTan(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  let value = tan(x)
+  return (value, { v in v * (1 + value * value) })
+}
+@derivative(of: asin, wrt: x)
+@inlinable internal func _vjpAsin(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (asin(x), { v in v / sqrt(1 - x * x) })
+}
+@derivative(of: acos, wrt: x)
+@inlinable internal func _vjpAcos(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (acos(x), { v in -v / sqrt(1 - x * x) })
+}
+@derivative(of: atan, wrt: x)
+@inlinable internal func _vjpAtan(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (atan(x), { v in v / (1 + x * x) })
+}
+@derivative(of: sinh, wrt: x)
+@inlinable internal func _vjpSinh(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (sinh(x), { v in v * cosh(x) })
+}
+@derivative(of: cosh, wrt: x)
+@inlinable internal func _vjpCosh(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (cosh(x), { v in v * sinh(x) })
+}
+@derivative(of: tanh, wrt: x)
+@inlinable internal func _vjpTanh(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  let value = tanh(x)
+  return (value, { v in v * (1 - value * value) })
+}
+@derivative(of: asinh, wrt: x)
+@inlinable internal func _vjpAsinh(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (asinh(x), { v in v / sqrt(1 + x * x) })
+}
+@derivative(of: acosh, wrt: x)
+@inlinable internal func _vjpAcosh(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (acosh(x), { v in v / sqrt(x * x - 1) })
+}
+@derivative(of: atanh, wrt: x)
+@inlinable internal func _vjpAtanh(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (atanh(x), { v in v / (1 - x * x) })
+}
+@derivative(of: expm1, wrt: x)
+@inlinable internal func _vjpExpm1(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (expm1(x), { v in exp(x) * v })
+}
+@derivative(of: log1p, wrt: x)
+@inlinable internal func _vjpLog1p(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (log1p(x), { v in v / (x + 1) })
+}
+@derivative(of: erf, wrt: x)
+@inlinable internal func _vjpErf(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (erf(x), { v in v * Float80(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: erfc, wrt: x)
+@inlinable internal func _vjpErfc(_ x: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> Swift.Float80) {
+  return (erfc(x), { v in v * -Float80(M_2_SQRTPI) * exp(-x * x) })
+}
+@derivative(of: pow, wrt: (x, y))
+@inlinable internal func _vjpPow(_ x: Swift.Float, _ y: Swift.Float) -> (value: Swift.Float, pullback: (Swift.Float) -> (Swift.Float, Swift.Float)) {
+  let value = pow(x, y)
+  return (value, { v in (
+    v * y * pow(x, y - 1), v * value * log(x.isLessThanOrEqualTo(0) ? Float(1) : x)
+  ) })
+}
+@derivative(of: pow, wrt: (x, y))
+@inlinable internal func _jvpPow(_ x: Swift.Float, _ y: Swift.Float) -> (value: Swift.Float, differential: (Swift.Float, Swift.Float) -> Swift.Float) {
+  let value = pow(x, y)
+  return (value, { (dx, dy) in
+    dx * y * pow(x, y - 1) + dy * value * log(x.isLessThanOrEqualTo(0) ? Float(1) : x)
+  })
+}
+@derivative(of: pow, wrt: (x, y))
+@inlinable internal func _vjpPow(_ x: Swift.Double, _ y: Swift.Double) -> (value: Swift.Double, pullback: (Swift.Double) -> (Swift.Double, Swift.Double)) {
+  let value = pow(x, y)
+  return (value, { v in (
+    v * y * pow(x, y - 1), v * value * log(x.isLessThanOrEqualTo(0) ? Double(1) : x)
+  ) })
+}
+@derivative(of: pow, wrt: (x, y))
+@inlinable internal func _jvpPow(_ x: Swift.Double, _ y: Swift.Double) -> (value: Swift.Double, differential: (Swift.Double, Swift.Double) -> Swift.Double) {
+  let value = pow(x, y)
+  return (value, { (dx, dy) in
+    dx * y * pow(x, y - 1) + dy * value * log(x.isLessThanOrEqualTo(0) ? Double(1) : x)
+  })
+}
+@derivative(of: pow, wrt: (x, y))
+@inlinable internal func _vjpPow(_ x: Swift.Float80, _ y: Swift.Float80) -> (value: Swift.Float80, pullback: (Swift.Float80) -> (Swift.Float80, Swift.Float80)) {
+  let value = pow(x, y)
+  return (value, { v in (
+    v * y * pow(x, y - 1), v * value * log(x.isLessThanOrEqualTo(0) ? Float80(1) : x)
+  ) })
+}
+@derivative(of: pow, wrt: (x, y))
+@inlinable internal func _jvpPow(_ x: Swift.Float80, _ y: Swift.Float80) -> (value: Swift.Float80, differential: (Swift.Float80, Swift.Float80) -> Swift.Float80) {
+  let value = pow(x, y)
+  return (value, { (dx, dy) in
+    dx * y * pow(x, y - 1) + dy * value * log(x.isLessThanOrEqualTo(0) ? Float80(1) : x)
+  })
+}
+extension Swift.SIMD2 : @retroactive Swift.AdditiveArithmetic where Scalar : Swift.FloatingPoint {
+}
+extension Swift.SIMD2 : _Differentiation.Differentiable where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar.TangentVector : Swift.BinaryFloatingPoint {
+  public typealias TangentVector = Swift.SIMD2<Scalar>
+}
+extension Swift.SIMD2 where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar == Scalar.TangentVector {
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _vjpSubscript(_ index: Swift.Int) -> (value: Scalar, pullback: (Scalar.TangentVector) -> Swift.SIMD2<Scalar>.TangentVector) {
+    return (self[index], { v in
+      var zeros = Self.zero
+      zeros[index] = v
+      return zeros
+    })
+  }
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _jvpSubscript(index: Swift.Int) -> (value: Scalar, differential: (Swift.SIMD2<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    return (self[index], { v in
+      return .init(v[index])
+    })
+  }
+  @derivative(of: subscript(_:).set, wrt: (self, newValue))
+  @inlinable internal mutating func _vjpSubscriptSetter(_ newValue: Scalar, _ index: Swift.Int) -> (value: Swift.Void, pullback: (inout Swift.SIMD2<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    self[index] = newValue
+    return ((), { dSelf in
+      let dNewValue = dSelf[index]
+      dSelf[index] = 0
+      return dNewValue
+    })
+  }
+}
+extension Swift.SIMD4 : @retroactive Swift.AdditiveArithmetic where Scalar : Swift.FloatingPoint {
+}
+extension Swift.SIMD4 : _Differentiation.Differentiable where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar.TangentVector : Swift.BinaryFloatingPoint {
+  public typealias TangentVector = Swift.SIMD4<Scalar>
+}
+extension Swift.SIMD4 where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar == Scalar.TangentVector {
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _vjpSubscript(_ index: Swift.Int) -> (value: Scalar, pullback: (Scalar.TangentVector) -> Swift.SIMD4<Scalar>.TangentVector) {
+    return (self[index], { v in
+      var zeros = Self.zero
+      zeros[index] = v
+      return zeros
+    })
+  }
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _jvpSubscript(index: Swift.Int) -> (value: Scalar, differential: (Swift.SIMD4<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    return (self[index], { v in
+      return .init(v[index])
+    })
+  }
+  @derivative(of: subscript(_:).set, wrt: (self, newValue))
+  @inlinable internal mutating func _vjpSubscriptSetter(_ newValue: Scalar, _ index: Swift.Int) -> (value: Swift.Void, pullback: (inout Swift.SIMD4<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    self[index] = newValue
+    return ((), { dSelf in
+      let dNewValue = dSelf[index]
+      dSelf[index] = 0
+      return dNewValue
+    })
+  }
+}
+extension Swift.SIMD8 : @retroactive Swift.AdditiveArithmetic where Scalar : Swift.FloatingPoint {
+}
+extension Swift.SIMD8 : _Differentiation.Differentiable where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar.TangentVector : Swift.BinaryFloatingPoint {
+  public typealias TangentVector = Swift.SIMD8<Scalar>
+}
+extension Swift.SIMD8 where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar == Scalar.TangentVector {
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _vjpSubscript(_ index: Swift.Int) -> (value: Scalar, pullback: (Scalar.TangentVector) -> Swift.SIMD8<Scalar>.TangentVector) {
+    return (self[index], { v in
+      var zeros = Self.zero
+      zeros[index] = v
+      return zeros
+    })
+  }
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _jvpSubscript(index: Swift.Int) -> (value: Scalar, differential: (Swift.SIMD8<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    return (self[index], { v in
+      return .init(v[index])
+    })
+  }
+  @derivative(of: subscript(_:).set, wrt: (self, newValue))
+  @inlinable internal mutating func _vjpSubscriptSetter(_ newValue: Scalar, _ index: Swift.Int) -> (value: Swift.Void, pullback: (inout Swift.SIMD8<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    self[index] = newValue
+    return ((), { dSelf in
+      let dNewValue = dSelf[index]
+      dSelf[index] = 0
+      return dNewValue
+    })
+  }
+}
+extension Swift.SIMD16 : @retroactive Swift.AdditiveArithmetic where Scalar : Swift.FloatingPoint {
+}
+extension Swift.SIMD16 : _Differentiation.Differentiable where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar.TangentVector : Swift.BinaryFloatingPoint {
+  public typealias TangentVector = Swift.SIMD16<Scalar>
+}
+extension Swift.SIMD16 where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar == Scalar.TangentVector {
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _vjpSubscript(_ index: Swift.Int) -> (value: Scalar, pullback: (Scalar.TangentVector) -> Swift.SIMD16<Scalar>.TangentVector) {
+    return (self[index], { v in
+      var zeros = Self.zero
+      zeros[index] = v
+      return zeros
+    })
+  }
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _jvpSubscript(index: Swift.Int) -> (value: Scalar, differential: (Swift.SIMD16<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    return (self[index], { v in
+      return .init(v[index])
+    })
+  }
+  @derivative(of: subscript(_:).set, wrt: (self, newValue))
+  @inlinable internal mutating func _vjpSubscriptSetter(_ newValue: Scalar, _ index: Swift.Int) -> (value: Swift.Void, pullback: (inout Swift.SIMD16<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    self[index] = newValue
+    return ((), { dSelf in
+      let dNewValue = dSelf[index]
+      dSelf[index] = 0
+      return dNewValue
+    })
+  }
+}
+extension Swift.SIMD32 : @retroactive Swift.AdditiveArithmetic where Scalar : Swift.FloatingPoint {
+}
+extension Swift.SIMD32 : _Differentiation.Differentiable where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar.TangentVector : Swift.BinaryFloatingPoint {
+  public typealias TangentVector = Swift.SIMD32<Scalar>
+}
+extension Swift.SIMD32 where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar == Scalar.TangentVector {
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _vjpSubscript(_ index: Swift.Int) -> (value: Scalar, pullback: (Scalar.TangentVector) -> Swift.SIMD32<Scalar>.TangentVector) {
+    return (self[index], { v in
+      var zeros = Self.zero
+      zeros[index] = v
+      return zeros
+    })
+  }
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _jvpSubscript(index: Swift.Int) -> (value: Scalar, differential: (Swift.SIMD32<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    return (self[index], { v in
+      return .init(v[index])
+    })
+  }
+  @derivative(of: subscript(_:).set, wrt: (self, newValue))
+  @inlinable internal mutating func _vjpSubscriptSetter(_ newValue: Scalar, _ index: Swift.Int) -> (value: Swift.Void, pullback: (inout Swift.SIMD32<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    self[index] = newValue
+    return ((), { dSelf in
+      let dNewValue = dSelf[index]
+      dSelf[index] = 0
+      return dNewValue
+    })
+  }
+}
+extension Swift.SIMD64 : @retroactive Swift.AdditiveArithmetic where Scalar : Swift.FloatingPoint {
+}
+extension Swift.SIMD64 : _Differentiation.Differentiable where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar.TangentVector : Swift.BinaryFloatingPoint {
+  public typealias TangentVector = Swift.SIMD64<Scalar>
+}
+extension Swift.SIMD64 where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar == Scalar.TangentVector {
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _vjpSubscript(_ index: Swift.Int) -> (value: Scalar, pullback: (Scalar.TangentVector) -> Swift.SIMD64<Scalar>.TangentVector) {
+    return (self[index], { v in
+      var zeros = Self.zero
+      zeros[index] = v
+      return zeros
+    })
+  }
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _jvpSubscript(index: Swift.Int) -> (value: Scalar, differential: (Swift.SIMD64<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    return (self[index], { v in
+      return .init(v[index])
+    })
+  }
+  @derivative(of: subscript(_:).set, wrt: (self, newValue))
+  @inlinable internal mutating func _vjpSubscriptSetter(_ newValue: Scalar, _ index: Swift.Int) -> (value: Swift.Void, pullback: (inout Swift.SIMD64<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    self[index] = newValue
+    return ((), { dSelf in
+      let dNewValue = dSelf[index]
+      dSelf[index] = 0
+      return dNewValue
+    })
+  }
+}
+extension Swift.SIMD3 : @retroactive Swift.AdditiveArithmetic where Scalar : Swift.FloatingPoint {
+}
+extension Swift.SIMD3 : _Differentiation.Differentiable where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar.TangentVector : Swift.BinaryFloatingPoint {
+  public typealias TangentVector = Swift.SIMD3<Scalar>
+}
+extension Swift.SIMD3 where Scalar : Swift.BinaryFloatingPoint, Scalar : _Differentiation.Differentiable, Scalar == Scalar.TangentVector {
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _vjpSubscript(_ index: Swift.Int) -> (value: Scalar, pullback: (Scalar.TangentVector) -> Swift.SIMD3<Scalar>.TangentVector) {
+    return (self[index], { v in
+      var zeros = Self.zero
+      zeros[index] = v
+      return zeros
+    })
+  }
+  @derivative(of: subscript(_:), wrt: self)
+  @inlinable internal func _jvpSubscript(index: Swift.Int) -> (value: Scalar, differential: (Swift.SIMD3<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    return (self[index], { v in
+      return .init(v[index])
+    })
+  }
+  @derivative(of: subscript(_:).set, wrt: (self, newValue))
+  @inlinable internal mutating func _vjpSubscriptSetter(_ newValue: Scalar, _ index: Swift.Int) -> (value: Swift.Void, pullback: (inout Swift.SIMD3<Scalar>.TangentVector) -> Scalar.TangentVector) {
+    self[index] = newValue
+    return ((), { dSelf in
+      let dNewValue = dSelf[index]
+      dSelf[index] = 0
+      return dNewValue
+    })
+  }
+}
+extension Swift.SIMD where Self : _Differentiation.Differentiable, Self.Scalar : Swift.BinaryFloatingPoint, Self.TangentVector : Swift.SIMD, Self.TangentVector.Scalar : Swift.BinaryFloatingPoint {
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpAdd(lhs: Self, rhs: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.TangentVector)) {
+    return (lhs + rhs, { v in
+      return (v, v)
+    })
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpAdd(lhs: Self, rhs: Self) -> (value: Self, differential: (Self.TangentVector, Self.TangentVector) -> Self.TangentVector) {
+    return (lhs + rhs, { ltan, rtan in
+      return ltan + rtan
+    })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpSubtract(lhs: Self, rhs: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.TangentVector)) {
+    return (lhs - rhs, { v in
+      return (v, -v)
+    })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpSubtract(lhs: Self, rhs: Self) -> (value: Self, differential: (Self.TangentVector, Self.TangentVector) -> Self.TangentVector) {
+    return (lhs - rhs, { ltan, rtan in
+      return ltan - rtan
+    })
+  }
+  @derivative(of: -, wrt: rhs)
+  @inlinable internal static func _vjpNegate(rhs: Self) -> (value: Self, pullback: (Self.TangentVector) -> Self.TangentVector) {
+    return (-rhs, { v in
+      return -v
+    })
+  }
+  @derivative(of: -, wrt: rhs)
+  @inlinable internal static func _jvpNegate(rhs: Self) -> (value: Self, differential: (Self.TangentVector) -> Self.TangentVector) {
+    return (-rhs, { v in
+      return -v
+    })
+  }
+}
+extension Swift.SIMD where Self : _Differentiation.Differentiable, Self == Self.TangentVector, Self.Scalar : Swift.BinaryFloatingPoint {
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpMultiply(lhs: Self, rhs: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.TangentVector)) {
+    return (lhs * rhs, { v in
+      return (v * rhs, v * lhs)
+    })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpMultiply(lhs: Self, rhs: Self) -> (value: Self, differential: (Self.TangentVector, Self.TangentVector) -> Self.TangentVector) {
+    return (lhs * rhs, { ltan, rtan in
+      return lhs * rtan + ltan * rhs
+    })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpDivide(lhs: Self, rhs: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.TangentVector)) {
+    return ( lhs / rhs, { v in
+      (v / rhs, -lhs / (rhs * rhs) * v)
+    })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpDivide(lhs: Self, rhs: Self) -> (value: Self, differential: (Self.TangentVector, Self.TangentVector) -> Self.TangentVector) {
+    return ( lhs / rhs, { ltan, rtan in
+      (ltan * rhs - lhs * rtan) / (rhs * rhs)
+    })
+  }
+}
+extension Swift.SIMD where Self : _Differentiation.Differentiable, Self.Scalar : Swift.BinaryFloatingPoint, Self.Scalar : _Differentiation.Differentiable, Self.TangentVector : Swift.SIMD, Self.Scalar.TangentVector : Swift.BinaryFloatingPoint, Self.Scalar.TangentVector == Self.TangentVector.Scalar {
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpAdd(lhs: Self.Scalar, rhs: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.Scalar.TangentVector, Self.TangentVector)) {
+    return (lhs + rhs, { v in
+      return (v.sum(), v)
+    })
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpAdd(lhs: Self.Scalar, rhs: Self) -> (value: Self, differential: (Self.Scalar.TangentVector, Self.TangentVector) -> Self.TangentVector) {
+    return (lhs + rhs, { ltan, rtan in
+      return ltan + rtan
+    })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpSubtract(lhs: Self.Scalar, rhs: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.Scalar.TangentVector, Self.TangentVector)) {
+    return (lhs - rhs, { v in
+      return (v.sum(), -v)
+    })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpSubtract(lhs: Self.Scalar, rhs: Self) -> (value: Self, differential: (Self.Scalar.TangentVector, Self.TangentVector) -> Self.TangentVector) {
+    return (lhs - rhs, { ltan, rtan in
+      return ltan - rtan
+    })
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpAdd(lhs: Self, rhs: Self.Scalar) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.Scalar.TangentVector)) {
+    return (lhs + rhs, { v in
+      return (v, v.sum())
+    })
+  }
+  @derivative(of: +, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpAdd(lhs: Self, rhs: Self.Scalar) -> (value: Self, differential: (Self.TangentVector, Self.Scalar.TangentVector) -> Self.TangentVector) {
+    return (lhs + rhs, { ltan, rtan in
+      return ltan + rtan
+    })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpSubtract(lhs: Self, rhs: Self.Scalar) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.Scalar.TangentVector)) {
+    return (lhs - rhs, { v in
+      return (v, -v.sum())
+    })
+  }
+  @derivative(of: -, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpSubtract(lhs: Self, rhs: Self.Scalar) -> (value: Self, differential: (Self.TangentVector, Self.Scalar.TangentVector) -> Self.TangentVector) {
+    return (lhs - rhs, { ltan, rtan in
+      return ltan - rtan
+    })
+  }
+}
+extension Swift.SIMD where Self : _Differentiation.Differentiable, Self == Self.TangentVector, Self.Scalar : Swift.BinaryFloatingPoint, Self.Scalar : _Differentiation.Differentiable, Self.Scalar == Self.Scalar.TangentVector {
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpMultiply(lhs: Self, rhs: Self.Scalar) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.Scalar.TangentVector)) {
+    return (lhs * rhs, { v in
+      return (v * rhs, (v * lhs).sum())
+    })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpMultiply(lhs: Self, rhs: Self.Scalar) -> (value: Self, differential: (Self.TangentVector, Self.Scalar.TangentVector) -> Self.TangentVector) {
+    return (lhs * rhs, { ltan, rtan in
+      return lhs * rtan + ltan * rhs
+    })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpDivide(lhs: Self, rhs: Self.Scalar) -> (value: Self, pullback: (Self.TangentVector) -> (Self.TangentVector, Self.Scalar.TangentVector)) {
+    return (lhs / rhs, { v in
+      (v / rhs, (-lhs / (rhs * rhs) * v).sum())
+    })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpDivide(lhs: Self, rhs: Self.Scalar) -> (value: Self, differential: (Self.TangentVector, Self.Scalar.TangentVector) -> Self.TangentVector) {
+    return (lhs / rhs, { ltan, rtan in
+      (ltan * rhs - lhs * rtan) / (rhs * rhs)
+    })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpMultiply(lhs: Self.Scalar, rhs: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.Scalar.TangentVector, Self.TangentVector)) {
+    return (lhs * rhs, { v in
+      return ((v * rhs).sum(), v * lhs)
+    })
+  }
+  @derivative(of: *, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpMultiply(lhs: Self.Scalar, rhs: Self) -> (value: Self, differential: (Self.Scalar.TangentVector, Self.TangentVector) -> Self.TangentVector) {
+    return (lhs * rhs, { ltan, rtan in
+      return lhs * rtan + ltan * rhs
+    })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable internal static func _vjpDivide(lhs: Self.Scalar, rhs: Self) -> (value: Self, pullback: (Self.TangentVector) -> (Self.Scalar.TangentVector, Self.TangentVector)) {
+    return (lhs / rhs, { v in
+      ((v / rhs).sum(), -lhs / (rhs * rhs) * v)
+    })
+  }
+  @derivative(of: /, wrt: (lhs, rhs))
+  @inlinable internal static func _jvpDivide(lhs: Self.Scalar, rhs: Self) -> (value: Self, differential: (Self.Scalar.TangentVector, Self.TangentVector) -> Self.TangentVector) {
+    return (lhs / rhs, { ltan, rtan in
+      (ltan * rhs - lhs * rtan) / (rhs * rhs)
+    })
+  }
+}
+extension Swift.SIMD where Self : _Differentiation.Differentiable, Self == Self.TangentVector, Self.Scalar : Swift.BinaryFloatingPoint, Self.Scalar : _Differentiation.Differentiable, Self.Scalar.TangentVector : Swift.BinaryFloatingPoint {
+  @derivative(of: sum, wrt: self)
+  @inlinable @_alwaysEmitIntoClient internal func _vjpSum() -> (value: Self.Scalar, pullback: (Self.Scalar.TangentVector) -> Self.TangentVector) {
+    return (sum(), { v in Self(repeating: Scalar(v)) })
+  }
+  @derivative(of: sum, wrt: self)
+  @inlinable @_alwaysEmitIntoClient internal func _jvpSum() -> (value: Self.Scalar, differential: (Self.TangentVector) -> Self.Scalar.TangentVector) {
+    return (sum(), { v in Scalar.TangentVector(v.sum()) })
+  }
+}
+extension Swift.SIMD where Self : _Differentiation.Differentiable, Self == Self.TangentVector, Self.Scalar : Swift.BinaryFloatingPoint, Self.Scalar : _Differentiation.Differentiable, Self.Scalar == Self.Scalar.TangentVector {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable internal static func _vjpInit(repeating value: Self.Scalar) -> (value: Self, pullback: (Self.TangentVector) -> Self.Scalar.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable internal static func _jvpInit(repeating value: Self.Scalar) -> (value: Self, differential: (Self.Scalar.TangentVector) -> Self.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD2 where Scalar == Swift.Float {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD2<Scalar>, pullback: (Swift.SIMD2<Scalar>.TangentVector) -> Swift.Float.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD2<Scalar>, differential: (Swift.Float.TangentVector) -> Swift.SIMD2<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD4 where Scalar == Swift.Float {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD4<Scalar>, pullback: (Swift.SIMD4<Scalar>.TangentVector) -> Swift.Float.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD4<Scalar>, differential: (Swift.Float.TangentVector) -> Swift.SIMD4<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD8 where Scalar == Swift.Float {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD8<Scalar>, pullback: (Swift.SIMD8<Scalar>.TangentVector) -> Swift.Float.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD8<Scalar>, differential: (Swift.Float.TangentVector) -> Swift.SIMD8<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD16 where Scalar == Swift.Float {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD16<Scalar>, pullback: (Swift.SIMD16<Scalar>.TangentVector) -> Swift.Float.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD16<Scalar>, differential: (Swift.Float.TangentVector) -> Swift.SIMD16<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD32 where Scalar == Swift.Float {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD32<Scalar>, pullback: (Swift.SIMD32<Scalar>.TangentVector) -> Swift.Float.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD32<Scalar>, differential: (Swift.Float.TangentVector) -> Swift.SIMD32<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD64 where Scalar == Swift.Float {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD64<Scalar>, pullback: (Swift.SIMD64<Scalar>.TangentVector) -> Swift.Float.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD64<Scalar>, differential: (Swift.Float.TangentVector) -> Swift.SIMD64<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD3 where Scalar == Swift.Float {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD3<Scalar>, pullback: (Swift.SIMD3<Scalar>.TangentVector) -> Swift.Float.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD3<Scalar>, differential: (Swift.Float.TangentVector) -> Swift.SIMD3<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD2 where Scalar == Swift.Double {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD2<Scalar>, pullback: (Swift.SIMD2<Scalar>.TangentVector) -> Swift.Double.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD2<Scalar>, differential: (Swift.Double.TangentVector) -> Swift.SIMD2<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD4 where Scalar == Swift.Double {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD4<Scalar>, pullback: (Swift.SIMD4<Scalar>.TangentVector) -> Swift.Double.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD4<Scalar>, differential: (Swift.Double.TangentVector) -> Swift.SIMD4<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD8 where Scalar == Swift.Double {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD8<Scalar>, pullback: (Swift.SIMD8<Scalar>.TangentVector) -> Swift.Double.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD8<Scalar>, differential: (Swift.Double.TangentVector) -> Swift.SIMD8<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD16 where Scalar == Swift.Double {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD16<Scalar>, pullback: (Swift.SIMD16<Scalar>.TangentVector) -> Swift.Double.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD16<Scalar>, differential: (Swift.Double.TangentVector) -> Swift.SIMD16<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD32 where Scalar == Swift.Double {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD32<Scalar>, pullback: (Swift.SIMD32<Scalar>.TangentVector) -> Swift.Double.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD32<Scalar>, differential: (Swift.Double.TangentVector) -> Swift.SIMD32<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD64 where Scalar == Swift.Double {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD64<Scalar>, pullback: (Swift.SIMD64<Scalar>.TangentVector) -> Swift.Double.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD64<Scalar>, differential: (Swift.Double.TangentVector) -> Swift.SIMD64<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension Swift.SIMD3 where Scalar == Swift.Double {
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _vjpInit(repeating value: Scalar) -> (value: Swift.SIMD3<Scalar>, pullback: (Swift.SIMD3<Scalar>.TangentVector) -> Swift.Double.TangentVector) {
+    return (Self(repeating: value), { v in v.sum() })
+  }
+  @derivative(of: init(repeating:), wrt: value)
+  @inlinable @_alwaysEmitIntoClient internal static func _jvpInit(repeating value: Scalar) -> (value: Swift.SIMD3<Scalar>, differential: (Swift.Double.TangentVector) -> Swift.SIMD3<Scalar>.TangentVector) {
+    return (Self(repeating: value), { v in Self(repeating: v) })
+  }
+}
+extension _Differentiation.AnyDerivative.OpaqueZero : Swift.Sendable {}
+extension _Differentiation.AnyDerivative.OpaqueZero : Swift.BitwiseCopyable {}

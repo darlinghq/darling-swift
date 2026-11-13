@@ -33,5 +33,13 @@ gunzip < "swift-${version}-RELEASE-osx-package.pkg/Payload" | cpio -i
 # older x86_64-only overlays already in this repository are left in place.
 echo "Moving the useful files"
 mv ./usr/lib/swift/macosx/libswift*dylib ../
+
+# The textual module interfaces (both architectures) of the modules the runtime libraries implement.
+# The Swift overlays are compiled against these; see README.md.
+for module in Swift _Concurrency _StringProcessing _RegexParser RegexBuilder Observation Synchronization \
+	Distributed _Builtin_float _Volatile Runtime _Differentiation SwiftOnoneSupport; do
+	mkdir -p "../stdlib-modules/$module.swiftmodule"
+	cp usr/lib/swift/macosx/"$module".swiftmodule/*-apple-macos.swiftinterface "../stdlib-modules/$module.swiftmodule/"
+done
 cd ..
 rm -rf build
