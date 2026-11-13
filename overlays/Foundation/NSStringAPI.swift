@@ -412,3 +412,161 @@ extension StringProtocol {
     try _ns.write(to: url, atomically: useAuxiliaryFile, encoding: enc.rawValue)
   }
 }
+
+// MARK: - Members from release/5.4 (apple/swift 845205b4407c) NSStringAPI.swift that were missing here
+// Written in the style of this file: current SDKs declare them on an unconstrained extension of StringProtocol and
+// take `Range<String.Index>`, so ranges are converted through the UTF-16 offsets of the receiver.
+
+extension StringProtocol {
+  fileprivate func _nsRange<R : RangeExpression>(_ r: R) -> NSRange where R.Bound == String.Index {
+    let bounds = (self as? Substring).map { r.relative(to: $0) } ?? r.relative(to: String(self))
+    return _nsRange(bounds)
+  }
+
+  public func _toRelativeNSRange(_ r: Range<String.Index>) -> NSRange {
+    return _nsRange(r)
+  }
+
+  /// Returns the number of bytes required to store the string in the given encoding, without a terminator.
+  public func lengthOfBytes(using encoding: String.Encoding) -> Int {
+    return _ns.lengthOfBytes(usingEncoding: encoding.rawValue)
+  }
+
+  /// The maximum number of bytes needed to store the string in the given encoding.
+  public func maximumLengthOfBytes(using encoding: String.Encoding) -> Int {
+    return _ns.maximumLengthOfBytes(usingEncoding: encoding.rawValue)
+  }
+
+  /// Returns whether the string can be converted to the given encoding without loss of information.
+  public func canBeConverted(to encoding: String.Encoding) -> Bool {
+    return _ns.canBeConverted(toEncoding: encoding.rawValue)
+  }
+
+  /// The fastest encoding to which the string can be converted without loss of information.
+  public var fastestEncoding: String.Encoding {
+    return String.Encoding(rawValue: _ns.fastestEncoding())
+  }
+
+  /// The smallest encoding to which the string can be converted without loss of information.
+  public var smallestEncoding: String.Encoding {
+    return String.Encoding(rawValue: _ns.smallestEncoding())
+  }
+
+  /// A string made by normalizing the string's contents using Form D.
+  public var decomposedStringWithCanonicalMapping: String {
+    return _ns.decomposedStringWithCanonicalMapping()
+  }
+
+  /// A string made by normalizing the string's contents using Form C.
+  public var precomposedStringWithCanonicalMapping: String {
+    return _ns.precomposedStringWithCanonicalMapping()
+  }
+
+  /// A string made by normalizing the string's contents using Form KC.
+  public var precomposedStringWithCompatibilityMapping: String {
+    return _ns.precomposedStringWithCompatibilityMapping()
+  }
+
+  /// Parses the string as a property list and returns the resulting object.
+  public func propertyList() -> Any {
+    return _ns.propertyList()
+  }
+
+  /// Parses the string as a `.strings` file and returns the resulting dictionary.
+  public func propertyListFromStringsFileFormat() -> [String : String] {
+    return (_ns.propertyListFromStringsFileFormat() as? [String : String]) ?? [:]
+  }
+
+  /// Compares the string and the given string using a localized comparison.
+  public func localizedCompare<T : StringProtocol>(_ aString: T) -> ComparisonResult {
+    return _ns.localizedCompare(String(aString))
+  }
+
+  /// Returns a new string made by appending the given string.
+  public func appending<T : StringProtocol>(_ aString: T) -> String {
+    return _ns.appending(String(aString))
+  }
+
+  /// Returns a string made by using the receiver as a format template for the given arguments.
+  public func appendingFormat<T : StringProtocol>(_ format: T, _ arguments: CVarArg...) -> String {
+    return withVaList(arguments) {
+      _ns.appending(NSString(format: String(format), arguments: $0) as String)
+    }
+  }
+
+  /// Returns a new string in which the characters in a range are replaced by another string.
+  public func replacingCharacters<T : StringProtocol, R : RangeExpression>(in range: R, with replacement: T) -> String
+    where R.Bound == String.Index {
+    return _ns.replacingCharacters(in: _nsRange(range), with: String(replacement))
+  }
+
+  /// Returns a string with the characters of the given range.
+  public func substring(with aRange: Range<String.Index>) -> String {
+    return _ns.substring(with: _nsRange(aRange))
+  }
+
+  /// Returns a string containing the characters from the given index to the end.
+  public func substring(from index: String.Index) -> String {
+    return _ns.substring(from: _utf16Offset(of: index))
+  }
+
+  /// Returns a string containing the characters up to, but not including, the given index.
+  public func substring(to index: String.Index) -> String {
+    return _ns.substring(to: _utf16Offset(of: index))
+  }
+
+  /// Returns the range of the composed character sequence at the given index.
+  public func rangeOfComposedCharacterSequence(at anIndex: String.Index) -> Range<String.Index> {
+    return _range(_ns.rangeOfComposedCharacterSequence(at: _utf16Offset(of: anIndex)))!
+  }
+
+  /// Returns the range of the composed character sequences covering the given range.
+  public func rangeOfComposedCharacterSequences<R : RangeExpression>(for range: R) -> Range<String.Index>
+    where R.Bound == String.Index {
+    return _range(_ns.rangeOfComposedCharacterSequences(for: _nsRange(range)))!
+  }
+
+  /// Returns the range of the line or lines containing the given range.
+  public func lineRange<R : RangeExpression>(for aRange: R) -> Range<String.Index> where R.Bound == String.Index {
+    return _range(_ns.lineRange(for: _nsRange(aRange)))!
+  }
+
+  /// Returns the range of the paragraph or paragraphs containing the given range.
+  public func paragraphRange<R : RangeExpression>(for aRange: R) -> Range<String.Index> where R.Bound == String.Index {
+    return _range(_ns.paragraphRange(for: _nsRange(aRange)))!
+  }
+
+  /// Returns the longest prefix the string shares with the given string, using the given options.
+  public func commonPrefix<T : StringProtocol>(
+    with aString: T,
+    options mask: String.CompareOptions = []
+  ) -> String {
+    return _ns.commonPrefix(with: String(aString), options: mask)
+  }
+
+  /// Returns a folded version of the string using the given options and locale.
+  public func folding(options: String.CompareOptions = [], locale: Locale?) -> String {
+    return _ns.folding(options: options, locale: locale)
+  }
+
+  /// Writes the string to a file, using the given encoding.
+  public func write<T : StringProtocol>(toFile path: T, atomically useAuxiliaryFile: Bool, encoding enc: String.Encoding) throws {
+    try _ns.write(toFile: String(path), atomically: useAuxiliaryFile, encoding: enc.rawValue)
+  }
+
+  /// Enumerates all the lines in the string.
+  public func enumerateLines(invoking body: @escaping (_ line: String, _ stop: inout Bool) -> Void) {
+    _ns.enumerateLines { line, stop in
+      var stop_ = false
+      body(line ?? "", &stop_)
+      if stop_ {
+        stop?.pointee = true
+      }
+    }
+  }
+
+  /// Copies the string's bytes in the given encoding into `buffer` and reports whether all of them fitted.
+  public func getCString(_ buffer: inout [CChar], maxLength: Int, encoding: String.Encoding) -> Bool {
+    return _ns.getCString(&buffer, maxLength: Swift.min(buffer.count, maxLength), encoding: encoding.rawValue)
+  }
+}
