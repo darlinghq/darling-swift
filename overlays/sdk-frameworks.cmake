@@ -15,3 +15,9 @@ add_darling_swift_library(CoreAudio
 	MODULES Dispatch CoreFoundation ObjectiveC Darwin
 	FLAGS ${overlay_shims}
 	LIBRARIES CoreAudio)
+
+add_darling_swift_library(Compression
+	SOURCES "${OVERLAYS}/Compression/Compression.swift"
+	MODULES Foundation Dispatch CoreFoundation ObjectiveC Darwin
+	FLAGS ${overlay_shims}
+	LIBRARIES compression)
