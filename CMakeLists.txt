@@ -49,6 +49,16 @@ if (SWIFT_TOOLCHAIN_FOUND)
 		MODULES Dispatch ObjectiveC Darwin
 		FLAGS ${overlay_shims} -Xcc -fmodule-map-file=${OVERLAYS}/XPC/shims/module.modulemap)
 
+	# CGFloat and the CoreGraphics Swift API. The module re-exports libswiftCoreFoundation, which defines CGFloat
+	# as the SDK's CoreGraphics does, so binaries that look it up through libswiftCoreGraphics still find it.
+	file(GLOB COREGRAPHICS_SOURCES "${OVERLAYS}/CoreGraphics/*.swift")
+	add_darling_swift_library(CoreGraphics
+		SOURCES ${COREGRAPHICS_SOURCES}
+		MODULES CoreFoundation ObjectiveC Darwin
+		FLAGS ${overlay_shims}
+		LIBRARIES CoreGraphics)
+	reexport(swiftCoreGraphics swiftCoreFoundation "${CMAKE_CURRENT_BINARY_DIR}/libswiftCoreFoundation.dylib")
+
 	# Foundation. AttributedString keeps its text in swift-collections' BigString, so two of that project's modules
 	# (overlays/Collections) are compiled without library evolution and linked into libswiftFoundation.dylib, which
 	# keeps their symbols out of its export table.
@@ -61,7 +71,7 @@ if (SWIFT_TOOLCHAIN_FOUND)
 	file(GLOB FOUNDATION_SOURCES "${OVERLAYS}/Foundation/*.swift")
 	add_darling_swift_library(Foundation
 		SOURCES ${FOUNDATION_SOURCES}
-		MODULES _RopeModule InternalCollectionsUtilities os XPC CoreFoundation Dispatch ObjectiveC Darwin
+		MODULES _RopeModule InternalCollectionsUtilities CoreGraphics os XPC CoreFoundation Dispatch ObjectiveC Darwin
 		FLAGS ${overlay_shims} -package-name swift-foundation
 			# Foundation's NSAppleEventDescriptor.h includes <AE/AE.h>, which the SDK does not expose by itself yet.
 			-Xcc -I${DARLING_TOP_DIRECTORY}/src/frameworks/CoreServices/include
