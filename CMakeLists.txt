@@ -79,6 +79,8 @@ if (SWIFT_TOOLCHAIN_FOUND)
 		LINK_FLAGS -Wl,-unexported_symbols_list,${CMAKE_CURRENT_BINARY_DIR}/foundation-unexported.txt
 		LIBRARIES Foundation CoreFoundation icucore)
 	set_property(TARGET swiftFoundation APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/foundation-unexported.txt")
+
+	include(overlays/sdk-frameworks.cmake)
 endif()
 
 # Newer SDKs split parts of the Darwin overlay out of libswiftDarwin.dylib into
@@ -117,5 +119,4 @@ set_target_properties(swiftWebKit PROPERTIES
 )
 install(TARGETS swiftWebKit DESTINATION libexec/darling/usr/lib/swift)
 
-file(GLOB DYLIBS "*.dylib")
-install(FILES ${DYLIBS} DESTINATION libexec/darling/usr/lib/swift)
+include(prebuilt_install.cmake)
