@@ -1,0 +1,4 @@
+module _DarlingXPCShims {
+  header "DarlingXPCShims.h"
+  export *
+}
