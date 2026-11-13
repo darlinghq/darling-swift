@@ -38,7 +38,7 @@ public struct TimeZone : Hashable, Equatable, ReferenceConvertible {
 
     /// The time zone currently used by the system.
     public static var current : TimeZone {
-        return TimeZone(adoptingReference: NSTimeZone.default(), autoupdating: false)
+        return TimeZone(adoptingReference: NSTimeZone.default() as NSTimeZone, autoupdating: false)
     }
 
     /// The time zone currently used by the system, automatically updating to the user's current preference.
@@ -47,10 +47,12 @@ public struct TimeZone : Hashable, Equatable, ReferenceConvertible {
     ///
     /// The autoupdating time zone only compares equal to itself.
     public static var autoupdatingCurrent : TimeZone {
+        // Bridged before locking, since bridging an NSTimeZone takes _autoupdatingLock.
+        let local = NSTimeZone.local().map { $0 as NSTimeZone }
         _autoupdatingLock.lock()
         defer { _autoupdatingLock.unlock() }
         if _autoupdatingReference == nil {
-            _autoupdatingReference = NSTimeZone.local()
+            _autoupdatingReference = local
         }
         return TimeZone(adoptingReference: _autoupdatingReference!, autoupdating: true)
     }
@@ -129,7 +131,7 @@ public struct TimeZone : Hashable, Equatable, ReferenceConvertible {
     ///
     /// - parameter date: The date to use for the calculation. The default value is the current date.
     public func secondsFromGMT(for date: Date = Date()) -> Int {
-        return _wrapped.secondsFromGMT(for: date._bridgeToObjectiveC())
+        return _wrapped.secondsFromGMT(for: date)
     }
 
     /// Returns the abbreviation for the time zone at a given date.
@@ -137,21 +139,21 @@ public struct TimeZone : Hashable, Equatable, ReferenceConvertible {
     /// Note that the abbreviation may be different at different dates. For example, during daylight saving time the US/Eastern time zone has an abbreviation of "EDT." At other times, its abbreviation is "EST."
     /// - parameter date: The date to use for the calculation. The default value is the current date.
     public func abbreviation(for date: Date = Date()) -> String? {
-        return _wrapped.abbreviation(for: date._bridgeToObjectiveC())
+        return _wrapped.abbreviation(for: date)
     }
 
     /// Returns a Boolean value that indicates whether the receiver uses daylight saving time at a given date.
     ///
     /// - parameter date: The date to use for the calculation. The default value is the current date.
     public func isDaylightSavingTime(for date: Date = Date()) -> Bool {
-        return _wrapped.isDaylightSavingTime(for: date._bridgeToObjectiveC())
+        return _wrapped.isDaylightSavingTime(for: date)
     }
 
     /// Returns the daylight saving time offset for a given date.
     ///
     /// - parameter date: The date to use for the calculation. The default value is the current date.
     public func daylightSavingTimeOffset(for date: Date = Date()) -> TimeInterval {
-        return _wrapped.daylightSavingTimeOffset(for: date._bridgeToObjectiveC())
+        return _wrapped.daylightSavingTimeOffset(for: date)
     }
 
     /// Returns the next daylight saving time transition after a given date.
@@ -159,7 +161,7 @@ public struct TimeZone : Hashable, Equatable, ReferenceConvertible {
     /// - parameter date: A date.
     /// - returns: The next daylight saving time transition after `date`. Depending on the time zone, this function may return a change of the time zone's offset from GMT. Returns `nil` if the time zone of the receiver does not observe daylight savings time as of `date`.
     public func nextDaylightSavingTimeTransition(after date: Date) -> Date? {
-        return _wrapped.nextDaylightSavingTimeTransition(after: date._bridgeToObjectiveC()).map { Date._unconditionallyBridgeFromObjectiveC($0) }
+        return _wrapped.nextDaylightSavingTimeTransition(after: date)
     }
 
     /// Returns an array of strings listing the identifier of all the time zones known to the system.
@@ -190,12 +192,12 @@ public struct TimeZone : Hashable, Equatable, ReferenceConvertible {
 
     /// Returns the date of the next (after the current instant) daylight saving time transition for the time zone. Depending on the time zone, the value of this property may represent a change of the time zone's offset from GMT. Returns `nil` if the time zone does not currently observe daylight saving time.
     public var nextDaylightSavingTimeTransition: Date? {
-        return _wrapped.nextDaylightSavingTimeTransition().map { Date._unconditionallyBridgeFromObjectiveC($0) }
+        return _wrapped.nextDaylightSavingTimeTransition()
     }
 
     /// Returns the name of the receiver localized for a given locale.
     public func localizedName(for style: NSTimeZoneNameStyle, locale: Locale?) -> String? {
-        return _wrapped.localizedName(style, locale: locale?._bridgeToObjectiveC())
+        return _wrapped.localizedName(style, locale: locale)
     }
 
     // MARK: -

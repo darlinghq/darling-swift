@@ -226,7 +226,7 @@ public struct LocalizedStringResource : ExpressibleByStringInterpolation, Custom
         switch bundle {
         case .main: return Bundle.main
         case .forClass(let cls): return Bundle(for: cls)
-        case .atURL(let url): return Bundle(url: url as NSURL)
+        case .atURL(let url): return Bundle(url: url)
         }
     }
 }

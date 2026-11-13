@@ -12,7 +12,6 @@
 
 // From release/5.4 stdlib/public/Darwin/Foundation/URL.swift: URLResourceValues and
 // URL.resourceValues(forKeys:) over Darling's -resourceValuesForKeys:error:.
-// Darling declares the NSURL*Key constants as plain NSString, so the keys are built with URLResourceKey(rawValue:).
 
 @_exported import Foundation // Clang module
 
@@ -37,23 +36,23 @@ public struct URLResourceValues {
 
     /// The date the resource was created.
     public var creationDate: Date? {
-        return _get(URLResourceKey(rawValue: NSURLCreationDateKey))
+        return _get(.creationDateKey)
     }
 
     public var isRegularFile: Bool? {
-        return _number(URLResourceKey(rawValue: NSURLIsRegularFileKey))?.boolValue()
+        return _number(.isRegularFileKey)?.boolValue()
     }
 
     public var isDirectory: Bool? {
-        return _number(URLResourceKey(rawValue: NSURLIsDirectoryKey))?.boolValue()
+        return _number(.isDirectoryKey)?.boolValue()
     }
 
     public var isSymbolicLink: Bool? {
-        return _number(URLResourceKey(rawValue: NSURLIsSymbolicLinkKey))?.boolValue()
+        return _number(.isSymbolicLinkKey)?.boolValue()
     }
 
     public var fileSize: Int? {
-        return _number(URLResourceKey(rawValue: NSURLFileSizeKey))?.integerValue()
+        return _number(.fileSizeKey)?.integerValue()
     }
 }
 
