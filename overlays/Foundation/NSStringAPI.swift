@@ -570,3 +570,135 @@ extension StringProtocol {
     return _ns.getCString(&buffer, maxLength: Swift.min(buffer.count, maxLength), encoding: encoding.rawValue)
   }
 }
+
+extension String {
+  /// Creates a string by copying the data from a given C array of UTF-8 bytes.
+  public init?(utf8String bytes: UnsafePointer<CChar>) {
+    if let str = String(validatingCString: bytes) {
+      self = str
+      return
+    }
+    if let ns = NSString(utf8String: bytes) {
+      self = String._unconditionallyBridgeFromObjectiveC(ns)
+    } else {
+      return nil
+    }
+  }
+
+  /// Creates a string from the bytes of a sequence, interpreted in the given encoding.
+  public init?<S : Sequence>(bytes: __shared S, encoding: Encoding) where S.Iterator.Element == UInt8 {
+    let byteArray = Array(bytes)
+    if let ns = NSString(bytes: byteArray, length: byteArray.count, encoding: encoding.rawValue) {
+      self = String._unconditionallyBridgeFromObjectiveC(ns)
+    } else {
+      return nil
+    }
+  }
+
+  /// Creates a string from UTF-16 code units.
+  public init(utf16CodeUnits: UnsafePointer<unichar>, count: Int) {
+    self = String._unconditionallyBridgeFromObjectiveC(NSString(characters: utf16CodeUnits, length: count))
+  }
+
+  /// Creates a string from UTF-16 code units without copying them when possible.
+  public init(utf16CodeUnitsNoCopy: UnsafePointer<unichar>, count: Int, freeWhenDone flag: Bool) {
+    self = String._unconditionallyBridgeFromObjectiveC(
+      NSString(charactersNoCopy: UnsafeMutablePointer(mutating: utf16CodeUnitsNoCopy), length: count, freeWhenDone: flag))
+  }
+
+  /// Creates a string from bytes without copying them when possible.
+  public init?(bytesNoCopy bytes: UnsafeMutableRawPointer, length: Int, encoding: Encoding, freeWhenDone flag: Bool) {
+    if let ns = NSString(bytesNoCopy: bytes, length: length, encoding: encoding.rawValue, freeWhenDone: flag) {
+      self = String._unconditionallyBridgeFromObjectiveC(ns)
+    } else {
+      return nil
+    }
+  }
+
+  /// Creates a string by reading the file at `path`, using the given encoding.
+  public init(contentsOfFile path: __shared String, encoding enc: Encoding) throws {
+    let ns = try NSString(contentsOfFile: path, encoding: enc.rawValue)
+    self = String._unconditionallyBridgeFromObjectiveC(ns)
+  }
+
+  /// Creates a string by reading the file at `path`, detecting the encoding.
+  public init(contentsOfFile path: __shared String, usedEncoding: inout Encoding) throws {
+    var enc: UInt = 0
+    let ns = try NSString(contentsOfFile: path, usedEncoding: &enc)
+    usedEncoding = Encoding(rawValue: enc)
+    self = String._unconditionallyBridgeFromObjectiveC(ns)
+  }
+
+  public init(contentsOfFile path: __shared String) throws {
+    var enc: UInt = 0
+    let ns = try NSString(contentsOfFile: path, usedEncoding: &enc)
+    self = String._unconditionallyBridgeFromObjectiveC(ns)
+  }
+
+  /// Creates a string by reading the contents of a URL, using the given encoding.
+  public init(contentsOf url: __shared URL, encoding enc: Encoding) throws {
+    let ns = try NSString(contentsOf: url, encoding: enc.rawValue)
+    self = String._unconditionallyBridgeFromObjectiveC(ns)
+  }
+
+  /// Creates a string by reading the contents of a URL, detecting the encoding.
+  public init(contentsOf url: __shared URL, usedEncoding: inout Encoding) throws {
+    var enc: UInt = 0
+    let ns = try NSString(contentsOf: url, usedEncoding: &enc)
+    usedEncoding = Encoding(rawValue: enc)
+    self = String._unconditionallyBridgeFromObjectiveC(ns)
+  }
+
+  public init(contentsOf url: __shared URL) throws {
+    var enc: UInt = 0
+    let ns = try NSString(contentsOf: url, usedEncoding: &enc)
+    self = String._unconditionallyBridgeFromObjectiveC(ns)
+  }
+
+  /// The encodings that NSString supports.
+  public static var availableStringEncodings: [Encoding] {
+    var result = [Encoding]()
+    guard var p = NSString.availableStringEncodings() else { return result }
+    while p.pointee != 0 {
+      result.append(Encoding(rawValue: p.pointee))
+      p += 1
+    }
+    return result
+  }
+
+  /// The default C string encoding.
+  public static var defaultCStringEncoding: Encoding {
+    return Encoding(rawValue: NSString.defaultCStringEncoding())
+  }
+
+  /// A human-readable name of the given encoding.
+  public static func localizedName(of encoding: Encoding) -> String {
+    return NSString.localizedName(ofStringEncoding: encoding.rawValue)
+  }
+}
+
+extension NSString {
+  public convenience init(format: __shared NSString, _ args: CVarArg...) {
+    let va_args = getVaList(args)
+    self.init(format: format as String, arguments: va_args)
+  }
+
+  public convenience init(format: __shared NSString, locale: Locale?, _ args: CVarArg...) {
+    let va_args = getVaList(args)
+    self.init(format: format as String, locale: locale, arguments: va_args)
+  }
+
+  public class func localizedStringWithFormat(_ format: NSString, _ args: CVarArg...) -> Self {
+    return withVaList(args) {
+      self.init(format: format as String, locale: Locale.current, arguments: $0)
+    }
+  }
+}
+
+extension NSMutableString {
+  public func appendFormat(_ format: NSString, _ args: CVarArg...) {
+    return withVaList(args) {
+      self.append(NSString(format: format as String, arguments: $0) as String)
+    }
+  }
+}
