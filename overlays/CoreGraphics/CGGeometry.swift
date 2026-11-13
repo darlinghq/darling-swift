@@ -314,3 +314,38 @@ extension CGSize : Codable {
         try container.encode(height)
     }
 }
+
+// Rung 1: swift release/5.4 stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift (Copyright (c) 2014 - 2017 Apple Inc.
+// and the Swift project authors, Apache License v2.0 with Runtime Library Exception), unchanged in content:
+// CGPoint Codable at line 289 (a point is [x, y]) and CGRect Codable at line 501 (a rect is [origin, size]).
+// Only the Codable forms Notes imports are here; CGPathFillRule, clip(using:), fillPath(using:) and debugDescription
+// are left out because no named app imports them.
+extension CGPoint : Codable {
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        let x = try container.decode(CGFloat.self)
+        let y = try container.decode(CGFloat.self)
+        self.init(x: x, y: y)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        try container.encode(x)
+        try container.encode(y)
+    }
+}
+
+extension CGRect : Codable {
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        let origin = try container.decode(CGPoint.self)
+        let size = try container.decode(CGSize.self)
+        self.init(origin: origin, size: size)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        try container.encode(origin)
+        try container.encode(size)
+    }
+}
