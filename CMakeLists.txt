@@ -119,5 +119,4 @@ set_target_properties(swiftWebKit PROPERTIES
 )
 install(TARGETS swiftWebKit DESTINATION libexec/darling/usr/lib/swift)
 
-file(GLOB DYLIBS "*.dylib")
-install(FILES ${DYLIBS} DESTINATION libexec/darling/usr/lib/swift)
+include(prebuilt_install.cmake)
