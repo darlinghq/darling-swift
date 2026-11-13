@@ -213,6 +213,12 @@ extension Date : CustomDebugStringConvertible, CustomStringConvertible, CustomRe
         return NSDate(timeIntervalSinceReferenceDate: _time).description()
     }
 
+    /// Returns a string representation of the `Date`, using the given locale, or, if the locale is `nil`, in the
+    /// international format `YYYY-MM-DD HH:MM:SS ±HHMM`.
+    public func description(with locale: Locale?) -> String {
+        return NSDate(timeIntervalSinceReferenceDate: _time).description(withLocale: locale)
+    }
+
     public var debugDescription: String {
         return description
     }

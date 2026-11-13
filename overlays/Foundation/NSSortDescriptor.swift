@@ -22,8 +22,9 @@ extension NSSortDescriptor {
         objc_setAssociatedObject(self, UnsafeRawPointer(&associationKey), keyPath, .OBJC_ASSOCIATION_RETAIN)
     }
     
-    public convenience init<Root, Value>(keyPath: KeyPath<Root, Value>, ascending: Bool, comparator cmptr: @escaping NSComparator) {
-        self.init(key: _bridgeKeyPathToString(keyPath), ascending: ascending, comparator: cmptr)
+    public convenience init<Root, Value>(keyPath: KeyPath<Root, Value>, ascending: Bool, comparator cmptr: @escaping (Any, Any) -> ComparisonResult) {
+        // Darling imports NSComparator with optional parameters (its header has no nullability annotations).
+        self.init(key: _bridgeKeyPathToString(keyPath), ascending: ascending, comparator: { cmptr($0 as Any, $1 as Any) })
         objc_setAssociatedObject(self, UnsafeRawPointer(&associationKey), keyPath, .OBJC_ASSOCIATION_RETAIN)
     }
     
