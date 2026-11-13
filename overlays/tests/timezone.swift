@@ -19,7 +19,7 @@ if let newYork = TimeZone(identifier: "America/New_York") {
     check(newYork.daylightSavingTimeOffset(for: summer) == 3600, "daylightSavingTimeOffset(for:)")
     // Darling's -abbreviationForDate: can give the abbreviation for another date, so compare with NSTimeZone.
     let abbreviation = newYork.abbreviation(for: winter)
-    check(abbreviation != nil && abbreviation == (newYork as NSTimeZone).abbreviation(for: winter as NSDate),
+    check(abbreviation != nil && abbreviation == (newYork as NSTimeZone).abbreviation(for: winter),
           "abbreviation(for:) matches NSTimeZone (\(String(describing: abbreviation)))")
     if let transition = newYork.nextDaylightSavingTimeTransition(after: winter) {
         check(transition > winter && transition < summer, "nextDaylightSavingTimeTransition(after:) (\(transition))")
@@ -45,9 +45,9 @@ if let plusTwo = TimeZone(secondsFromGMT: 7200) {
 check(TimeZone(abbreviation: "GMT")?.secondsFromGMT(for: winter) == 0, "init(abbreviation:)")
 
 let current = TimeZone.current
-check(current.identifier == (NSTimeZone.default()?.name() ?? ""), "current matches +[NSTimeZone defaultTimeZone] (\(current.identifier))")
+check(current.identifier == (NSTimeZone.default()?.identifier ?? ""), "current matches +[NSTimeZone defaultTimeZone] (\(current.identifier))")
 check(current.secondsFromGMT() == (NSTimeZone.default()?.secondsFromGMT() ?? -1), "current secondsFromGMT()")
-check((NSTimeZone.system() as TimeZone).identifier == (NSTimeZone.system()?.name() ?? ""), "systemTimeZone bridges without touching +localTimeZone")
+check((NSTimeZone.system() as TimeZone).identifier == (NSTimeZone.system()?.identifier ?? ""), "systemTimeZone bridges without touching +localTimeZone")
 // Darling's +localTimeZone dereferences getenv("TZ"), so only exercise autoupdatingCurrent when TZ is set.
 if getenv("TZ") != nil {
     check(TimeZone.autoupdatingCurrent == TimeZone.autoupdatingCurrent && TimeZone.autoupdatingCurrent != current, "autoupdatingCurrent equality")

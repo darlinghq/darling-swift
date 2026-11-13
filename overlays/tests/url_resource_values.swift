@@ -18,10 +18,10 @@ if fd >= 0 { close(fd) }
 check(mkdir(directory, 0o700) == 0, "create directory")
 check(symlink(file, link) == 0, "create symlink")
 
-let regular = URLResourceKey(rawValue: NSURLIsRegularFileKey)
-let isDirectory = URLResourceKey(rawValue: NSURLIsDirectoryKey)
-let symbolic = URLResourceKey(rawValue: NSURLIsSymbolicLinkKey)
-let size = URLResourceKey(rawValue: NSURLFileSizeKey)
+let regular = URLResourceKey.isRegularFileKey
+let isDirectory = URLResourceKey.isDirectoryKey
+let symbolic = URLResourceKey.isSymbolicLinkKey
+let size = URLResourceKey.fileSizeKey
 
 do {
     let values = try URL(fileURLWithPath: file).resourceValues(forKeys: [regular, isDirectory, size])

@@ -35,7 +35,7 @@ let archiver = NSKeyedArchiver(forWritingWith: data)!
 archiver.encode("value" as NSString, forKey: "name")
 archiver.encode(7 as NSNumber, forKey: "number")
 archiver.finishEncoding()
-if let unarchiver = NSKeyedUnarchiver(forReadingWith: data) {
+if let unarchiver = NSKeyedUnarchiver(forReadingWith: data as Data) {
     let name: NSString? = unarchiver.decodeObject(of: NSString.self, forKey: "name")
     check(name == "value", "decodeObject(of: NSString.self)")
     let wrongClass: NSNumber? = unarchiver.decodeObject(of: NSNumber.self, forKey: "name")
@@ -56,7 +56,7 @@ if let unarchiver = NSKeyedUnarchiver(forReadingWith: data) {
 }
 
 // With secure coding on, Darling's unarchiver pushes the classes as the allowed set.
-if let secure = NSKeyedUnarchiver(forReadingWith: data) {
+if let secure = NSKeyedUnarchiver(forReadingWith: data as Data) {
     typealias SetBool = @convention(c) (AnyObject, Selector, Bool) -> Void
     let setter = Selector(("setRequiresSecureCoding:"))
     unsafeBitCast(secure.method(for: setter), to: SetBool.self)(secure, setter, true)
@@ -68,7 +68,7 @@ if let secure = NSKeyedUnarchiver(forReadingWith: data) {
 }
 
 // URL.resourceValues(forKeys:) and URLResourceValues.creationDate.
-let creationKey = URLResourceKey(rawValue: NSURLCreationDateKey)
+let creationKey = URLResourceKey.creationDateKey
 var template = Array((NSTemporaryDirectory() + "/console-resource.XXXXXX").utf8CString)
 let fd = mkstemp(&template)
 if fd >= 0 {

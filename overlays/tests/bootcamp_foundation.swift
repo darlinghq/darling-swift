@@ -77,7 +77,7 @@ if let dirPointer = mkdtemp(&template) {
         }
         return result
     }
-    let manager = NSFileManager.default()!
+    let manager = FileManager.default!
     let all = names(manager.enumerator(at: URL(fileURLWithPath: dir), includingPropertiesForKeys: nil))
     check(all == ["a.txt", "sub", "b.txt"], "enumerator(at:) visits every item (\(all))")
     let withKeys = names(manager.enumerator(at: URL(fileURLWithPath: dir),
