@@ -31,6 +31,11 @@ list(SORT combine_orig)
 file(GLOB combine_patches CONFIGURE_DEPENDS "${COMBINE_PATCH_DIR}/*.patch")
 list(SORT combine_patches)
 
+# Sources that are not in the pinned OpenCombine commit (overlays/Combine/Sources, compiled into the framework as they
+# are; they get no patches).
+file(GLOB COMBINE_EXTRA_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/overlays/Combine/Sources/*.swift")
+list(SORT COMBINE_EXTRA_SOURCES)
+
 set(COMBINE_SOURCES)
 set(combine_orig_abs)
 foreach(rel IN LISTS combine_orig)
@@ -57,7 +62,7 @@ add_custom_command(
 # so clients of Combine do not need the module map.
 add_darling_swift_library(Combine
 	FRAMEWORK
-	SOURCES ${COMBINE_SOURCES}
+	SOURCES ${COMBINE_SOURCES} ${COMBINE_EXTRA_SOURCES}
 	FLAGS -Xcc -fmodule-map-file=${OPENCOMBINE_HELPERS_INCLUDE}/module.modulemap
 	NATIVE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/overlays/Combine/helpers.c"
 	NATIVE_FLAGS -fvisibility=hidden -I${OPENCOMBINE_HELPERS_INCLUDE})
