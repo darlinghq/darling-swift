@@ -51,7 +51,7 @@ check(CGFloat(exactly: NSNumber(value: 7)) == 7, "CGFloat(exactly:)")
 // Collections bridge their elements
 let floats: [Float] = [1, 2.5]
 check(((floats as NSArray).object(at: 1) as? NSNumber)?.floatValue() == 2.5, "[Float] -> NSArray")
-let fromObjC = [NSNumber(value: 1)!, NSNumber(value: 0.25)!] as NSArray
+let fromObjC = [NSNumber(value: 1), NSNumber(value: 0.25)] as NSArray
 check((fromObjC as? [CGFloat]) == [1, 0.25], "NSArray as? [CGFloat]")
 check((fromObjC as? [UInt]) == nil, "NSArray with 0.25 as? [UInt] fails")
 let sizes: [String: UInt32] = ["a": 1, "b": 4_000_000_000]
@@ -60,7 +60,7 @@ check((nsSizes as? [String: UInt32]) == sizes, "[String: UInt32] round trip thro
 check((nsSizes as? [String: Int16]) == nil, "[String: UInt32] as? [String: Int16] fails for 4e9")
 
 // Any/AnyObject casts go through the same conformances
-let boxed: Any = NSNumber(value: UInt8(9))!
+let boxed: Any = NSNumber(value: UInt8(9))
 check((boxed as? UInt16) == 9, "Any(NSNumber) as? UInt16")
 check((CGFloat(4) as AnyObject) is NSNumber, "CGFloat as AnyObject is NSNumber")
 
