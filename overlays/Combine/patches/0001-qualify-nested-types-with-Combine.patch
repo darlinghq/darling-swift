@@ -1,0 +1,115 @@
+Qualify the nested Publisher/Subscriber/Subject types with `Combine.`
+
+OpenCombine writes `OpenCombine.Publisher` wherever a nested type named
+`Publisher` would otherwise shadow the protocol. Built with
+`-module-name Combine` there is no module called `OpenCombine`, so those
+references have to name this module instead.
+
+The qualifier is not part of a mangled name, so this changes none of them.
+
+--- a/AnySubscriber.swift
++++ b/AnySubscriber.swift
+@@ -42,7 +42,7 @@
+     /// - Parameter s: The subscriber to type-erase.
+     @inline(__always)
+     @inlinable
+-    public init<Subscriber: OpenCombine.Subscriber>(_ subscriber: Subscriber)
++    public init<Subscriber: Combine.Subscriber>(_ subscriber: Subscriber)
+         where Input == Subscriber.Input, Failure == Subscriber.Failure
+     {
+         if let erased = subscriber as? AnySubscriber<Input, Failure> {
+@@ -76,7 +76,7 @@
+         }
+     }
+ 
+-    public init<Subject: OpenCombine.Subject>(_ subject: Subject)
++    public init<Subject: Combine.Subject>(_ subject: Subject)
+         where Input == Subject.Output, Failure == Subject.Failure
+     {
+         self.init(SubjectSubscriber(subject))
+--- a/GENERATED-RootProtocols.swift
++++ b/GENERATED-RootProtocols.swift
+@@ -67,7 +67,7 @@
+     ///
+     /// - Parameter subscriber: The subscriber to attach to this publisher. After
+     ///   attaching, the subscriber can start to receive values.
+-    func receive<Subscriber: OpenCombine.Subscriber>(subscriber: Subscriber)
++    func receive<Subscriber: Combine.Subscriber>(subscriber: Subscriber)
+         where Failure == Subscriber.Failure, Output == Subscriber.Input
+ }
+ 
+@@ -273,7 +273,7 @@
+     ///
+     /// - Parameter subscriber: The subscriber to attach to this publisher. After
+     ///   attaching, the subscriber can start to receive values.
+-    func receive<Subscriber: OpenCombine.Subscriber>(subscriber: Subscriber)
++    func receive<Subscriber: Combine.Subscriber>(subscriber: Subscriber)
+         where Failure == Subscriber.Failure, Output == Subscriber.Input
+ }
+ 
+--- a/Helpers/SubscriberTap.swift
++++ b/Helpers/SubscriberTap.swift
+@@ -9,8 +9,8 @@
+     var inner: Any { mutating get }
+ }
+ 
+-internal struct SubscriberTap<Subscriber: OpenCombine.Subscriber>
+-: OpenCombine.Subscriber,
++internal struct SubscriberTap<Subscriber: Combine.Subscriber>
++: Combine.Subscriber,
+   CustomStringConvertible,
+   SubscriberTapMarker
+ {
+--- a/Published.swift
++++ b/Published.swift
+@@ -84,7 +84,7 @@
+ public struct Published<Value> {
+ 
+     /// A publisher for properties marked with the `@Published` attribute.
+-    public struct Publisher: OpenCombine.Publisher {
++    public struct Publisher: Combine.Publisher {
+ 
+         public typealias Output = Value
+ 
+--- a/Publisher+Subscribe.swift
++++ b/Publisher+Subscribe.swift
+@@ -17,7 +17,7 @@
+     /// - Parameters:
+     ///     - subscriber: The subscriber to attach to this `Publisher`. After attaching,
+     ///       the subscriber can start to receive values.
+-    public func subscribe<Subscriber: OpenCombine.Subscriber>(_ subscriber: Subscriber)
++    public func subscribe<Subscriber: Combine.Subscriber>(_ subscriber: Subscriber)
+         where Failure == Subscriber.Failure, Output == Subscriber.Input
+     {
+         if let hook = DebugHook.getGlobalHook() {
+@@ -41,7 +41,7 @@
+     /// Attaches the specified subject to this publisher.
+     ///
+     /// - Parameter subject: The subject to attach to this publisher.
+-    public func subscribe<Subject: OpenCombine.Subject>(
++    public func subscribe<Subject: Combine.Subject>(
+         _ subject: Subject
+     ) -> AnyCancellable
+         where Failure == Subject.Failure, Output == Subject.Output
+--- a/Publishers/Optional.Publisher.swift
++++ b/Publishers/Optional.Publisher.swift
+@@ -39,7 +39,7 @@
+         /// In contrast with the `Just` publisher, which always produces a single value,
+         /// this publisher might not send any values and instead finish normally,
+         /// if `output` is `nil`.
+-        public struct Publisher: OpenCombine.Publisher {
++        public struct Publisher: Combine.Publisher {
+ 
+             /// The kind of value published by this publisher.
+             ///
+--- a/Publishers/Result.Publisher.swift
++++ b/Publishers/Result.Publisher.swift
+@@ -42,7 +42,7 @@
+         /// In contrast with `Just`, a `Once` publisher can terminate with an error
+         /// instead of sending a value. In contrast with `Optional`, a `Once` publisher
+         /// always sends one value (unless it terminates with an error).
+-        public struct Publisher: OpenCombine.Publisher {
++        public struct Publisher: Combine.Publisher {
+ 
+             public typealias Output = Success
+ 

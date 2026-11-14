@@ -1,0 +1,685 @@
+Drop @inlinable, @usableFromInline and @_fixed_layout
+
+OpenCombine is not written for library evolution. This framework is built with
+-enable-library-evolution, because apps link it the way they link Apple's
+Combine, and the compile fails on these attributes there: keeping them gives
+48 errors, starting with "'let' property 'box' may not be initialized
+directly" in AnyPublisher.swift.
+
+None of the three is part of a mangled name, so this changes none of them.
+What it costs is cross-module inlining of `Subscribers.Demand` arithmetic and
+the `AnyPublisher`/`AnySubscriber` boxes.
+
+--- a/AnyPublisher.swift
++++ b/AnyPublisher.swift
+@@ -46,7 +46,7 @@
+     ///     // Prints "Successfully cast nonErased.publisher."
+     ///
+     /// - Returns: An ``AnyPublisher`` wrapping this publisher.
+-    @inlinable
++    
+     public func eraseToAnyPublisher() -> AnyPublisher<Output, Failure> {
+         return .init(self)
+     }
+@@ -66,13 +66,13 @@
+   : CustomStringConvertible,
+     CustomPlaygroundDisplayConvertible
+ {
+-    @usableFromInline
++    
+     internal let box: PublisherBoxBase<Output, Failure>
+ 
+     /// Creates a type-erasing publisher to wrap the provided publisher.
+     ///
+     /// - Parameter publisher: A publisher to wrap with a type-eraser.
+-    @inlinable
++    
+     public init<PublisherType: Publisher>(_ publisher: PublisherType)
+         where Output == PublisherType.Output, Failure == PublisherType.Failure
+     {
+@@ -102,7 +102,7 @@
+     /// - Parameters:
+     ///     - subscriber: The subscriber to attach to this `Publisher`.
+     ///                   once attached it can begin to receive values.
+-    @inlinable
++    
+     public func receive<Downstream: Subscriber>(subscriber: Downstream)
+         where Output == Downstream.Input, Failure == Downstream.Failure
+     {
+@@ -112,13 +112,13 @@
+ 
+ /// A type-erasing base class. Its concrete subclass is generic over the underlying
+ /// publisher.
+-@usableFromInline
++
+ internal class PublisherBoxBase<Output, Failure: Error>: Publisher {
+ 
+-    @inlinable
++    
+     internal init() {}
+ 
+-    @usableFromInline
++    
+     internal func receive<Downstream: Subscriber>(subscriber: Downstream)
+         where Failure == Downstream.Failure, Output == Downstream.Input
+     {
+@@ -126,20 +126,20 @@
+     }
+ }
+ 
+-@usableFromInline
++
+ internal final class PublisherBox<PublisherType: Publisher>
+     : PublisherBoxBase<PublisherType.Output, PublisherType.Failure>
+ {
+-    @usableFromInline
++    
+     internal let base: PublisherType
+ 
+-    @inlinable
++    
+     internal init(base: PublisherType) {
+         self.base = base
+         super.init()
+     }
+ 
+-    @inlinable
++    
+     override internal func receive<Downstream: Subscriber>(subscriber: Downstream)
+         where Failure == Downstream.Failure, Output == Downstream.Input
+     {
+--- a/AnySubscriber.swift
++++ b/AnySubscriber.swift
+@@ -16,16 +16,16 @@
+                                                     CustomReflectable,
+                                                     CustomPlaygroundDisplayConvertible
+ {
+-    @usableFromInline
++    
+     internal let box: AnySubscriberBase<Input, Failure>
+ 
+-    @usableFromInline
++    
+     internal let descriptionThunk: () -> String
+ 
+-    @usableFromInline
++    
+     internal let customMirrorThunk: () -> Mirror
+ 
+-    @usableFromInline
++    
+     internal let playgroundDescriptionThunk: () -> Any
+ 
+     public let combineIdentifier: CombineIdentifier
+@@ -41,7 +41,7 @@
+     ///
+     /// - Parameter s: The subscriber to type-erase.
+     @inline(__always)
+-    @inlinable
++    
+     public init<Subscriber: Combine.Subscriber>(_ subscriber: Subscriber)
+         where Input == Subscriber.Input, Failure == Subscriber.Failure
+     {
+@@ -92,7 +92,7 @@
+     ///   - receiveCompletion: A closure to execute when the subscriber receives
+     ///     a completion callback from the publisher.
+     @inline(__always)
+-    @inlinable
++    
+     public init(receiveSubscription: ((Subscription) -> Void)? = nil,
+                 receiveValue: ((Input) -> Subscribers.Demand)? = nil,
+                 receiveCompletion: ((Subscribers.Completion<Failure>) -> Void)? = nil) {
+@@ -110,19 +110,19 @@
+     }
+ 
+     @inline(__always)
+-    @inlinable
++    
+     public func receive(subscription: Subscription) {
+         box.receive(subscription: subscription)
+     }
+ 
+     @inline(__always)
+-    @inlinable
++    
+     public func receive(_ value: Input) -> Subscribers.Demand {
+         return box.receive(value)
+     }
+ 
+     @inline(__always)
+-    @inlinable
++    
+     public func receive(completion: Subscribers.Completion<Failure>) {
+         box.receive(completion: completion)
+     }
+@@ -130,78 +130,78 @@
+ 
+ /// A type-erasing base class. Its concrete subclass is generic over the underlying
+ /// subscriber.
+-@usableFromInline
++
+ internal class AnySubscriberBase<Input, Failure: Error>: Subscriber {
+ 
+     @inline(__always)
+-    @inlinable
++    
+     internal init() {}
+ 
+     @inline(__always)
+-    @inlinable
++    
+     deinit {}
+ 
+-    @usableFromInline
++    
+     internal func receive(subscription: Subscription) {
+         abstractMethod()
+     }
+ 
+-    @usableFromInline
++    
+     internal func receive(_ input: Input) -> Subscribers.Demand {
+         abstractMethod()
+     }
+ 
+-    @usableFromInline
++    
+     internal func receive(completion: Subscribers.Completion<Failure>) {
+         abstractMethod()
+     }
+ }
+ 
+-@usableFromInline
++
+ internal final class AnySubscriberBox<Base: Subscriber>
+     : AnySubscriberBase<Base.Input, Base.Failure>
+ {
+-    @usableFromInline
++    
+     internal let base: Base
+ 
+-    @inlinable
++    
+     internal init(_ base: Base) {
+         self.base = base
+     }
+ 
+-    @inlinable
++    
+     deinit {}
+ 
+-    @inlinable
++    
+     override internal func receive(subscription: Subscription) {
+         base.receive(subscription: subscription)
+     }
+ 
+-    @inlinable
++    
+     override internal func receive(_ input: Base.Input) -> Subscribers.Demand {
+         return base.receive(input)
+     }
+ 
+-    @inlinable
++    
+     override internal func receive(completion: Subscribers.Completion<Base.Failure>) {
+         base.receive(completion: completion)
+     }
+ }
+ 
+-@usableFromInline
++
+ internal final class ClosureBasedAnySubscriber<Input, Failure: Error>
+     : AnySubscriberBase<Input, Failure>
+ {
+-    @usableFromInline
++    
+     internal let receiveSubscriptionThunk: (Subscription) -> Void
+ 
+-    @usableFromInline
++    
+     internal let receiveValueThunk: (Input) -> Subscribers.Demand
+ 
+-    @usableFromInline
++    
+     internal let receiveCompletionThunk: (Subscribers.Completion<Failure>) -> Void
+ 
+-    @inlinable
++    
+     internal init(_ rcvSubscription: @escaping (Subscription) -> Void,
+                   _ rcvValue: @escaping (Input) -> Subscribers.Demand,
+                   _ rcvCompletion: @escaping (Subscribers.Completion<Failure>) -> Void) {
+@@ -210,20 +210,20 @@
+         receiveCompletionThunk = rcvCompletion
+     }
+ 
+-    @inlinable
++    
+     deinit {}
+ 
+-    @inlinable
++    
+     override internal func receive(subscription: Subscription) {
+         receiveSubscriptionThunk(subscription)
+     }
+ 
+-    @inlinable
++    
+     override internal func receive(_ input: Input) -> Subscribers.Demand {
+         return receiveValueThunk(input)
+     }
+ 
+-    @inlinable
++    
+     override internal func receive(completion: Subscribers.Completion<Failure>) {
+         receiveCompletionThunk(completion)
+     }
+--- a/ImmediateScheduler.swift
++++ b/ImmediateScheduler.swift
+@@ -54,21 +54,21 @@
+             public var magnitude: Int
+ 
+             /// Creates an immediate scheduler time interval from the given time interval.
+-            @inlinable
++            
+             public init(_ value: Int) {
+                 magnitude = value
+             }
+ 
+             /// Creates an immediate scheduler time interval from an integer seconds
+             /// value.
+-            @inlinable
++            
+             public init(integerLiteral value: Int) {
+                 self.init(value)
+             }
+ 
+             /// Creates an immediate scheduler time interval from a floating-point seconds
+             /// value.
+-            @inlinable
++            
+             public init(floatLiteral value: Double) {
+                 self.init(Int(value))
+             }
+@@ -77,7 +77,7 @@
+             ///
+             /// If `exactly` can’t convert to an `Int`, the resulting time interval is
+             /// `nil`.
+-            @inlinable
++            
+             public init?<BinaryIntegerType: BinaryInteger>(
+                 exactly source: BinaryIntegerType
+             ) {
+@@ -87,27 +87,27 @@
+                 self.init(magnitude)
+             }
+ 
+-            @inlinable
++            
+             public static func < (lhs: Stride, rhs: Stride) -> Bool {
+                 return lhs.magnitude < rhs.magnitude
+             }
+ 
+-            @inlinable
++            
+             public static func * (lhs: Stride, rhs: Stride) -> Stride {
+                 return Stride(lhs.magnitude * rhs.magnitude)
+             }
+ 
+-            @inlinable
++            
+             public static func + (lhs: Stride, rhs: Stride) -> Stride {
+                 return Stride(lhs.magnitude + rhs.magnitude)
+             }
+ 
+-            @inlinable
++            
+             public static func - (lhs: Stride, rhs: Stride) -> Stride {
+                 return Stride(lhs.magnitude - rhs.magnitude)
+             }
+ 
+-            @inlinable
++            
+             public static func -= (lhs: inout Stride, rhs: Stride) {
+                 lhs.magnitude -= rhs.magnitude
+             }
+@@ -142,7 +142,7 @@
+     public static let shared = ImmediateScheduler()
+ 
+     /// Performs the action at the next possible opportunity.
+-    @inlinable
++    
+     public func schedule(options: SchedulerOptions?, _ action: @escaping () -> Void) {
+         action()
+     }
+--- a/Scheduler.swift
++++ b/Scheduler.swift
+@@ -35,14 +35,14 @@
+     /// minimum tolerance.
+     ///
+     /// The immediate scheduler ignores `date` and performs the action immediately.
+-    @inlinable
++    
+     public func schedule(after date: SchedulerTimeType,
+                          _ action: @escaping () -> Void) {
+         schedule(after: date, tolerance: minimumTolerance, action)
+     }
+ 
+     /// Performs the action at the next possible opportunity, without options.
+-    @inlinable
++    
+     public func schedule(_ action: @escaping () -> Void) {
+         schedule(options: nil, action)
+     }
+@@ -50,7 +50,7 @@
+     /// Performs the action at some time after the specified date.
+     ///
+     /// The immediate scheduler ignores `date` and performs the action immediately.
+-    @inlinable
++    
+     public func schedule(after date: SchedulerTimeType,
+                          tolerance: SchedulerTimeType.Stride,
+                          _ action: @escaping () -> Void) {
+@@ -61,7 +61,7 @@
+     /// frequency, taking into account tolerance if possible.
+     ///
+     /// The immediate scheduler ignores `date` and performs the action immediately.
+-    @inlinable
++    
+     public func schedule(after date: SchedulerTimeType,
+                          interval: SchedulerTimeType.Stride,
+                          tolerance: SchedulerTimeType.Stride,
+@@ -77,7 +77,7 @@
+     /// frequency, using minimum tolerance possible for this Scheduler.
+     ///
+     /// The immediate scheduler ignores `date` and performs the action immediately.
+-    @inlinable
++    
+     public func schedule(after date: SchedulerTimeType,
+                          interval: SchedulerTimeType.Stride,
+                          _ action: @escaping () -> Void) -> Cancellable {
+--- a/Subscribers/Subscribers.Demand.swift
++++ b/Subscribers/Subscribers.Demand.swift
+@@ -21,18 +21,18 @@
+                           Codable,
+                           CustomStringConvertible
+     {
+-        @usableFromInline
++        
+         internal let rawValue: UInt
+ 
+         @inline(__always)
+-        @inlinable
++        
+         internal init(rawValue: UInt) {
+             self.rawValue = min(UInt(Int.max) + 1, rawValue)
+         }
+ 
+         /// A request for as many values as the publisher can produce.
+         @inline(__always)
+-        @inlinable
++        
+         public static var unlimited: Demand {
+             return Demand(rawValue: .max)
+         }
+@@ -41,7 +41,7 @@
+         ///
+         /// This is equivalent to `Demand.max(0)`.
+         @inline(__always)
+-        @inlinable
++        
+         public static var none: Demand { return .max(0) }
+ 
+         /// Creates a demand for the given maximum number of elements.
+@@ -52,7 +52,7 @@
+         /// - Parameter value: The maximum number of elements. Providing a negative value
+         /// for this parameter results in a fatal error.
+         @inline(__always)
+-        @inlinable
++        
+         public static func max(_ value: Int) -> Demand {
+             precondition(value >= 0, "demand cannot be negative")
+             return Demand(rawValue: UInt(value))
+@@ -69,7 +69,7 @@
+         /// Returns the result of adding two demands.
+         /// When adding any value to `.unlimited`, the result is `.unlimited`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func + (lhs: Demand, rhs: Demand) -> Demand {
+             switch (lhs, rhs) {
+             case (.unlimited, _):
+@@ -86,7 +86,7 @@
+         /// Adds two demands, and assigns the result to the first demand.
+         /// When adding any value to `.unlimited`, the result is `.unlimited`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func += (lhs: inout Demand, rhs: Demand) {
+             if lhs == .unlimited { return }
+             lhs = lhs + rhs
+@@ -95,7 +95,7 @@
+         /// Returns the result of adding an integer to a demand.
+         /// When adding any value to` .unlimited`, the result is `.unlimited`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func + (lhs: Demand, rhs: Int) -> Demand {
+             if lhs == .unlimited {
+                 return .unlimited
+@@ -107,7 +107,7 @@
+         /// Adds an integer to a demand, and assigns the result to the demand.
+         /// When adding any value to `.unlimited`, the result is `.unlimited`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func += (lhs: inout Demand, rhs: Int) {
+             lhs = lhs + rhs
+         }
+@@ -128,7 +128,7 @@
+         /// When multiplying any value by `.unlimited`, the result is `.unlimited`. If
+         /// the multiplication operation overflows, the result is `.unlimited`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func *= (lhs: inout Demand, rhs: Int) {
+             lhs = lhs * rhs
+         }
+@@ -139,7 +139,7 @@
+         /// (except `.unlimited`) results in `.max(0)`. A negative demand is not possible;
+         /// any operation that would result in a negative value is clamped to `.max(0)`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func - (lhs: Demand, rhs: Demand) -> Demand {
+             switch (lhs, rhs) {
+             case (.unlimited, _):
+@@ -160,7 +160,7 @@
+         /// any operation that would result in a negative value is clamped to `.max(0)`.
+         /// but be aware that it is not usable when requesting values in a subscription.
+         @inline(__always)
+-        @inlinable
++        
+         public static func -= (lhs: inout Demand, rhs: Demand) {
+             lhs = lhs - rhs
+         }
+@@ -171,7 +171,7 @@
+         /// A negative demand is not possible; any operation that would result in
+         /// a negative value is clamped to `.max(0)`
+         @inline(__always)
+-        @inlinable
++        
+         public static func - (lhs: Demand, rhs: Int) -> Demand {
+             if lhs == .unlimited {
+                 return .unlimited
+@@ -188,7 +188,7 @@
+         /// A negative demand is not possible; any operation that would result in
+         /// a negative value is clamped to `.max(0)`
+         @inline(__always)
+-        @inlinable
++        
+         public static func -= (lhs: inout Demand, rhs: Int) {
+             if lhs == .unlimited { return }
+             lhs = lhs - rhs
+@@ -199,7 +199,7 @@
+         /// If `lhs` is `.unlimited`, then the result is always `true`.
+         /// Otherwise, the operator compares the demand’s `max` value to `rhs`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func > (lhs: Demand, rhs: Int) -> Bool {
+             if lhs == .unlimited {
+                 return true
+@@ -213,7 +213,7 @@
+         /// If `lhs` is `.unlimited`, then the result is always `true`.
+         /// Otherwise, the operator compares the demand’s `max` value to `rhs`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func >= (lhs: Demand, rhs: Int) -> Bool {
+             if lhs == .unlimited {
+                 return true
+@@ -227,7 +227,7 @@
+         /// If `rhs` is `.unlimited`, then the result is always `false`.
+         /// Otherwise, the operator compares the demand’s `max` value to `lhs`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func > (lhs: Int, rhs: Demand) -> Bool {
+             if rhs == .unlimited {
+                 return false
+@@ -241,7 +241,7 @@
+         /// If `rhs` is `.unlimited`, then the result is always `false`.
+         /// Otherwise, the operator compares the demand’s `max` value to `lhs`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func >= (lhs: Int, rhs: Demand) -> Bool {
+             if rhs == .unlimited {
+                 return false
+@@ -255,7 +255,7 @@
+         /// If `lhs` is `.unlimited`, then the result is always `false`.
+         /// Otherwise, the operator compares the demand’s `max` value to `rhs`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func < (lhs: Demand, rhs: Int) -> Bool {
+             if lhs == .unlimited {
+                 return false
+@@ -269,7 +269,7 @@
+         /// If `rhs` is `.unlimited`, then the result is always `true`.
+         /// Otherwise, the operator compares the demand’s `max` value to `lhs`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func < (lhs: Int, rhs: Demand) -> Bool {
+             if rhs == .unlimited {
+                 return true
+@@ -283,7 +283,7 @@
+         /// If `lhs` is `.unlimited`, then the result is always `false`.
+         /// Otherwise, the operator compares the demand’s `max` value to `rhs`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func <= (lhs: Demand, rhs: Int) -> Bool {
+             if lhs == .unlimited {
+                 return false
+@@ -297,7 +297,7 @@
+         /// If `rhs` is `.unlimited`, then the result is always `true`.
+         /// Otherwise, the operator compares the demand’s `max` value to `lhs`.
+         @inline(__always)
+-        @inlinable
++        
+         public static func <= (lhs: Int, rhs: Demand) -> Bool {
+             if rhs == .unlimited {
+                 return true
+@@ -313,7 +313,7 @@
+         /// If `rhs` is `.unlimited`, then the result is always `true`.
+         /// Otherwise, this operator compares the demands’ `max` values.
+         @inline(__always)
+-        @inlinable
++        
+         public static func < (lhs: Demand, rhs: Demand) -> Bool {
+             switch (lhs, rhs) {
+             case (.unlimited, _):
+@@ -332,7 +332,7 @@
+         /// If `rhs` is `.unlimited` then the result is always `true`.
+         /// Otherwise, this operator compares the demands’ `max` values.
+         @inline(__always)
+-        @inlinable
++        
+         public static func <= (lhs: Demand, rhs: Demand) -> Bool {
+             switch (lhs, rhs) {
+             case (.unlimited, .unlimited):
+@@ -353,7 +353,7 @@
+         /// If rhs is `.unlimited` then the result is always `false`.
+         /// Otherwise, this operator compares the demands’ `max` values.
+         @inline(__always)
+-        @inlinable
++        
+         public static func >= (lhs: Demand, rhs: Demand) -> Bool {
+             switch (lhs, rhs) {
+             case (.unlimited, .unlimited):
+@@ -374,7 +374,7 @@
+         /// If `rhs` is `.unlimited` then the result is always `false`.
+         /// Otherwise, this operator compares the demands’ `max` values.
+         @inline(__always)
+-        @inlinable
++        
+         public static func > (lhs: Demand, rhs: Demand) -> Bool {
+             switch (lhs, rhs) {
+             case (.unlimited, .unlimited):
+@@ -392,7 +392,7 @@
+         /// of elements.
+         /// An `.unlimited` demand doesn’t match any integer.
+         @inline(__always)
+-        @inlinable
++        
+         public static func == (lhs: Demand, rhs: Int) -> Bool {
+             if lhs == .unlimited {
+                 return false
+@@ -404,7 +404,7 @@
+         /// Returns a Boolean value indicating whether a demand is not equal to
+         /// an integer.
+         /// The `.unlimited` value isn’t equal to any integer.
+-        @inlinable
++        
+         public static func != (lhs: Demand, rhs: Int) -> Bool {
+             if lhs == .unlimited {
+                 return true
+@@ -416,7 +416,7 @@
+         /// Returns a Boolean value indicating whether a given number of elements matches
+         /// the request of a given demand.
+         /// An `.unlimited` demand doesn’t match any integer.
+-        @inlinable
++        
+         public static func == (lhs: Int, rhs: Demand) -> Bool {
+             if rhs == .unlimited {
+                 return false
+@@ -428,7 +428,7 @@
+         /// Returns a Boolean value indicating whether an integer is not equal to
+         /// a demand.
+         /// The `.unlimited` value isn’t equal to any integer.
+-        @inlinable
++        
+         public static func != (lhs: Int, rhs: Demand) -> Bool {
+             if rhs == .unlimited {
+                 return true
+@@ -437,7 +437,7 @@
+             }
+         }
+ 
+-        @inlinable
++        
+         public static func == (lhs: Demand, rhs: Demand) -> Bool {
+             return lhs.rawValue == rhs.rawValue
+         }
+@@ -445,7 +445,7 @@
+         /// The number of requested values.
+         ///
+         /// The value is `nil` if the demand is `Subscribers.Demand.unlimited`.
+-        @inlinable public var max: Int? {
++        public var max: Int? {
+             if self == .unlimited {
+                 return nil
+             } else {

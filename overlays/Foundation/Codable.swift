@@ -11,10 +11,10 @@
 //===----------------------------------------------------------------------===//
 
 // From release/5.4 stdlib/public/Darwin/Foundation/Codable.swift.
-// Darling: there is no Combine overlay, so the TopLevelEncoder/TopLevelDecoder conformances are left out, and
-// _typeDescription also describes the JSON box for integers above Int64.max as a number.
+// Darling: _typeDescription also describes the JSON box for integers above Int64.max as a number.
 
 @_exported import Foundation // Clang module
+import Combine
 
 //===----------------------------------------------------------------------===//
 // Errors
@@ -92,3 +92,19 @@ internal func _exactly<T : BinaryInteger>(_ number: NSNumber, as type: T.Type) -
         return T(exactly: number.longLongValue())
     }
 }
+
+//===----------------------------------------------------------------------===//
+// Combine: the coders as TopLevelEncoder and TopLevelDecoder
+//===----------------------------------------------------------------------===//
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension JSONEncoder: TopLevelEncoder { }
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension PropertyListEncoder: TopLevelEncoder { }
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension JSONDecoder: TopLevelDecoder { }
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension PropertyListDecoder: TopLevelDecoder { }

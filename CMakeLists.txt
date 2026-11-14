@@ -59,6 +59,9 @@ if (SWIFT_TOOLCHAIN_FOUND)
 		LIBRARIES CoreGraphics)
 	reexport(swiftCoreGraphics swiftCoreFoundation "${CMAKE_CURRENT_BINARY_DIR}/libswiftCoreFoundation.dylib")
 
+	# Combine.framework, built from OpenCombine. Foundation's publishers and schedulers import it, as on macOS.
+	include(overlays/Combine/combine.cmake)
+
 	# Foundation. AttributedString keeps its text in swift-collections' BigString, so two of that project's modules
 	# (overlays/Collections) are compiled without library evolution and linked into libswiftFoundation.dylib, which
 	# keeps their symbols out of its export table.
@@ -72,6 +75,8 @@ if (SWIFT_TOOLCHAIN_FOUND)
 	add_darling_swift_library(Foundation
 		SOURCES ${FOUNDATION_SOURCES}
 		MODULES _RopeModule InternalCollectionsUtilities CoreGraphics os XPC CoreFoundation Dispatch ObjectiveC Darwin
+		# Combine is linked weakly, as on macOS: a program that never uses its publishers does not need it.
+		WEAK_MODULES Combine
 		FLAGS ${overlay_shims} -package-name swift-foundation
 			# Foundation's NSAppleEventDescriptor.h includes <AE/AE.h>, which the SDK does not expose by itself yet.
 			-Xcc -I${DARLING_TOP_DIRECTORY}/src/frameworks/CoreServices/include
