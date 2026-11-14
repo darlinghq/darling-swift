@@ -1,6 +1,7 @@
 // Exercises the Combine framework under Darling: that publishers actually publish, not just that
 // the framework loads. The @Published/objectWillChange cases are the surface apps bind most.
 import Combine
+import Darwin
 
 var failures = 0
 func check(_ condition: Bool, _ label: String) {
@@ -88,3 +89,4 @@ Fail<Int, TestError>(error: .boom)
 check(failureSeen && !valueAfterFailure, "Fail delivers a failure completion")
 
 print(failures == 0 ? "ALL PASSED" : "\(failures) FAILED")
+exit(failures == 0 ? 0 : 1)
