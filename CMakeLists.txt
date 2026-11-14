@@ -68,14 +68,42 @@ if (SWIFT_TOOLCHAIN_FOUND)
 	add_darling_swift_object(_RopeModule SOURCES ${ROPE_SOURCES} MODULES InternalCollectionsUtilities)
 	file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/foundation-unexported.txt"
 		"_$s*11_RopeModule*\n_$s*28InternalCollectionsUtilities*\n")
+	# The rest of Foundation's Swift API (AttributedString, the format styles and parse strategies) is
+	# apple/swift-foundation at the tag in swift-foundation-sources.cmake. Its files are compiled from a checkout of
+	# that repository, next to the overlay's own sources in overlays/Foundation, which carry the files that had to
+	# change and the Darling-specific ones (DARLING-CHANGES.md). The Markdown parser is swift-cmark, compiled into the
+	# overlay with hidden visibility so that none of its symbols is exported.
+	set(SWIFT_FOUNDATION_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../swift-foundation" CACHE PATH
+		"Checkout of apple/swift-foundation at the tag swift-6.3.3-RELEASE")
+	set(SWIFT_CMARK_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../swift-cmark" CACHE PATH
+		"Checkout of swiftlang/swift-cmark at the tag swift-6.3.3-RELEASE")
+	foreach(checkout SWIFT_FOUNDATION_SOURCE_DIR SWIFT_CMARK_SOURCE_DIR)
+		if (NOT EXISTS "${${checkout}}/Package.swift")
+			message(FATAL_ERROR "${checkout} (${${checkout}}) is not a checkout: fetch the submodules "
+				"(git submodule update --init) or point ${checkout} at one")
+		endif()
+	endforeach()
+	include(overlays/swift-foundation-sources.cmake)
+	set(FOUNDATION_UPSTREAM_SOURCES)
+	foreach(file IN LISTS SWIFT_FOUNDATION_ESSENTIALS_FILES SWIFT_FOUNDATION_INTERNATIONALIZATION_FILES)
+		list(APPEND FOUNDATION_UPSTREAM_SOURCES "${SWIFT_FOUNDATION_SOURCE_DIR}/Sources/${file}")
+	endforeach()
+	file(GLOB CMARK_SOURCES "${SWIFT_CMARK_SOURCE_DIR}/src/*.c" "${SWIFT_CMARK_SOURCE_DIR}/extensions/*.c")
+	set(cmark_includes_0 "${SWIFT_CMARK_SOURCE_DIR}/src/include")
+	set(cmark_includes_1 "${SWIFT_CMARK_SOURCE_DIR}/extensions/include")
+
 	file(GLOB FOUNDATION_SOURCES "${OVERLAYS}/Foundation/*.swift")
 	add_darling_swift_library(Foundation
-		SOURCES ${FOUNDATION_SOURCES}
+		SOURCES ${FOUNDATION_SOURCES} ${FOUNDATION_UPSTREAM_SOURCES}
 		MODULES _RopeModule InternalCollectionsUtilities CoreGraphics os XPC CoreFoundation Dispatch ObjectiveC Darwin
 		FLAGS ${overlay_shims} -package-name swift-foundation
-			# Foundation's NSAppleEventDescriptor.h includes <AE/AE.h>, which the SDK does not expose by itself yet.
-			-Xcc -I${DARLING_TOP_DIRECTORY}/src/frameworks/CoreServices/include
+			-Xcc -DCMARK_GFM_STATIC_DEFINE
+			-Xcc -fmodule-map-file=${cmark_includes_0}/module.modulemap
+			-Xcc -fmodule-map-file=${cmark_includes_1}/module.modulemap
+			-Xcc -I${cmark_includes_0} -Xcc -I${cmark_includes_1}
 		OBJECTS "${_RopeModule_OBJECT}" "${InternalCollectionsUtilities_OBJECT}"
+		NATIVE_SOURCES ${CMARK_SOURCES}
+		NATIVE_FLAGS -fvisibility=hidden -DCMARK_GFM_STATIC_DEFINE -DNDEBUG -I${cmark_includes_0} -I${cmark_includes_1}
 		LINK_FLAGS -Wl,-unexported_symbols_list,${CMAKE_CURRENT_BINARY_DIR}/foundation-unexported.txt
 		LIBRARIES Foundation CoreFoundation icucore)
 	set_property(TARGET swiftFoundation APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/foundation-unexported.txt")
