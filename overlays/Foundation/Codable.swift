@@ -76,7 +76,7 @@ internal let _kCFNumberSInt128Type = CFNumberType(rawValue: 17)!
 
 /// The number's value as `T`, if it is exactly representable.
 internal func _exactly<T : BinaryInteger>(_ number: NSNumber, as type: T.Type) -> T? {
-    switch number.objCType().map({ String(cString: $0) }) ?? "" {
+    switch String(cString: number.objCType) {
     case "f", "d":
         return T(exactly: number.doubleValue())
     case "Q", "":

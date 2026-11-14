@@ -537,7 +537,7 @@ extension Float : _ObjectiveCBridgeable {
 
     public init?(exactly number: __shared NSNumber) {
         // Unsigned ('I', 'L', 'Q') and signed ('i', 'l', 'q') integer encodings are checked through 64-bit values.
-        let type = number.objCType().pointee
+        let type = number.objCType.pointee
         if type == 0x49 || type == 0x4c || type == 0x51 {
             guard let result = Float(exactly: number.unsignedLongLongValue()) else { return nil }
             self = result
