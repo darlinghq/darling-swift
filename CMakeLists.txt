@@ -86,6 +86,16 @@ if (SWIFT_TOOLCHAIN_FOUND)
 	set_property(TARGET swiftFoundation APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/foundation-unexported.txt")
 
 	include(overlays/sdk-frameworks.cmake)
+
+	# GroupActivities.framework: the public API shape of SharePlay's framework, answering as a device that is not
+	# in a FaceTime call (see overlays/README.md).
+	add_darling_swift_library(GroupActivities
+		FRAMEWORK
+		SOURCES "${OVERLAYS}/GroupActivities/Sources/GroupActivities.swift"
+		MODULES Combine Foundation Dispatch CoreFoundation ObjectiveC Darwin
+		FLAGS ${overlay_shims}
+			-Xcc -I${DARLING_TOP_DIRECTORY}/src/frameworks/CoreServices/include
+		LIBRARIES Foundation)
 endif()
 
 # Newer SDKs split parts of the Darwin overlay out of libswiftDarwin.dylib into
