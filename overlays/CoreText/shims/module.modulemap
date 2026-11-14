@@ -1,0 +1,4 @@
+module _DarlingCoreTextShims {
+  header "DarlingCoreTextShims.h"
+  export *
+}
