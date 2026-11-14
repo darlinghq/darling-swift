@@ -21,3 +21,12 @@ add_darling_swift_library(Compression
 	MODULES Foundation Dispatch CoreFoundation ObjectiveC Darwin
 	FLAGS ${overlay_shims}
 	LIBRARIES compression)
+
+# UniformTypeIdentifiers: UTType and UTTagClass over the framework's Objective-C UTType
+# (imported as UTTypeReference through the framework's Clang module and API notes in the SDK). Written for Darling.
+add_darling_swift_library(UniformTypeIdentifiers
+	SOURCES "${OVERLAYS}/UniformTypeIdentifiers/UniformTypeIdentifiers.swift"
+	MODULES Foundation Dispatch CoreFoundation ObjectiveC Darwin
+	WEAK_MODULES Combine
+	FLAGS ${overlay_shims}
+	LIBRARIES UniformTypeIdentifiers Foundation)

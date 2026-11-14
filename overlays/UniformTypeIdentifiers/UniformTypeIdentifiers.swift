@@ -7,8 +7,10 @@
 // and setDefaultHandler(to:completionHandler:), and the static types whose Objective-C constants Darling does not
 // export yet (css, heics, exr, dng, jpegxl, tarArchive, ahap, geoJSON, linkPresentationMetadata).
 
+// The framework's Clang module: UTTypeReference (Darling's Objective-C UTType under its Swift name) and the UTType*
+// constants. Re-exported so that clients need no module map of their own.
+@_exported import UniformTypeIdentifiers
 import Foundation
-import _DarlingUniformTypeIdentifiersShims
 
 public struct UTType: @unchecked Sendable {
 	internal let _reference: UTTypeReference
@@ -20,7 +22,7 @@ public struct UTType: @unchecked Sendable {
 
 extension UTType {
 	public init?(_ identifier: String) {
-		guard let reference = UTTypeReference(identifier: identifier) else { return nil }
+		guard let reference = UTTypeReference(identifier) else { return nil }
 		self.init(_reference: reference)
 	}
 
@@ -42,7 +44,7 @@ extension UTType {
 	public var referenceURL: URL? { _reference.referenceURL.map { $0 as URL } }
 	public var isDynamic: Bool { _reference.isDynamic }
 	public var isDeclared: Bool { _reference.isDeclared }
-	public var isPublic: Bool { _reference.isPublicType }
+	public var isPublic: Bool { _reference.isPublic }
 }
 
 extension UTType {
@@ -62,7 +64,7 @@ extension UTType {
 	}
 
 	public static func types(tag: String, tagClass: UTTagClass, conformingTo supertype: UTType?) -> [UTType] {
-		UTTypeReference.types(withTag: tag, tagClass: tagClass.rawValue, conformingTo: supertype?._reference).map { UTType(_reference: $0) }
+		UTTypeReference.types(tag: tag, tagClass: tagClass.rawValue, conformingTo: supertype?._reference).map { UTType(_reference: $0) }
 	}
 
 	public var tags: [UTTagClass: [String]] {
@@ -77,17 +79,17 @@ extension UTType {
 extension UTType {
 	public init(exportedAs identifier: String, conformingTo parentType: UTType? = nil) {
 		if let parentType {
-			self.init(_reference: UTTypeReference.exportedType(withIdentifier: identifier, conformingTo: parentType._reference))
+			self.init(_reference: UTTypeReference(exportedAs: identifier, conformingTo: parentType._reference))
 		} else {
-			self.init(_reference: UTTypeReference.exportedType(withIdentifier: identifier))
+			self.init(_reference: UTTypeReference(exportedAs: identifier))
 		}
 	}
 
 	public init(importedAs identifier: String, conformingTo parentType: UTType? = nil) {
 		if let parentType {
-			self.init(_reference: UTTypeReference.importedType(withIdentifier: identifier, conformingTo: parentType._reference))
+			self.init(_reference: UTTypeReference(importedAs: identifier, conformingTo: parentType._reference))
 		} else {
-			self.init(_reference: UTTypeReference.importedType(withIdentifier: identifier))
+			self.init(_reference: UTTypeReference(importedAs: identifier))
 		}
 	}
 }

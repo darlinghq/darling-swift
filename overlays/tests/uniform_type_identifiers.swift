@@ -10,7 +10,7 @@ func check(_ ok: Bool, _ what: String) {
 	if !ok { failures += 1 }
 }
 
-// The symbols AppZapper 3000 binds to.
+// UTType.folder and its bridging to the Objective-C type.
 check(UTType.folder.identifier == "public.folder", "UTType.folder is public.folder")
 check(UTType.folder.conforms(to: .directory) && UTType.folder.conforms(to: .item), "folder conforms to directory and item")
 check(!UTType.folder.conforms(to: .data), "folder does not conform to data")
