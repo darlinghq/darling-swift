@@ -30,11 +30,16 @@ if (SWIFT_TOOLCHAIN_FOUND)
 		FLAGS ${overlay_shims}
 		LIBRARIES CoreFoundation)
 
+	# Combine.framework, built from OpenCombine. The Dispatch and Foundation overlays import it (DispatchQueue's and the
+	# Foundation schedulers and publishers), as on macOS, and link it weakly.
+	include(overlays/Combine/combine.cmake)
+
 	# OS_OBJECT_SWIFT3 makes the dispatch headers declare the OS_dispatch_source_* protocols, as when Swift imports them.
 	file(GLOB DISPATCH_SOURCES "${OVERLAYS}/Dispatch/*.swift")
 	add_darling_swift_library(Dispatch
 		SOURCES ${DISPATCH_SOURCES}
 		MODULES ObjectiveC Darwin
+		WEAK_MODULES Combine
 		FLAGS ${overlay_shims}
 		NATIVE_SOURCES "${OVERLAYS}/Dispatch/Dispatch.mm"
 		NATIVE_FLAGS -std=c++17 -fobjc-arc -DOS_OBJECT_SWIFT3=1 -I${OVERLAYS}/Dispatch/include)
@@ -58,9 +63,6 @@ if (SWIFT_TOOLCHAIN_FOUND)
 		FLAGS ${overlay_shims}
 		LIBRARIES CoreGraphics)
 	reexport(swiftCoreGraphics swiftCoreFoundation "${CMAKE_CURRENT_BINARY_DIR}/libswiftCoreFoundation.dylib")
-
-	# Combine.framework, built from OpenCombine. Foundation's publishers and schedulers import it, as on macOS.
-	include(overlays/Combine/combine.cmake)
 
 	# Foundation. AttributedString keeps its text in swift-collections' BigString, so two of that project's modules
 	# (overlays/Collections) are compiled without library evolution and linked into libswiftFoundation.dylib, which
