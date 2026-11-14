@@ -42,3 +42,13 @@ add_darling_swift_library(UniformTypeIdentifiers
 	WEAK_MODULES Combine
 	FLAGS ${overlay_shims}
 	LIBRARIES UniformTypeIdentifiers Foundation)
+
+# Network: NWConnection, NWListener, NWPath and the other Swift types over the nw_* C API of libnetwork. It imports the
+# shim module _SwiftNetworkOverlayShims (overlays/shims/NetworkOverlayShims.h, part of ${overlay_shims}) and needs the
+# SDK's Network Clang module.
+file(GLOB NETWORK_SOURCES "${OVERLAYS}/Network/*.swift")
+add_darling_swift_library(Network
+	SOURCES ${NETWORK_SOURCES}
+	MODULES Foundation Dispatch CoreFoundation ObjectiveC Darwin
+	FLAGS ${overlay_shims}
+	LIBRARIES Network)
