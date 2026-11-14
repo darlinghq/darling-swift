@@ -55,5 +55,26 @@ Publishers.MergeMany([AnyPublisher<Int, Never>]())
     .store(in: &cancellables)
 check(noneFinished && none == 0, "MergeMany of no publishers finishes at once")
 
+// Merge3 to Merge8: the merge(with:) overloads for up to seven further publishers of the same output and failure.
+let s1 = PassthroughSubject<Int, Never>(), s2 = PassthroughSubject<Int, Never>(), s3 = PassthroughSubject<Int, Never>()
+let s4 = PassthroughSubject<Int, Never>(), s5 = PassthroughSubject<Int, Never>(), s6 = PassthroughSubject<Int, Never>()
+let s7 = PassthroughSubject<Int, Never>(), s8 = PassthroughSubject<Int, Never>()
+var m3: [Int] = [], m8: [Int] = []
+var m3Done = false, m8Done = false
+let merged3: Publishers.Merge3<PassthroughSubject<Int, Never>, PassthroughSubject<Int, Never>, PassthroughSubject<Int, Never>> =
+    s1.merge(with: s2, s3)
+merged3.sink(receiveCompletion: { _ in m3Done = true }, receiveValue: { m3.append($0) }).store(in: &cancellables)
+let merged8 = s1.merge(with: s2, s3, s4, s5, s6, s7, s8)
+merged8.sink(receiveCompletion: { _ in m8Done = true }, receiveValue: { m8.append($0) }).store(in: &cancellables)
+s3.send(1)
+s1.send(2)
+s8.send(3)
+check(m3 == [1, 2], "Merge3 delivers its three upstreams (\(m3))")
+check(m8 == [1, 2, 3], "Merge8 delivers its eight upstreams (\(m8))")
+for s in [s1, s2, s3] { s.send(completion: .finished) }
+check(m3Done && !m8Done, "Merge3 finishes after its three upstreams, Merge8 still waits")
+for s in [s4, s5, s6, s7, s8] { s.send(completion: .finished) }
+check(m8Done, "Merge8 finishes after all eight upstreams")
+
 print(failures == 0 ? "ALL PASSED" : "\(failures) FAILED")
 exit(failures == 0 ? 0 : 1)
