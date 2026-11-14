@@ -60,6 +60,14 @@ extension CGSize: Equatable {
     }
 }
 
+// Apple documents CGSize as Hashable. Consistent with ==: CGFloat hashes -0 and +0 alike.
+extension CGSize: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(width)
+        hasher.combine(height)
+    }
+}
+
 extension CGRect {
     public static var zero: CGRect {
         return CGRect(origin: CGPoint(), size: CGSize())
