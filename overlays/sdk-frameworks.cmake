@@ -21,3 +21,15 @@ add_darling_swift_library(Compression
 	MODULES Foundation Dispatch CoreFoundation ObjectiveC Darwin
 	FLAGS ${overlay_shims}
 	LIBRARIES compression)
+
+# CoreText: AttributedString.AdaptiveImageGlyph and the CTAdaptiveImageGlyph conversions, written for Darling from the
+# documented API. The CoreText Clang module comes from the SDK; the private CTAdaptiveImageGlyph class is declared by
+# overlays/CoreText/shims. The conversion has package access (exported under its macOS mangled name), hence
+# -package-name.
+add_darling_swift_library(CoreText
+	SOURCES "${OVERLAYS}/CoreText/CoreText.swift"
+	MODULES Foundation CoreGraphics Dispatch CoreFoundation ObjectiveC Darwin
+	WEAK_MODULES Combine
+	FLAGS ${overlay_shims} -package-name swift-coretext
+		-Xcc -fmodule-map-file=${OVERLAYS}/CoreText/shims/module.modulemap
+	LIBRARIES CoreText Foundation)

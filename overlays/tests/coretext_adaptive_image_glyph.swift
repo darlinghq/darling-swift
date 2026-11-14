@@ -1,6 +1,6 @@
-// CoreText overlay: AttributedString.AdaptiveImageGlyph storage, equality, hashing and Codable, and the conversion
-// to CTAdaptiveImageGlyph called through the mangled name OpenSwiftUI binds. Exits non-zero on failure. With
-// `contentIdentifier`, `contentDescription` or `contentType` as its argument it reads that member instead, which must trap.
+// CoreText overlay: AttributedString.AdaptiveImageGlyph storage, equality, hashing and Codable, and the conversions
+// to and from CTAdaptiveImageGlyph, called through their mangled names as a client that declares them itself does.
+// Exits non-zero on failure.
 
 import CoreText
 import Foundation
@@ -17,14 +17,11 @@ extension CTAdaptiveImageGlyph {
 	static func convertingFromMangledName(_ adaptiveImageGlyph: AttributedString.AdaptiveImageGlyph) -> CTAdaptiveImageGlyph
 }
 
+@_silgen_name("$s10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV15_convertingFromAFSo010CTAdaptivegH0C_tcfC")
+func adaptiveImageGlyph(convertingFrom glyph: CTAdaptiveImageGlyph) -> AttributedString.AdaptiveImageGlyph
+
 let content = Data([0, 0, 0, 0x18] + Array("ftypheic".utf8))
 let glyph = AttributedString.AdaptiveImageGlyph(imageContent: content)
-switch CommandLine.arguments.dropFirst().first {
-case "contentIdentifier": print(glyph.contentIdentifier); exit(0)
-case "contentDescription": print(glyph.contentDescription); exit(0)
-case "contentType": print(AttributedString.AdaptiveImageGlyph.contentType); exit(0)
-default: break
-}
 check(glyph.imageContent == content, "image content round trip")
 check(glyph == AttributedString.AdaptiveImageGlyph(imageContent: content), "equal content, equal glyphs")
 check(glyph.hashValue == AttributedString.AdaptiveImageGlyph(imageContent: content).hashValue, "equal content, equal hashes")
@@ -45,5 +42,6 @@ let ctGlyph = CTAdaptiveImageGlyph.convertingFromMangledName(glyph)
 check(ctGlyph.imageContent == content, "conversion to CTAdaptiveImageGlyph keeps the content")
 check(ctGlyph.conforms(to: CTAdaptiveImageProviding.self), "CTAdaptiveImageGlyph provides adaptive images")
 check(ctGlyph.isEqual(CTAdaptiveImageGlyph.convertingFromMangledName(glyph)), "conversions of equal glyphs are equal")
+check(adaptiveImageGlyph(convertingFrom: ctGlyph) == glyph, "converting back from CTAdaptiveImageGlyph keeps the content")
 
 exit(failures == 0 ? 0 : 1)
