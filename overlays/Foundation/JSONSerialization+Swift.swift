@@ -99,7 +99,7 @@ internal enum _JSONSerialization {
                 append("false")
                 return
             }
-            switch number.objCType().map({ String(cString: $0) }) ?? "" {
+            switch String(cString: number.objCType) {
             case "f":
                 let float = number.floatValue()
                 guard float.isFinite else {

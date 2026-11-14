@@ -119,10 +119,30 @@ public struct URLRequest : ReferenceConvertible, Equatable, Hashable {
     @available(macOS 10.8, iOS 6.0, *)
     public var allowsCellularAccess: Bool {
         get {
-            return _handle.map { $0.allowsCellularAccess() }
+            return _handle.map { $0.allowsCellularAccess }
         }
         set {
-            _applyMutation { $0.setAllowsCellularAccess(newValue) }
+            _applyMutation { $0.allowsCellularAccess = newValue }
+        }
+    }
+
+    /// `true` if the request may use expensive network paths; the default is `true`.
+    public var allowsExpensiveNetworkAccess: Bool {
+        get {
+            return _handle.map { $0.allowsExpensiveNetworkAccess }
+        }
+        set {
+            _applyMutation { $0.allowsExpensiveNetworkAccess = newValue }
+        }
+    }
+
+    /// `true` if the request may use constrained network paths; the default is `true`.
+    public var allowsConstrainedNetworkAccess: Bool {
+        get {
+            return _handle.map { $0.allowsConstrainedNetworkAccess }
+        }
+        set {
+            _applyMutation { $0.allowsConstrainedNetworkAccess = newValue }
         }
     }
 

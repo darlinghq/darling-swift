@@ -25,7 +25,7 @@ extension NSRange: _ObjectiveCBridgeable {
 
   public static func _forceBridgeFromObjectiveC(_ source: NSValue,
                                                 result: inout NSRange?) {
-    precondition(strcmp(source.objCType(),
+    precondition(strcmp(source.objCType,
                         _getObjCTypeEncoding(NSRange.self)) == 0,
                  "NSValue does not contain the right type to bridge to NSRange")
     result = NSRange()
@@ -35,7 +35,7 @@ extension NSRange: _ObjectiveCBridgeable {
   public static func _conditionallyBridgeFromObjectiveC(_ source: NSValue,
                                                         result: inout NSRange?)
       -> Bool {
-    if strcmp(source.objCType(), _getObjCTypeEncoding(NSRange.self)) != 0 {
+    if strcmp(source.objCType, _getObjCTypeEncoding(NSRange.self)) != 0 {
       result = nil
       return false
     }
@@ -47,7 +47,7 @@ extension NSRange: _ObjectiveCBridgeable {
   public static func _unconditionallyBridgeFromObjectiveC(_ source: NSValue?)
       -> NSRange {
     let unwrappedSource = source!
-    precondition(strcmp(unwrappedSource.objCType(),
+    precondition(strcmp(unwrappedSource.objCType,
                         _getObjCTypeEncoding(NSRange.self)) == 0,
                  "NSValue does not contain the right type to bridge to NSRange")
     var result = NSRange()
@@ -65,7 +65,7 @@ extension CGRect: _ObjectiveCBridgeable {
 
   public static func _forceBridgeFromObjectiveC(_ source: NSValue,
                                                 result: inout CGRect?) {
-    precondition(strcmp(source.objCType(),
+    precondition(strcmp(source.objCType,
                         _getObjCTypeEncoding(CGRect.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGRect")
     result = CGRect()
@@ -75,7 +75,7 @@ extension CGRect: _ObjectiveCBridgeable {
   public static func _conditionallyBridgeFromObjectiveC(_ source: NSValue,
                                                         result: inout CGRect?)
       -> Bool {
-    if strcmp(source.objCType(), _getObjCTypeEncoding(CGRect.self)) != 0 {
+    if strcmp(source.objCType, _getObjCTypeEncoding(CGRect.self)) != 0 {
       result = nil
       return false
     }
@@ -87,7 +87,7 @@ extension CGRect: _ObjectiveCBridgeable {
   public static func _unconditionallyBridgeFromObjectiveC(_ source: NSValue?)
       -> CGRect {
     let unwrappedSource = source!
-    precondition(strcmp(unwrappedSource.objCType(),
+    precondition(strcmp(unwrappedSource.objCType,
                         _getObjCTypeEncoding(CGRect.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGRect")
     var result = CGRect()
@@ -105,7 +105,7 @@ extension CGPoint: _ObjectiveCBridgeable {
 
   public static func _forceBridgeFromObjectiveC(_ source: NSValue,
                                                 result: inout CGPoint?) {
-    precondition(strcmp(source.objCType(),
+    precondition(strcmp(source.objCType,
                         _getObjCTypeEncoding(CGPoint.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGPoint")
     result = CGPoint()
@@ -115,7 +115,7 @@ extension CGPoint: _ObjectiveCBridgeable {
   public static func _conditionallyBridgeFromObjectiveC(_ source: NSValue,
                                                         result: inout CGPoint?)
       -> Bool {
-    if strcmp(source.objCType(), _getObjCTypeEncoding(CGPoint.self)) != 0 {
+    if strcmp(source.objCType, _getObjCTypeEncoding(CGPoint.self)) != 0 {
       result = nil
       return false
     }
@@ -127,7 +127,7 @@ extension CGPoint: _ObjectiveCBridgeable {
   public static func _unconditionallyBridgeFromObjectiveC(_ source: NSValue?)
       -> CGPoint {
     let unwrappedSource = source!
-    precondition(strcmp(unwrappedSource.objCType(),
+    precondition(strcmp(unwrappedSource.objCType,
                         _getObjCTypeEncoding(CGPoint.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGPoint")
     var result = CGPoint()
@@ -145,7 +145,7 @@ extension CGVector: _ObjectiveCBridgeable {
 
   public static func _forceBridgeFromObjectiveC(_ source: NSValue,
                                                 result: inout CGVector?) {
-    precondition(strcmp(source.objCType(),
+    precondition(strcmp(source.objCType,
                         _getObjCTypeEncoding(CGVector.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGVector")
     result = CGVector()
@@ -155,7 +155,7 @@ extension CGVector: _ObjectiveCBridgeable {
   public static func _conditionallyBridgeFromObjectiveC(_ source: NSValue,
                                                         result: inout CGVector?)
       -> Bool {
-    if strcmp(source.objCType(), _getObjCTypeEncoding(CGVector.self)) != 0 {
+    if strcmp(source.objCType, _getObjCTypeEncoding(CGVector.self)) != 0 {
       result = nil
       return false
     }
@@ -167,7 +167,7 @@ extension CGVector: _ObjectiveCBridgeable {
   public static func _unconditionallyBridgeFromObjectiveC(_ source: NSValue?)
       -> CGVector {
     let unwrappedSource = source!
-    precondition(strcmp(unwrappedSource.objCType(),
+    precondition(strcmp(unwrappedSource.objCType,
                         _getObjCTypeEncoding(CGVector.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGVector")
     var result = CGVector()
@@ -185,7 +185,7 @@ extension CGSize: _ObjectiveCBridgeable {
 
   public static func _forceBridgeFromObjectiveC(_ source: NSValue,
                                                 result: inout CGSize?) {
-    precondition(strcmp(source.objCType(),
+    precondition(strcmp(source.objCType,
                         _getObjCTypeEncoding(CGSize.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGSize")
     result = CGSize()
@@ -195,7 +195,7 @@ extension CGSize: _ObjectiveCBridgeable {
   public static func _conditionallyBridgeFromObjectiveC(_ source: NSValue,
                                                         result: inout CGSize?)
       -> Bool {
-    if strcmp(source.objCType(), _getObjCTypeEncoding(CGSize.self)) != 0 {
+    if strcmp(source.objCType, _getObjCTypeEncoding(CGSize.self)) != 0 {
       result = nil
       return false
     }
@@ -207,7 +207,7 @@ extension CGSize: _ObjectiveCBridgeable {
   public static func _unconditionallyBridgeFromObjectiveC(_ source: NSValue?)
       -> CGSize {
     let unwrappedSource = source!
-    precondition(strcmp(unwrappedSource.objCType(),
+    precondition(strcmp(unwrappedSource.objCType,
                         _getObjCTypeEncoding(CGSize.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGSize")
     var result = CGSize()
@@ -225,7 +225,7 @@ extension CGAffineTransform: _ObjectiveCBridgeable {
 
   public static func _forceBridgeFromObjectiveC(_ source: NSValue,
                                                 result: inout CGAffineTransform?) {
-    precondition(strcmp(source.objCType(),
+    precondition(strcmp(source.objCType,
                         _getObjCTypeEncoding(CGAffineTransform.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGAffineTransform")
     result = CGAffineTransform()
@@ -235,7 +235,7 @@ extension CGAffineTransform: _ObjectiveCBridgeable {
   public static func _conditionallyBridgeFromObjectiveC(_ source: NSValue,
                                                         result: inout CGAffineTransform?)
       -> Bool {
-    if strcmp(source.objCType(), _getObjCTypeEncoding(CGAffineTransform.self)) != 0 {
+    if strcmp(source.objCType, _getObjCTypeEncoding(CGAffineTransform.self)) != 0 {
       result = nil
       return false
     }
@@ -247,7 +247,7 @@ extension CGAffineTransform: _ObjectiveCBridgeable {
   public static func _unconditionallyBridgeFromObjectiveC(_ source: NSValue?)
       -> CGAffineTransform {
     let unwrappedSource = source!
-    precondition(strcmp(unwrappedSource.objCType(),
+    precondition(strcmp(unwrappedSource.objCType,
                         _getObjCTypeEncoding(CGAffineTransform.self)) == 0,
                  "NSValue does not contain the right type to bridge to CGAffineTransform")
     var result = CGAffineTransform()
@@ -261,7 +261,7 @@ extension NSValue {
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     public func value<StoredType>(of type: StoredType.Type) -> StoredType? {
         if StoredType.self is AnyObject.Type {
-            let encoding = String(cString: objCType())
+            let encoding = String(cString: objCType)
             // some subclasses of NSValue can return @ and the default initialized variant returns ^v for encoding
             guard encoding == "^v" || encoding == "@" else {
                 return nil
@@ -270,7 +270,7 @@ extension NSValue {
         } else if _isPOD(StoredType.self) {
             var storedSize = 0
             var storedAlignment = 0
-            NSGetSizeAndAlignment(objCType(), &storedSize, &storedAlignment)
+            NSGetSizeAndAlignment(objCType, &storedSize, &storedAlignment)
             guard MemoryLayout<StoredType>.size == storedSize && MemoryLayout<StoredType>.alignment == storedAlignment else {
                 return nil
             }
