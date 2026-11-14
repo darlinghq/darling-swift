@@ -89,6 +89,10 @@ public struct TimeZone : Hashable, Equatable, ReferenceConvertible {
         }
     }
 
+    /// The time zone for Greenwich Mean Time, an offset of zero seconds.
+    @available(macOS 13, iOS 16, tvOS 16, watchOS 9, *)
+    public static var gmt: TimeZone { TimeZone(secondsFromGMT: 0)! }
+
     /// Returns a time zone identified by a given abbreviation.
     ///
     /// In general, you are discouraged from using abbreviations except for unique instances such as "GMT". Time Zone abbreviations are not standardized and so a given abbreviation may have multiple meanings--for example, "EST" refers to Eastern Time in both the United States and Australia

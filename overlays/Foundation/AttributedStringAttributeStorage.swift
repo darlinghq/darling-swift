@@ -33,7 +33,6 @@ extension AttributedString {
             invalidationConditions = K.invalidationConditions
         }
         
-        #if FOUNDATION_FRAMEWORK
         @inline(__always)
         private static func _unsafeAssumeSendableRawValue<T>(_ value: T) -> RawValue {
             // Perform this cast in a separate function unaware of the T: Hashable constraint to avoid compiler warnings when performing the Hashable --> Hashable & Sendable cast
@@ -46,7 +45,6 @@ extension AttributedString {
             inheritedByAddedText = K.inheritedByAddedText
             invalidationConditions = K.invalidationConditions
         }
-        #endif
 
         var isInvalidatedOnTextChange: Bool {
             invalidationConditions?.contains(.textChanged) ?? false
@@ -76,7 +74,6 @@ extension AttributedString {
             return value
         }
         
-        #if FOUNDATION_FRAMEWORK
         fileprivate func rawValueAssumingSendable<K: AttributedStringKey>(
             as key: K.Type
         ) -> K.Value {
@@ -86,7 +83,6 @@ extension AttributedString {
             }
             return value
         }
-        #endif
         
         static func ==(left: Self, right: Self) -> Bool {
             func openEquatableLHS<LeftValue: Hashable & Sendable>(_ leftValue: LeftValue) -> Bool {
@@ -221,7 +217,6 @@ extension AttributedString._AttributeStorage {
         set { self[T.name] = .wrapIfPresent(newValue, for: T.self) }
     }
     
-    #if FOUNDATION_FRAMEWORK
     /// Stores & retrieves an attribute value bypassing the T.Value : Sendable constraint
     ///
     /// In general, callers should _always_ use the subscript that contains a T.Value : Sendable constraint
@@ -238,7 +233,6 @@ extension AttributedString._AttributeStorage {
             self[T.name] = _AttributeValue(assumingSendable: newValue, for: T.self)
         }
     }
-    #endif
 
     subscript (_ attributeName: String) -> _AttributeValue? {
         get { self.contents[attributeName] }

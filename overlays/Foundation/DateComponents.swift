@@ -134,6 +134,10 @@ public struct DateComponents : ReferenceConvertible, Hashable, Equatable {
     /// Set to true if these components represent a leap month.
     public var isLeapMonth: Bool?
 
+    // Internal until Calendar.Component has a dayOfYear case; the ISO 8601 styles read and write it,
+    // and Calendar.date(from:) honours it.
+    internal var dayOfYear: Int?
+
     /// Returns a `Date` calculated from the current components using the `calendar` property.
     public var date: Date? {
         guard var calendar = calendar else { return nil }

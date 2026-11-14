@@ -48,8 +48,6 @@ extension String {
     }
 }
 
-#if FOUNDATION_FRAMEWORK
-
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 public protocol ObjectiveCConvertibleAttributedStringKey : AttributedStringKey {
     associatedtype ObjectiveCValue : NSObject
@@ -64,7 +62,7 @@ extension ObjectiveCConvertibleAttributedStringKey where Value : RawRepresentabl
         return NSNumber(value: value.rawValue)
     }
     public static func value(for object: ObjectiveCValue) throws -> Value {
-        if let val = Value(rawValue: object.intValue) {
+        if let val = Value(rawValue: Int(truncating: object)) {
             return val
         }
         throw CocoaError(.coderInvalidValue)
@@ -182,7 +180,7 @@ extension NSAttributedString {
         options: _AttributeConversionOptions = []
     ) throws {
         // FIXME: Consider making an NSString subclass backed by a BigString
-        let result = NSMutableAttributedString(string: String(attrStr._guts.string))
+        let result: NSMutableAttributedString = NSMutableAttributedString(string: String(attrStr._guts.string))
         // Iterate through each run of the source
         var nsStartIndex = 0
         var stringStart = attrStr._guts.string.startIndex
@@ -283,8 +281,6 @@ extension AttributedString {
         }
     }
 }
-
-#endif // FOUNDATION_FRAMEWORK
 
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension String.Index {

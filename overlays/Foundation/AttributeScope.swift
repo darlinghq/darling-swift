@@ -33,11 +33,10 @@ public enum AttributeScopes { }
 @available(*, unavailable)
 extension AttributeScopes : Sendable {}
 
-#if FOUNDATION_FRAMEWORK
-
+// Darling: compiled without FOUNDATION_FRAMEWORK. Scope fields are read with the standard library's
+// _forEachField instead of ReflectionInternal, and metatypes are keyed by ObjectIdentifier.
 import Darwin
-internal import MachO.dyld
-internal import ReflectionInternal
+@_spi(Reflection) import Swift
 
 fileprivate struct ScopeDescription : Sendable {
     var attributes: [String : any AttributedStringKey.Type] = [:]
@@ -64,7 +63,7 @@ fileprivate struct LoadedScopeCache : Sendable {
     }
     private var scopeMangledNames : [String : ScopeType]
     private var lastImageCount: UInt32
-    private var scopeContents : [Type : ScopeDescription]
+    private var scopeContents : [ObjectIdentifier : ScopeDescription]
     
     init() {
         scopeMangledNames = [:]
@@ -108,10 +107,10 @@ fileprivate struct LoadedScopeCache : Sendable {
     
     subscript(_ type: any AttributeScope.Type) -> ScopeDescription? {
         get {
-            scopeContents[Type(type)]
+            scopeContents[ObjectIdentifier(type)]
         }
         set {
-            scopeContents[Type(type)] = newValue
+            scopeContents[ObjectIdentifier(type)] = newValue
         }
     }
 }
@@ -179,8 +178,8 @@ extension AttributeScope {
         }
         
         var desc = ScopeDescription()
-        for field in Type(Self.self).fields {
-            switch field.type.swiftType {
+        _forEachField(of: Self.self, options: .ignoreUnknown) { _, _, fieldType, _ in
+            switch fieldType {
             case let attribute as any AttributedStringKey.Type:
                 desc.attributes[attribute.name] = attribute
                 if let markdownAttribute = attribute as? any MarkdownDecodableAttributedStringKey.Type {
@@ -190,6 +189,7 @@ extension AttributeScope {
                 desc.merge(scope.scopeDescription)
             default: break
             }
+            return true
         }
         let _desc = desc
         _loadedScopeCache.withLock {
@@ -212,4 +212,3 @@ extension AttributeScope {
         Self.scopeDescription.attributes.values
     }
 }
-#endif // FOUNDATION_FRAMEWORK

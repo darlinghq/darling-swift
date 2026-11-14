@@ -7,7 +7,7 @@
 
 // String.LocalizationValue, LocalizedStringResource and String(localized:), written for Darling from Apple's public
 // API documentation (macOS 12/13 Foundation). Only the API macOS 26 apps import is provided; there's no
-// AttributedString or FormatStyle support.
+// FormatStyle support. The AttributedString forms are in AttributedString+Localized.swift.
 // A localization value keeps the format key built from its literal segments and interpolations ("Hello %@") and the
 // interpolated arguments. Localizing looks the key up in the bundle's strings table and formats the result with the
 // arguments.
@@ -74,9 +74,13 @@ extension CGFloat : _FormatSpecifiable {
 }
 
 extension String {
-    public struct LocalizationValue : ExpressibleByStringInterpolation, @unchecked Sendable {
+    public struct LocalizationValue : Equatable, ExpressibleByStringInterpolation, @unchecked Sendable {
         internal var _key: String
         internal var _arguments: [CVarArg]
+        /// The interpolated values `_arguments` was made from, compared by `==`.
+        internal var _argumentValues: [_EquatableValue]
+        /// Interpolated attributed strings by argument index; `_arguments` holds their plain text.
+        internal var _attributedArguments: [Int : _AttributedArgument]
         /// Whether `_key` is a format string built by interpolation (with "%" escaped), rather than a plain literal.
         internal var _isFormat: Bool
         /// Whether the key holds placeholder specifiers that have no arguments, so it can't be formatted.
@@ -85,6 +89,8 @@ extension String {
         public init(_ value: String) {
             _key = value
             _arguments = []
+            _argumentValues = []
+            _attributedArguments = [:]
             _isFormat = false
             _hasPlaceholder = false
         }
@@ -96,6 +102,8 @@ extension String {
         public init(stringInterpolation: StringInterpolation) {
             _key = stringInterpolation._key
             _arguments = stringInterpolation._arguments
+            _argumentValues = stringInterpolation._argumentValues
+            _attributedArguments = stringInterpolation._attributedArguments
             _isFormat = true
             _hasPlaceholder = stringInterpolation._hasPlaceholder
         }
@@ -109,6 +117,12 @@ extension String {
             }
         }
 
+        public static func == (a: LocalizationValue, b: LocalizationValue) -> Bool {
+            a._key == b._key && a._isFormat == b._isFormat && a._hasPlaceholder == b._hasPlaceholder
+                && a._argumentValues.count == b._argumentValues.count
+                && zip(a._argumentValues, b._argumentValues).allSatisfy { $0.isEqual($1.value) }
+        }
+
         public enum Placeholder : Hashable, Sendable {
             case int
             case unsignedInt
@@ -120,6 +134,8 @@ extension String {
         public struct StringInterpolation : StringInterpolationProtocol, @unchecked Sendable {
             internal var _key = ""
             internal var _arguments: [CVarArg] = []
+            internal var _argumentValues: [_EquatableValue] = []
+            internal var _attributedArguments: [Int : _AttributedArgument] = [:]
             internal var _hasPlaceholder = false
 
             public init(literalCapacity: Int, interpolationCount: Int) {
@@ -135,16 +151,33 @@ extension String {
             public mutating func appendInterpolation(_ string: String) {
                 _key += "%@"
                 _arguments.append(string)
+                _argumentValues.append(_EquatableValue(string))
             }
 
             public mutating func appendInterpolation<T : _FormatSpecifiable>(_ value: T, specifier: String) {
                 _key += specifier
                 _arguments.append(value._arg)
+                _argumentValues.append(_EquatableValue(value))
             }
 
             public mutating func appendInterpolation<T : CustomLocalizedStringResourceConvertible>(_ value: T) {
                 _key += "%@"
                 _arguments.append(String(localized: value.localizedStringResource))
+                _argumentValues.append(_EquatableValue(value.localizedStringResource))
+            }
+
+            /// Localizing into an `AttributedString` inserts `attrStr` with its attributes; into a `String`, its text.
+            public mutating func appendInterpolation(_ attrStr: AttributedString, options: AttributedString.InterpolationOptions = []) {
+                let argument = _AttributedArgument(string: attrStr, options: options)
+                _key += "%@"
+                _attributedArguments[_arguments.count] = argument
+                _arguments.append(String(attrStr.characters))
+                _argumentValues.append(_EquatableValue(argument))
+            }
+
+            @_alwaysEmitIntoClient
+            public mutating func appendInterpolation(_ attributedSubstring: AttributedSubstring, options: AttributedString.InterpolationOptions = []) {
+                self.appendInterpolation(AttributedString(attributedSubstring), options: options)
             }
 
             /// Adds a specifier to the key without an argument, for keys shared with other localized strings.
@@ -179,7 +212,7 @@ public protocol CustomLocalizedStringResourceConvertible {
 }
 
 /// A reference to a localizable string: its key, default value, table, locale and bundle, resolved when localized.
-public struct LocalizedStringResource : ExpressibleByStringInterpolation, CustomLocalizedStringResourceConvertible, @unchecked Sendable {
+public struct LocalizedStringResource : Equatable, ExpressibleByStringInterpolation, CustomLocalizedStringResourceConvertible, @unchecked Sendable {
     public typealias StringInterpolation = String.LocalizationValue.StringInterpolation
 
     public enum BundleDescription : @unchecked Sendable {
@@ -222,6 +255,18 @@ public struct LocalizedStringResource : ExpressibleByStringInterpolation, Custom
         return self
     }
 
+    public static func == (lhs: LocalizedStringResource, rhs: LocalizedStringResource) -> Bool {
+        let sameBundle: Bool
+        switch (lhs.bundle, rhs.bundle) {
+        case (.main, .main): sameBundle = true
+        case (.forClass(let a), .forClass(let b)): sameBundle = a == b
+        case (.atURL(let a), .atURL(let b)): sameBundle = a == b
+        default: sameBundle = false
+        }
+        return sameBundle && lhs.key == rhs.key && lhs.table == rhs.table && lhs.locale == rhs.locale
+            && lhs._defaultValue == rhs._defaultValue
+    }
+
     internal var _bundle: Bundle? {
         switch bundle {
         case .main: return Bundle.main
@@ -229,4 +274,20 @@ public struct LocalizedStringResource : ExpressibleByStringInterpolation, Custom
         case .atURL(let url): return Bundle(url: url)
         }
     }
+}
+
+/// An interpolated value kept for `String.LocalizationValue`'s `==`.
+internal struct _EquatableValue {
+    let value: Any
+    let isEqual: (Any) -> Bool
+
+    init<T : Equatable>(_ value: T) {
+        self.value = value
+        isEqual = { ($0 as? T) == value }
+    }
+}
+
+internal struct _AttributedArgument : Equatable {
+    var string: AttributedString
+    var options: AttributedString.InterpolationOptions
 }
