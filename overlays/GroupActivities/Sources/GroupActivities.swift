@@ -3,16 +3,13 @@
 // an app imports, not from Apple sources. See overlays/README.md.
 
 import Combine
+import Foundation
 
-// Reaching any of these does not mean "SharePlay is unavailable"; it means this stub's API surface
-// drifted from Apple's and something built a type that should be unbuildable. Say so explicitly.
-private func unreachable(_ what: String) -> Never {
-    fatalError("""
-        GroupActivities: \(what) is unreachable. SharePlay needs a coordination daemon Darling \
-        does not have, so this framework never creates a session. Reaching this means the stub \
-        diverged from Apple's API; please report it with the app name.
-        """)
-}
+// SharePlay needs a coordination service that Darling does not have, so this framework answers as a device that is
+// not in a FaceTime call: nothing is eligible, no activity can be activated, and no session is ever delivered. A
+// GroupSession cannot be created by clients (its initializer is private), so the calls that need one never run;
+// the members still behave sensibly instead of trapping should that change.
+private let notAvailable = CocoaError(.featureUnsupported)
 
 public struct GroupActivityMetadata {
     public struct ActivityType {
@@ -91,15 +88,19 @@ public final class GroupSession<A: GroupActivity> {
         public func makeAsyncIterator() -> Iterator { Iterator() }
     }
 
-    // Deliberately uninitialised: init traps, so these are never observed. They are not defaults,
-    // and must not be treated as sane ones if this class ever becomes constructible.
     @Published public var state: State
     @Published public var activeParticipants: Set<Participant>
 
-    private init() { unreachable("GroupSession") }
+    // No session can be created, so this exists only to give the properties valid values: a session that has
+    // already been invalidated and has no participants.
+    private init() {
+        state = .invalidated(reason: notAvailable)
+        activeParticipants = []
+    }
 
-    public func join() { unreachable("GroupSession.join") }
-    public func leave() { unreachable("GroupSession.leave") }
+    // There is no group to join or leave.
+    public func join() {}
+    public func leave() {}
 }
 
 public final class GroupStateObserver {
@@ -114,23 +115,20 @@ public final class GroupSessionMessenger {
         public typealias Element = (M, MessageContext)
 
         public struct Iterator: AsyncIteratorProtocol {
-            // Unobservable: messages(of:) traps, so no Messages value exists. If that ever gains a
-            // real implementation this nil becomes the same fabricated completion as Sessions above.
+            // No messages ever arrive: the sequence is empty and finishes at once.
             public mutating func next() async -> (M, MessageContext)? { nil }
         }
 
         public func makeAsyncIterator() -> Iterator { Iterator() }
     }
 
-    public init<A: GroupActivity>(session: GroupSession<A>) {
-        unreachable("GroupSessionMessenger")
-    }
+    // A messenger needs a session, and none can exist; it keeps nothing.
+    public init<A: GroupActivity>(session: GroupSession<A>) {}
 
+    // Nobody is in the session to receive the message.
     public func send<M: Codable>(_ message: M, to participants: Participants) async throws {
-        unreachable("GroupSessionMessenger.send")
+        throw notAvailable
     }
 
-    public func messages<M: Codable>(of type: M.Type) -> Messages<M> {
-        unreachable("GroupSessionMessenger.messages")
-    }
+    public func messages<M: Codable>(of type: M.Type) -> Messages<M> { Messages<M>() }
 }
