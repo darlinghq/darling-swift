@@ -145,3 +145,59 @@ extension CGPath {
 
   public func mutableCopy() -> CGMutablePath? { return CGPathCreateMutableCopy(self) }
 }
+
+// Apple spells these with a defaulted `transform:` argument, which a C swift_name cannot express.
+// Written over the C entry points, which take the transform by pointer.
+extension CGMutablePath {
+  public func move(to point: CGPoint, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathMoveToPoint(self, $0, point.x, point.y) }
+  }
+
+  public func addLine(to point: CGPoint, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddLineToPoint(self, $0, point.x, point.y) }
+  }
+
+  public func addPath(_ path: CGPath, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddPath(self, $0, path) }
+  }
+
+  public func addQuadCurve(to end: CGPoint, control: CGPoint, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) {
+      CGPathAddQuadCurveToPoint(self, $0, control.x, control.y, end.x, end.y)
+    }
+  }
+
+  public func addCurve(to end: CGPoint, control1: CGPoint, control2: CGPoint,
+                       transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) {
+      CGPathAddCurveToPoint(self, $0, control1.x, control1.y, control2.x, control2.y, end.x, end.y)
+    }
+  }
+
+  public func addRect(_ rect: CGRect, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddRect(self, $0, rect) }
+  }
+
+  public func addRoundedRect(in rect: CGRect, cornerWidth: CGFloat, cornerHeight: CGFloat,
+                             transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddRoundedRect(self, $0, rect, cornerWidth, cornerHeight) }
+  }
+
+  public func addRects(_ rects: [CGRect], transform: CGAffineTransform = .identity) {
+    guard !rects.isEmpty else { return }
+    withUnsafePointer(to: transform) { t in
+      rects.withUnsafeBufferPointer { CGPathAddRects(self, t, $0.baseAddress!, $0.count) }
+    }
+  }
+
+  public func addLines(between points: [CGPoint], transform: CGAffineTransform = .identity) {
+    guard !points.isEmpty else { return }
+    withUnsafePointer(to: transform) { t in
+      points.withUnsafeBufferPointer { CGPathAddLines(self, t, $0.baseAddress!, $0.count) }
+    }
+  }
+
+  public func addEllipse(in rect: CGRect, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddEllipseInRect(self, $0, rect) }
+  }
+}
