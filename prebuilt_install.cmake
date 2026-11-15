@@ -14,7 +14,7 @@ file(GLOB DYLIBS "${CMAKE_CURRENT_SOURCE_DIR}/*.dylib")
 
 # Names (after libswift) of libraries an overlay may name through @rpath: the prebuilt ones and the ones built from source.
 set(SWIFT_REWRITE_NAMES
-	Darwin ObjectiveC CoreFoundation CoreGraphics Dispatch Foundation os XPC IOKit CoreAudio Compression Network WebKit
+	Darwin ObjectiveC CoreFoundation CoreGraphics Dispatch Foundation os XPC IOKit CoreAudio Compression WebKit
 	_errno _DarwinFoundation1 _DarwinFoundation2 _DarwinFoundation3 _math _signal _stdio _time sys_time unistd)
 foreach(dylib IN LISTS DYLIBS)
 	get_filename_component(name "${dylib}" NAME_WE)
