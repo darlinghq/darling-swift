@@ -51,4 +51,4 @@ add_darling_swift_library(Network
 	SOURCES ${NETWORK_SOURCES}
 	MODULES Foundation Dispatch CoreFoundation ObjectiveC Darwin
 	FLAGS ${overlay_shims}
-	LIBRARIES Network)
+	LIBRARIES Network Security)
