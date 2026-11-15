@@ -38,3 +38,10 @@ that says why. To see the difference, diff the file against the checkout, for ex
   public documentation, because swift-foundation does not have them.
 - **The ICU shim.** `shims/FoundationICU.h` exposes the libicucore headers as the module `_FoundationICU` that
   swift-foundation imports. A header is admitted only when an overlay source calls into it.
+- **The Network shim.** `shims/NetworkOverlayShims.h` is the module `_SwiftNetworkOverlayShims` that the Network
+  overlay of Swift 5.2.2 (`stdlib/public/Darwin/Network`) imports. It is the header of the same name from apple/swift
+  `swift-5.2.2-RELEASE` (`stdlib/public/SwiftShims`, Apache-2.0 with Runtime Library Exception), with one change: the
+  original `_swift_nw_parameters_create_custom_ip` did not return its result. The shim redeclares the functions that
+  Network.framework exports but does not publish (`nw_endpoint_create_unix`, `nw_endpoint_copy_interface`,
+  `nw_interface_create_with_name`, `NWCreateNSDataFromDispatchData`, ...), so libnetwork and the Network
+  framework declare them with the same types. The Network overlay itself is not built from source here.
