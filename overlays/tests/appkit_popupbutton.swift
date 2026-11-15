@@ -5,7 +5,7 @@
 // menu stays empty with titleOfSelectedItem nil.
 import AppKit
 
-// Darling's AppKit headers declare these members as methods, not properties, so the test reads them with key-value coding.
+// The members are read with key-value coding, which does not depend on whether the AppKit headers declare them as properties or as methods.
 extension NSPopUpButton {
     var kvPullsDown: Bool { return value(forKey: "pullsDown") as! Bool }
     var kvMenu: NSMenu? { return value(forKey: "menu") as? NSMenu }
