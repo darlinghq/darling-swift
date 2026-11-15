@@ -173,4 +173,31 @@ extension CGMutablePath {
       CGPathAddCurveToPoint(self, $0, control1.x, control1.y, control2.x, control2.y, end.x, end.y)
     }
   }
+
+  public func addRect(_ rect: CGRect, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddRect(self, $0, rect) }
+  }
+
+  public func addRoundedRect(in rect: CGRect, cornerWidth: CGFloat, cornerHeight: CGFloat,
+                             transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddRoundedRect(self, $0, rect, cornerWidth, cornerHeight) }
+  }
+
+  public func addRects(_ rects: [CGRect], transform: CGAffineTransform = .identity) {
+    guard !rects.isEmpty else { return }
+    withUnsafePointer(to: transform) { t in
+      rects.withUnsafeBufferPointer { CGPathAddRects(self, t, $0.baseAddress!, $0.count) }
+    }
+  }
+
+  public func addLines(between points: [CGPoint], transform: CGAffineTransform = .identity) {
+    guard !points.isEmpty else { return }
+    withUnsafePointer(to: transform) { t in
+      points.withUnsafeBufferPointer { CGPathAddLines(self, t, $0.baseAddress!, $0.count) }
+    }
+  }
+
+  public func addEllipse(in rect: CGRect, transform: CGAffineTransform = .identity) {
+    withUnsafePointer(to: transform) { CGPathAddEllipseInRect(self, $0, rect) }
+  }
 }

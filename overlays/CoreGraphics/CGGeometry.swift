@@ -315,11 +315,11 @@ extension CGSize : Codable {
     }
 }
 
-// Rung 1: swift release/5.4 stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift (Copyright (c) 2014 - 2017 Apple Inc.
+// swift release/5.4 stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift (Copyright (c) 2014 - 2017 Apple Inc.
 // and the Swift project authors, Apache License v2.0 with Runtime Library Exception), unchanged in content:
 // CGPoint Codable at line 289 (a point is [x, y]) and CGRect Codable at line 501 (a rect is [origin, size]).
-// Only the Codable forms Notes imports are here; CGPathFillRule, clip(using:), fillPath(using:) and debugDescription
-// are left out because no named app imports them.
+// Only the Codable forms are here; CGPathFillRule, clip(using:), fillPath(using:) and debugDescription
+// are not provided yet.
 extension CGPoint : Codable {
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
