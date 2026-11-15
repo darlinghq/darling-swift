@@ -11,9 +11,13 @@
 // is free. Every documented member is implemented, not only the demanded ones, so the type is complete.
 // Cost: appends and the counts are O(1) per identifier; indexOfItem, sectionIdentifier(containingItem:) and the missing-identifier
 // checks scan the items linearly.
-// GUESS (the documentation gives signatures, not behaviour): that an identifier already present, an anchor or section
-// that is absent, or an absent identifier to delete, move or reload traps (the documented behaviour for a missing
-// section in numberOfItems(inSection:)), and that deleting the last item of a section keeps the section.
+// Behaviour on identifiers (observed on macOS 26.7.3 with a black-box probe, see MAC-EVIDENCE in the pull request): a
+// section identifier that is already present, an absent section or anchor identifier (numberOfItems(inSection:),
+// appendItems(toSection:), insertItems relative to an absent item, moves, reloads), an item batch that repeats an
+// identifier, a move onto itself and appendItems with no section all terminate the process; here they trap. An item
+// identifier that is already in the snapshot is moved to the new place instead of failing. Deleting an absent item or
+// section is ignored, deleting a section deletes its items, deleting the last item of a section keeps the section and
+// deleteAllItems removes the sections too.
 
 @_exported import Foundation
 
@@ -78,7 +82,8 @@ public struct NSDiffableDataSourceSnapshot<SectionIdentifierType: Hashable, Item
             }
             index = last
         }
-        requireNewItems(identifiers)
+        requireDistinct(identifiers)
+        removeItemsKeepingSections(identifiers)
         itemsBySection[index].append(contentsOf: identifiers)
         allItems.formUnion(identifiers)
     }
@@ -92,15 +97,21 @@ public struct NSDiffableDataSourceSnapshot<SectionIdentifierType: Hashable, Item
     }
 
     public mutating func insertItems(_ identifiers: [ItemIdentifierType], beforeItem beforeIdentifier: ItemIdentifierType) {
+        _ = requireItem(beforeIdentifier)
+        requireDistinct(identifiers)
+        precondition(!identifiers.contains(beforeIdentifier), "Cannot insert an item relative to itself")
+        removeItemsKeepingSections(identifiers)
         let place = requireItem(beforeIdentifier)
-        requireNewItems(identifiers)
         itemsBySection[place.section].insert(contentsOf: identifiers, at: place.item)
         allItems.formUnion(identifiers)
     }
 
     public mutating func insertItems(_ identifiers: [ItemIdentifierType], afterItem afterIdentifier: ItemIdentifierType) {
+        _ = requireItem(afterIdentifier)
+        requireDistinct(identifiers)
+        precondition(!identifiers.contains(afterIdentifier), "Cannot insert an item relative to itself")
+        removeItemsKeepingSections(identifiers)
         let place = requireItem(afterIdentifier)
-        requireNewItems(identifiers)
         itemsBySection[place.section].insert(contentsOf: identifiers, at: place.item + 1)
         allItems.formUnion(identifiers)
     }
@@ -114,16 +125,12 @@ public struct NSDiffableDataSourceSnapshot<SectionIdentifierType: Hashable, Item
     }
 
     public mutating func deleteItems(_ identifiers: [ItemIdentifierType]) {
-        for identifier in identifiers {
-            let place = requireItem(identifier)
-            itemsBySection[place.section].remove(at: place.item)
-            allItems.remove(identifier)
-        }
+        removeItemsKeepingSections(identifiers)
     }
 
     public mutating func deleteSections(_ identifiers: [SectionIdentifierType]) {
         for identifier in identifiers {
-            let index = requireSection(identifier)
+            guard let index = sections.firstIndex(of: identifier) else { continue }
             sections.remove(at: index)
             allItems.subtract(itemsBySection.remove(at: index))
         }
@@ -211,11 +218,19 @@ public struct NSDiffableDataSourceSnapshot<SectionIdentifierType: Hashable, Item
         }
     }
 
-    private func requireNewItems(_ identifiers: [ItemIdentifierType]) {
+    private func requireDistinct(_ identifiers: [ItemIdentifierType]) {
         var added = Set<ItemIdentifierType>()
         for identifier in identifiers {
-            precondition(!allItems.contains(identifier) && added.insert(identifier).inserted,
-                         "Item identifier \(identifier) is already in the snapshot")
+            precondition(added.insert(identifier).inserted, "Item identifier \(identifier) is repeated in one call")
+        }
+    }
+
+    // Removes the identifiers that are present; absent ones are skipped.
+    private mutating func removeItemsKeepingSections(_ identifiers: [ItemIdentifierType]) {
+        for identifier in identifiers where allItems.contains(identifier) {
+            let place = locate(identifier)!
+            itemsBySection[place.section].remove(at: place.item)
+            allItems.remove(identifier)
         }
     }
 

@@ -29,15 +29,17 @@ func sample() -> Snapshot {
 }
 
 let trapCases: [String: () -> Void] = [
-    "duplicate-item": { var s = sample(); s.appendItems([1], toSection: "b") },
     "duplicate-within-one-call": { var s = sample(); s.appendItems([7, 7], toSection: "a") },
     "duplicate-section": { var s = sample(); s.appendSections(["a"]) },
     "append-to-missing-section": { var s = sample(); s.appendItems([9], toSection: "z") },
     "append-with-no-sections": { var s = Snapshot(); s.appendItems([9]) },
     "count-in-missing-section": { _ = sample().numberOfItems(inSection: "z") },
     "insert-after-missing-item": { var s = sample(); s.insertItems([9], afterItem: 99) },
-    "delete-missing-item": { var s = sample(); s.deleteItems([99]) },
     "move-onto-itself": { var s = sample(); s.moveItem(1, afterItem: 1) },
+    "insert-before-itself": { var s = sample(); s.insertItems([1], beforeItem: 1) },
+    "move-section-onto-itself": { var s = sample(); s.moveSection("a", afterSection: "a") },
+    "insert-sections-before-missing": { var s = sample(); s.insertSections(["x"], beforeSection: "z") },
+    "reload-missing-section": { var s = sample(); s.reloadSections(["z"]) },
     "reload-missing-item": { var s = sample(); s.reloadItems([99]) },
 ]
 
@@ -92,6 +94,17 @@ withItems.appendItems([1], toSection: "c")
 check(withItems.itemIdentifiers == [4, 5, 1], "an identifier of a deleted section can be reused")
 withItems.deleteItems([4, 5])
 check(withItems.sectionIdentifiers == ["b", "c"] && withItems.numberOfItems == 1, "deleting the last item keeps its section")
+
+// An identifier that is already present is moved, not rejected; absent identifiers are ignored by deletion.
+var again = sample()
+again.appendItems([1], toSection: "b")
+check(again.itemIdentifiers(inSection: "a") == [2, 3] && again.itemIdentifiers(inSection: "b") == [4, 5, 1],
+      "appending a present identifier moves it")
+again.insertItems([5], beforeItem: 2)
+check(again.itemIdentifiers(inSection: "a") == [5, 2, 3] && again.itemIdentifiers(inSection: "b") == [4, 1],
+      "inserting a present identifier moves it")
+again.deleteItems([99, 4]); again.deleteSections(["z", "c"])
+check(again.sectionIdentifiers == ["a", "b"] && again.itemIdentifiers == [5, 2, 3, 1], "deleting absent identifiers is ignored")
 
 var many = Snapshot()
 many.appendSections(["only"])
