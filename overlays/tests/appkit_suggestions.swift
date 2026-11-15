@@ -1,6 +1,5 @@
 // NSSuggestionItem, NSSuggestionItemResponse and NSTextSuggestionsDelegate from the AppKit overlay, under Darling.
 import AppKit
-import _DarlingAppKitShims
 
 var failures = 0
 func check(_ condition: Bool, _ label: String) {
@@ -62,9 +61,9 @@ MainActor.assumeIsolated {
     let stringItem = NSSuggestionItem(representedValue: "k", title: "Applesauce")
     check(minimal.textField(NSTextField(), textCompletionFor: stringItem) == "Applesauce", "default completion is the title")
     let target = NSTextField()
-    target.stringValue = "apple"
+    target.setValue("apple", forKey: "stringValue")
     minimal.textField(target, didSelect: stringItem)
-    check(target.stringValue == "Applesauce", "default selection replaces the field text with the completion")
+    check(target.value(forKey: "stringValue") as? String == "Applesauce", "default selection replaces the field text with the completion")
 
     let delegate = Delegate()
     var delivered = 0

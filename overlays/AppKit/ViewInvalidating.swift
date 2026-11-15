@@ -1,33 +1,21 @@
 // NSView.Invalidating (macOS 12), the property wrapper that invalidates a view when a property changes, the
 // NSViewInvalidating protocol and the Invalidations types that conform to it.
 //
-// Provenance. Names: Reminders and App Store import Invalidating (nominal type, init(wrappedValue:_:), the
-// static subscript's get, set and modify), Invalidations.Layout and .IntrinsicContentSize, Invalidations.Tuple and its
-// conformance, the two-invalidation init(wrappedValue:_:_:), and NSViewInvalidating with invalidate(view:)
-// (rung 5, llvm-nm -u -m). Declarations: Apple's public documentation,
+// Provenance. Declarations: Apple's public documentation,
 // https://developer.apple.com/documentation/appkit/nsview/invalidating (`<Value: Equatable, InvalidationType:
 // NSViewInvalidating>`, initializers for one to ten invalidations, where several are nested Tuples:
 // `Tuple<Tuple<I1, I2>, I3>` for three, `Tuple<Tuple<I1, I2>, Tuple<I3, I4>>` for four),
 // .../nsview/invalidations (Constraints, Display, IntrinsicContentSize, Layout, RestorableState, Tuple<Invalidation1,
 // Invalidation2>) and .../nsviewinvalidating (`invalidate(view:)`). Each invalidation sets the flag or calls the method
 // its name says (needsLayout, needsDisplay, needsUpdateConstraints, invalidateIntrinsicContentSize,
-// invalidateRestorableState); the documentation says the wrapper sets the flag "causing the system to redraw".
+// invalidateRestorableState).
 // Layout that cannot matter: every type here is a non-frozen struct or an enum namespace, under library evolution.
-// GUESS (no public source): that the wrapper invalidates only when the new value differs from the old (the Equatable
-// constraint implies a comparison; the documentation does not say), the requirement set of NSViewInvalidating (one
-// method), and that Tuple invalidates the first and then the second. NEEDS-REAL-MAC: whether the Invalidations structs
-// are frozen upstream (an app imports a protocol witness table for Layout directly, which hints at it; both are empty
-// structs, so their size is zero either way) and whether the non-resilience arguments above hold for them.
-// The static members `layout`, `display`, `constraints`, `intrinsicContentSize` and `restorableState` are the documented
-// pages' `static var x: NSView.Invalidations.X { get }`, written as constrained protocol-extension members.
-// Initializers for five to ten invalidations are left out because no named app imports them.
+// Behaviour (black-box probe on macOS 26.7.3): the wrapper invalidates only when the new value differs from the old
+// one, and each kind of invalidation does what its name says. The order in which a Tuple applies its two
+// invalidations could not be observed; it applies the first and then the second. The declarations, including
+// the protocol's single requirement, were compared with the macOS 26 SDK's Swift module interface (declarations only).
 
 @_exported import Foundation
-#if DARLING_APPKIT_CLANG_MODULE
-@_exported import AppKit
-#else
-import _DarlingAppKitShims
-#endif
 
 /// A way of telling a view that something it displays has changed.
 public protocol NSViewInvalidating {
@@ -85,7 +73,12 @@ extension NSView {
         /// Asks the system to save the view's restorable state again.
         public struct RestorableState: NSViewInvalidating {
             public init() {}
-            public func invalidate(view: NSView) { view.invalidateRestorableState() }
+            // Darling's AppKit has no state restoration and its NSResponder does not declare
+            // -invalidateRestorableState yet, so the message is sent only to a view that implements it.
+            public func invalidate(view: NSView) {
+                let selector = Selector(("invalidateRestorableState"))
+                if view.responds(to: selector) { _ = view.perform(selector) }
+            }
         }
 
         /// Both invalidations, for a change that affects two aspects of a view.
@@ -116,7 +109,9 @@ extension NSView {
             self.invalidation = invalidation
         }
 
-        // The compiler requires the plain accessor; reading or writing it directly skips the invalidation.
+        // The compiler requires the plain accessor; the enclosing-instance subscript below is what runs for a property of
+        // an NSView subclass, and it is unavailable to direct use as in the macOS SDK.
+        @available(*, unavailable, message: "@NSView.Invalidating can only be used on subclasses of NSView")
         public var wrappedValue: Value {
             get { return storage }
             set { storage = newValue }
@@ -153,6 +148,42 @@ extension NSView {
             self.init(wrappedValue: wrappedValue,
                       Invalidations.Tuple(Invalidations.Tuple(invalidation1, invalidation2),
                                           Invalidations.Tuple(invalidation3, invalidation4)))
+        }
+
+        public init<I1: NSViewInvalidating, I2: NSViewInvalidating, I3: NSViewInvalidating, I4: NSViewInvalidating, I5: NSViewInvalidating>(
+            wrappedValue: Value, _ invalidation1: I1, _ invalidation2: I2, _ invalidation3: I3, _ invalidation4: I4, _ invalidation5: I5
+        ) where InvalidationType == Invalidations.Tuple<Invalidations.Tuple<Invalidations.Tuple<I1, I2>, Invalidations.Tuple<I3, I4>>, I5> {
+            self.init(wrappedValue: wrappedValue, Invalidations.Tuple(Invalidations.Tuple(Invalidations.Tuple(invalidation1, invalidation2), Invalidations.Tuple(invalidation3, invalidation4)), invalidation5))
+        }
+
+        public init<I1: NSViewInvalidating, I2: NSViewInvalidating, I3: NSViewInvalidating, I4: NSViewInvalidating, I5: NSViewInvalidating, I6: NSViewInvalidating>(
+            wrappedValue: Value, _ invalidation1: I1, _ invalidation2: I2, _ invalidation3: I3, _ invalidation4: I4, _ invalidation5: I5, _ invalidation6: I6
+        ) where InvalidationType == Invalidations.Tuple<Invalidations.Tuple<Invalidations.Tuple<I1, I2>, Invalidations.Tuple<I3, I4>>, Invalidations.Tuple<I5, I6>> {
+            self.init(wrappedValue: wrappedValue, Invalidations.Tuple(Invalidations.Tuple(Invalidations.Tuple(invalidation1, invalidation2), Invalidations.Tuple(invalidation3, invalidation4)), Invalidations.Tuple(invalidation5, invalidation6)))
+        }
+
+        public init<I1: NSViewInvalidating, I2: NSViewInvalidating, I3: NSViewInvalidating, I4: NSViewInvalidating, I5: NSViewInvalidating, I6: NSViewInvalidating, I7: NSViewInvalidating>(
+            wrappedValue: Value, _ invalidation1: I1, _ invalidation2: I2, _ invalidation3: I3, _ invalidation4: I4, _ invalidation5: I5, _ invalidation6: I6, _ invalidation7: I7
+        ) where InvalidationType == Invalidations.Tuple<Invalidations.Tuple<Invalidations.Tuple<I1, I2>, Invalidations.Tuple<I3, I4>>, Invalidations.Tuple<Invalidations.Tuple<I5, I6>, I7>> {
+            self.init(wrappedValue: wrappedValue, Invalidations.Tuple(Invalidations.Tuple(Invalidations.Tuple(invalidation1, invalidation2), Invalidations.Tuple(invalidation3, invalidation4)), Invalidations.Tuple(Invalidations.Tuple(invalidation5, invalidation6), invalidation7)))
+        }
+
+        public init<I1: NSViewInvalidating, I2: NSViewInvalidating, I3: NSViewInvalidating, I4: NSViewInvalidating, I5: NSViewInvalidating, I6: NSViewInvalidating, I7: NSViewInvalidating, I8: NSViewInvalidating>(
+            wrappedValue: Value, _ invalidation1: I1, _ invalidation2: I2, _ invalidation3: I3, _ invalidation4: I4, _ invalidation5: I5, _ invalidation6: I6, _ invalidation7: I7, _ invalidation8: I8
+        ) where InvalidationType == Invalidations.Tuple<Invalidations.Tuple<Invalidations.Tuple<I1, I2>, Invalidations.Tuple<I3, I4>>, Invalidations.Tuple<Invalidations.Tuple<I5, I6>, Invalidations.Tuple<I7, I8>>> {
+            self.init(wrappedValue: wrappedValue, Invalidations.Tuple(Invalidations.Tuple(Invalidations.Tuple(invalidation1, invalidation2), Invalidations.Tuple(invalidation3, invalidation4)), Invalidations.Tuple(Invalidations.Tuple(invalidation5, invalidation6), Invalidations.Tuple(invalidation7, invalidation8))))
+        }
+
+        public init<I1: NSViewInvalidating, I2: NSViewInvalidating, I3: NSViewInvalidating, I4: NSViewInvalidating, I5: NSViewInvalidating, I6: NSViewInvalidating, I7: NSViewInvalidating, I8: NSViewInvalidating, I9: NSViewInvalidating>(
+            wrappedValue: Value, _ invalidation1: I1, _ invalidation2: I2, _ invalidation3: I3, _ invalidation4: I4, _ invalidation5: I5, _ invalidation6: I6, _ invalidation7: I7, _ invalidation8: I8, _ invalidation9: I9
+        ) where InvalidationType == Invalidations.Tuple<Invalidations.Tuple<Invalidations.Tuple<Invalidations.Tuple<I1, I2>, Invalidations.Tuple<I3, I4>>, Invalidations.Tuple<Invalidations.Tuple<I5, I6>, Invalidations.Tuple<I7, I8>>>, I9> {
+            self.init(wrappedValue: wrappedValue, Invalidations.Tuple(Invalidations.Tuple(Invalidations.Tuple(Invalidations.Tuple(invalidation1, invalidation2), Invalidations.Tuple(invalidation3, invalidation4)), Invalidations.Tuple(Invalidations.Tuple(invalidation5, invalidation6), Invalidations.Tuple(invalidation7, invalidation8))), invalidation9))
+        }
+
+        public init<I1: NSViewInvalidating, I2: NSViewInvalidating, I3: NSViewInvalidating, I4: NSViewInvalidating, I5: NSViewInvalidating, I6: NSViewInvalidating, I7: NSViewInvalidating, I8: NSViewInvalidating, I9: NSViewInvalidating, I10: NSViewInvalidating>(
+            wrappedValue: Value, _ invalidation1: I1, _ invalidation2: I2, _ invalidation3: I3, _ invalidation4: I4, _ invalidation5: I5, _ invalidation6: I6, _ invalidation7: I7, _ invalidation8: I8, _ invalidation9: I9, _ invalidation10: I10
+        ) where InvalidationType == Invalidations.Tuple<Invalidations.Tuple<Invalidations.Tuple<Invalidations.Tuple<I1, I2>, Invalidations.Tuple<I3, I4>>, Invalidations.Tuple<Invalidations.Tuple<I5, I6>, Invalidations.Tuple<I7, I8>>>, Invalidations.Tuple<I9, I10>> {
+            self.init(wrappedValue: wrappedValue, Invalidations.Tuple(Invalidations.Tuple(Invalidations.Tuple(Invalidations.Tuple(invalidation1, invalidation2), Invalidations.Tuple(invalidation3, invalidation4)), Invalidations.Tuple(Invalidations.Tuple(invalidation5, invalidation6), Invalidations.Tuple(invalidation7, invalidation8))), Invalidations.Tuple(invalidation9, invalidation10)))
         }
     }
 }

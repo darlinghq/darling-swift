@@ -1,6 +1,5 @@
 // NSView.Invalidating, NSViewInvalidating and the Invalidations types from the AppKit overlay, under Darling.
 import AppKit
-import _DarlingAppKitShims
 
 var failures = 0
 func check(_ condition: Bool, _ label: String) {

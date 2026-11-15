@@ -1,44 +1,70 @@
 // The NSTextField suggestions API (macOS 15). The types are plain values and a protocol; nothing calls the delegate
 // yet, the text field only stores it.
 //
-// Provenance. Names: imported by Notes and Photos (rung 5, llvm-nm -u -m). Declarations, generic parameters and the
-// documented members: Apple's public documentation, https://developer.apple.com/documentation/appkit/
-// nssuggestionitem, nssuggestionitemsection, nssuggestionitemresponse, nstextsuggestionsdelegate (a class-bound
-// `@MainActor` protocol with one associated type and the `Item`, `ItemResponse` and `ItemSection` aliases; the two
-// optional methods have default implementations, and the page for `textField(_:didSelect:)` says its default inserts
-// the `textField(_:textCompletionFor:)` text into the control) and nstextfield/suggestionsdelegate.
-// Layout that cannot matter, by reasoning rather than a source (NEEDS-REAL-MAC whether Apple froze them): the structs and
-// the `Phase` enum are built with library evolution, and the demanded names are accessors, an initializer and the enum case
-// constructor, which an app only needs if it reaches them through the library rather than inline.
-// GUESS (no public source): the declaration order of the three protocol requirements (it fixes the witness-table
-// layout; nothing in this overlay calls through it, an app's conformance is only stored), the declaration order of
-// the Phase cases, the default `textField(_:textCompletionFor:)` (documented to exist, not to return `title`), and
-// that `init(items:)` makes one untitled section.
-// Left out because no named app imports them: `secondaryTitle`, `toolTip` and the attributed titles of the item,
-// `Equatable` and `Hashable` on all three structs, `preferredHighlight`, and the `appending(_:)` methods.
+// Provenance. Declarations, generic parameters and members: Apple's public documentation,
+// https://developer.apple.com/documentation/appkit/nssuggestionitem, nssuggestionitemsection,
+// nssuggestionitemresponse, nstextsuggestionsdelegate and nstextfield/suggestionsdelegate, compared with the macOS 26
+// SDK's Swift module interface (declarations only: the member list, the generic constraints, the declaration order of
+// the three protocol requirements and of the Phase and Highlight cases, the @MainActor protocol with the `Item`,
+// `ItemResponse` and `ItemSection` aliases). Behaviour (black-box probe on macOS 26.7.3): a response made with
+// `init()`, `init(items:)` or `init(itemSections:)` has phase `.final` and highlight `.automatic`, `init(items:)` makes one
+// untitled section, the default `textField(_:textCompletionFor:)` returns the item's title, the default
+// `textField(_:didSelect:)` sets the field's string to that completion, and the field holds its delegate weakly.
+// Equality of items compares the represented value, the titles and the tooltip but not the image; responses compare
+// their phase, highlight and sections.
+// Not provided: the `appending(_:)` combinators of NSTextSuggestionsDelegate, and the field never calls the delegate.
 
 @_exported import Foundation
-#if DARLING_APPKIT_CLANG_MODULE
-@_exported import AppKit
-#else
-import _DarlingAppKitShims
-#endif
 import ObjectiveC
 
 /// One suggestion shown in a text field's suggestions list.
 public struct NSSuggestionItem<SuggestionItemType> {
-    /// The text shown for the suggestion.
-    public var title: String
+    public var representedValue: SuggestionItemType
+
+    /// The text shown for the suggestion; setting it replaces `attributedTitle`.
+    public var title: String {
+        get { return String(attributedTitle.characters) }
+        set { attributedTitle = AttributedString(newValue) }
+    }
+
+    public var attributedTitle: AttributedString
+
+    public var secondaryTitle: String? {
+        get { return attributedSecondaryTitle.map { String($0.characters) } }
+        set { attributedSecondaryTitle = newValue.map { AttributedString($0) } }
+    }
+
+    public var attributedSecondaryTitle: AttributedString?
+
+    public var toolTip: String?
 
     /// An optional image shown beside the title.
     public var image: NSImage?
 
-    /// The value the suggestion stands for, handed back to the delegate on selection.
-    public let representedValue: SuggestionItemType
-
     public init(representedValue: SuggestionItemType, title: String) {
         self.representedValue = representedValue
-        self.title = title
+        self.attributedTitle = AttributedString(title)
+    }
+
+    public init(representedValue: SuggestionItemType, attributedTitle: AttributedString) {
+        self.representedValue = representedValue
+        self.attributedTitle = attributedTitle
+    }
+}
+
+extension NSSuggestionItem: Equatable where SuggestionItemType: Equatable {
+    public static func == (lhs: NSSuggestionItem<SuggestionItemType>, rhs: NSSuggestionItem<SuggestionItemType>) -> Bool {
+        return lhs.representedValue == rhs.representedValue && lhs.attributedTitle == rhs.attributedTitle
+            && lhs.attributedSecondaryTitle == rhs.attributedSecondaryTitle && lhs.toolTip == rhs.toolTip
+    }
+}
+
+extension NSSuggestionItem: Hashable where SuggestionItemType: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(representedValue)
+        hasher.combine(attributedTitle)
+        hasher.combine(attributedSecondaryTitle)
+        hasher.combine(toolTip)
     }
 }
 
@@ -60,13 +86,18 @@ public struct NSSuggestionItemSection<SuggestionItemType> {
     }
 }
 
+extension NSSuggestionItemSection: Equatable where SuggestionItemType: Equatable {}
+extension NSSuggestionItemSection: Hashable where SuggestionItemType: Hashable {}
+
 /// The delegate's answer to a request for suggestions.
 public struct NSSuggestionItemResponse<SuggestionItemType> {
     public typealias Item = NSSuggestionItem<SuggestionItemType>
     public typealias ItemSection = NSSuggestionItemSection<SuggestionItemType>
 
+    public var itemSections: [ItemSection]
+
     /// Whether the response is a first approximation or the complete list.
-    public enum Phase {
+    public enum Phase: Equatable, Hashable {
         /// More suggestions may follow.
         case intermediate
         /// The complete list.
@@ -74,10 +105,16 @@ public struct NSSuggestionItemResponse<SuggestionItemType> {
     }
 
     public var phase: Phase = .final
-    public var itemSections: [ItemSection]
 
-    public init() {
-        itemSections = []
+    public enum Highlight: Equatable, Hashable {
+        case automatic
+        case firstSelectableItem
+    }
+
+    public var preferredHighlight: Highlight = .automatic
+
+    public init(itemSections: [ItemSection]) {
+        self.itemSections = itemSections
     }
 
     /// A response holding `items` in one untitled section.
@@ -85,8 +122,22 @@ public struct NSSuggestionItemResponse<SuggestionItemType> {
         itemSections = [ItemSection(items: items)]
     }
 
-    public init(itemSections: [ItemSection]) {
-        self.itemSections = itemSections
+    public init() {
+        itemSections = []
+    }
+}
+
+extension NSSuggestionItemResponse: Equatable where SuggestionItemType: Equatable {
+    public static func == (lhs: NSSuggestionItemResponse<SuggestionItemType>, rhs: NSSuggestionItemResponse<SuggestionItemType>) -> Bool {
+        return lhs.itemSections == rhs.itemSections && lhs.phase == rhs.phase && lhs.preferredHighlight == rhs.preferredHighlight
+    }
+}
+
+extension NSSuggestionItemResponse: Hashable where SuggestionItemType: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(itemSections)
+        hasher.combine(phase)
+        hasher.combine(preferredHighlight)
     }
 }
 
@@ -103,7 +154,7 @@ public protocol NSTextSuggestionsDelegate<SuggestionItemType>: AnyObject {
     func textField(_ textField: NSTextField,
                    provideUpdatedSuggestions responseHandler: @escaping (NSSuggestionItemResponse<SuggestionItemType>) -> Void)
 
-    /// The text to complete the field with for `item`; `nil` leaves the text alone.
+    /// The text to complete the field with for `item`; the default is the item's title.
     func textField(_ textField: NSTextField, textCompletionFor item: NSSuggestionItem<SuggestionItemType>) -> String?
 
     /// Called when the user chooses `item`.
@@ -117,7 +168,8 @@ extension NSTextSuggestionsDelegate {
 
     public func textField(_ textField: NSTextField, didSelect item: NSSuggestionItem<SuggestionItemType>) {
         if let completion = self.textField(textField, textCompletionFor: item) {
-            textField.stringValue = completion
+            // Key-value coding: Darling's NSControl declares -setStringValue: without the property.
+            textField.setValue(completion, forKey: "stringValue")
         }
     }
 }

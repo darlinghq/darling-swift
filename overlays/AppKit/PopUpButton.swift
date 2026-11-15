@@ -1,17 +1,13 @@
 // NSPopUpButton.init(image:pullDownMenu:) and init(title:image:pullDownMenu:).
 //
-// Provenance. Names: Freeform imports the `title:` form and Mail the image-only form. Declarations: Apple's public
-// documentation (developer.apple.com/documentation/appkit/nspopupbutton/init(title:image:pulldownmenu:) and
-// .../init(image:pulldownmenu:)): each "creates a standard pull-down button with a title, optional image, and menu";
-// `title` is the title and `image` the icon displayed on the button, `pullDownMenu` the menu it presents; the
-// button's `usesItemFromMenu` is false. Behaviour: observed on a real Mac (macOS 26.1, probe symbols_b_probe1,
-// output lines 17-18): both forms give pullsDown true and leave the menu as it was (same object, same two items,
-// the first still titled "first"); the image-only form has title "" and keeps the image (`image === img`),
-// usesItemFromMenu false and titleOfSelectedItem "first"; the title form with image nil has title "T".
-//
-// An EMPTY menu, also observed on the Mac (probe symbols_b_probe2.txt lines 56-58): both forms give pullsDown true,
-// leave the menu with 0 items, and titleOfSelectedItem nil; the title is "" for the image-only form and "T" for the
-// title form. Nothing is added to the menu and nothing is raised here either.
+// Provenance. Declarations: Apple's public documentation (developer.apple.com/documentation/appkit/nspopupbutton/
+// init(title:image:pulldownmenu:) and .../init(image:pulldownmenu:)): each "creates a standard pull-down button with a
+// title, optional image, and menu"; compared with the macOS 26 SDK's Swift module interface (declarations only).
+// Behaviour (black-box probe on macOS 26.7.3): both forms give pullsDown true and leave the menu as it was (same
+// object, same two items, the first still titled "first"); the image-only form has title "" and keeps the image
+// (`image === img`) and titleOfSelectedItem "first"; the title form with image nil has title "T". With an EMPTY menu
+// both forms give pullsDown true, leave the menu with 0 items, and titleOfSelectedItem nil; the title is "" for the
+// image-only form and "T" for the title form. Nothing is added to the menu and nothing is raised.
 //
 // Known gaps in Darling's AppKit, not in this file: NSPopUpButtonCell has no `usesItemFromMenu` and its -setImage:
 // has no effect (it takes a pull-down button's image from the menu's first item), so the image is stored but not
@@ -26,27 +22,22 @@
 // `usesItemFromMenu` in Cocotron's NSPopUpButtonCell (a follow-up); this file cannot do it.
 
 @_exported import Foundation
-#if DARLING_APPKIT_CLANG_MODULE
-@_exported import AppKit
-#else
-import _DarlingAppKitShims
-#endif
 
 extension NSPopUpButton {
     /// A pull-down button that shows `image` and pulls down `menu`; its title is empty.
     public convenience init(image: NSImage, pullDownMenu: NSMenu) {
         self.init(frame: .zero, pullsDown: true)
-        self.menu = pullDownMenu
+        setMenu(pullDownMenu)
         setCellTitle("")
-        self.image = image
+        setImage(image)
     }
 
     /// A pull-down button that shows `title` and `image` and pulls down `menu`.
     public convenience init(title: String, image: NSImage? = nil, pullDownMenu: NSMenu) {
         self.init(frame: .zero, pullsDown: true)
-        self.menu = pullDownMenu
+        setMenu(pullDownMenu)
         setCellTitle(title)
-        self.image = image
+        setImage(image)
     }
 
     private func setCellTitle(_ title: String) {

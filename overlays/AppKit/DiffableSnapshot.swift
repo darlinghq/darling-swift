@@ -1,17 +1,14 @@
 // NSDiffableDataSourceSnapshot: an ordered list of unique section identifiers, each holding an ordered list of item
 // identifiers that are unique across the whole snapshot.
 //
-// Provenance. Names: Reminders, Mail and App Store import the type, the initializer, the sectionIdentifiers,
-// itemIdentifiers and numberOfItems/numberOfSections getters, appendSections, appendItems, reloadItems and
-// moveItem(_:beforeItem:)/(_:afterItem:) (rung 5, llvm-nm -u -m). Declarations and generic constraints: Apple's public
-// documentation (https://developer.apple.com/documentation/appkit/nsdiffabledatasourcesnapshot-swift.struct and its
-// member pages): `<SectionIdentifierType: Hashable, ItemIdentifierType: Hashable>`, `appendItems(_:toSection:)` with a
-// nil default, `numberOfItems(inSection:)` taking a section identifier and failing on an unknown one.
+// Provenance. Declarations and generic constraints: Apple's public documentation
+// (https://developer.apple.com/documentation/appkit/nsdiffabledatasourcesnapshot-swift.struct and its member pages):
+// `<SectionIdentifierType: Hashable, ItemIdentifierType: Hashable>`, `appendItems(_:toSection:)` with a nil default;
+// the member list was compared with the macOS 26 SDK's Swift module interface (declarations only).
 // The struct is not frozen under library evolution, so apps reach it through exported accessors and its stored layout
-// is free. Every documented member is implemented, not only the demanded ones, so the type is complete.
-// Cost: appends and the counts are O(1) per identifier; indexOfItem, sectionIdentifier(containingItem:) and the missing-identifier
-// checks scan the items linearly.
-// Behaviour on identifiers (observed on macOS 26.7.3 with a black-box probe, see MAC-EVIDENCE in the pull request): a
+// is free. Every documented member is implemented. Cost: appends and the counts are O(1) per identifier; indexOfItem,
+// sectionIdentifier(containingItem:) and the missing-identifier checks scan the items linearly.
+// Behaviour on identifiers (observed on macOS 26.7.3 with a black-box probe): a
 // section identifier that is already present, an absent section or anchor identifier (numberOfItems(inSection:),
 // appendItems(toSection:), insertItems relative to an absent item, moves, reloads), an item batch that repeats an
 // identifier, a move onto itself and appendItems with no section all terminate the process; here they trap. An item
