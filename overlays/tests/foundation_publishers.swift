@@ -52,7 +52,12 @@ check(stride + .seconds(0.5) == .seconds(2), "RunLoop strides add")
 check(RunLoop.SchedulerTimeType.Stride.milliseconds(250).timeInterval == 0.25, "stride from milliseconds")
 
 // OperationQueue scheduler: receive(on:) delivers on the queue's thread, not the caller's.
+// The queue is serial. receive(on:) schedules the value and the completion as two separate operations, and on a
+// queue that runs operations concurrently (the default) the completion operation may run first, in which case the
+// value is dropped. macOS behaves the same way (about 7% of deliveries are lost on a default queue there), so
+// a test that needs the value must not rely on ordering between the two operations.
 let queue = OperationQueue()
+queue.maxConcurrentOperationCount = 1
 let done = DispatchSemaphore(value: 0)
 var onMain: Bool?
 Just(1).receive(on: queue).sink { _ in
@@ -61,6 +66,27 @@ Just(1).receive(on: queue).sink { _ in
 }.store(in: &cancellables)
 check(done.wait(timeout: .now() + 5) == .success, "OperationQueue scheduler delivers")
 check(onMain == false, "OperationQueue scheduler delivers off the main thread")
+
+// On a serial queue the value always arrives before the completion, every time.
+var serialDelivered = 0
+var serialCompleted = 0
+var serialOutOfOrder = false
+for _ in 0..<200 {
+    let finished = DispatchSemaphore(value: 0)
+    var gotValue = false
+    let token = Just(1).receive(on: queue).sink(receiveCompletion: { _ in
+        if !gotValue { serialOutOfOrder = true }
+        serialCompleted += 1
+        finished.signal()
+    }, receiveValue: { _ in
+        gotValue = true
+        serialDelivered += 1
+    })
+    _ = finished.wait(timeout: .now() + 5)
+    token.cancel()
+}
+check(serialDelivered == 200 && serialCompleted == 200 && !serialOutOfOrder,
+      "OperationQueue scheduler on a serial queue delivers every value before its completion (\(serialDelivered), \(serialCompleted))")
 
 // JSONEncoder and JSONDecoder as TopLevelEncoder and TopLevelDecoder.
 struct Item: Codable, Equatable { var id: Int; var title: String }
