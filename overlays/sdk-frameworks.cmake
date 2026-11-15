@@ -1,6 +1,6 @@
 # Copyright (C) 2026 Lubos Dolezel
 #
-# Swift overlays for SDK frameworks (IOKit, CoreAudio, ...), built from the sources of the Swift 5.2.2 release
+# Swift overlays for SDK frameworks (IOKit, CoreAudio, AppKit, ...), built from the sources of the Swift 5.2.2 release
 # (apple/swift tag swift-5.2.2-RELEASE, stdlib/public/Darwin/<Framework>). Included from the parent CMakeLists.txt
 # when the Swift toolchain was found, so ${OVERLAYS} and ${overlay_shims} are set.
 
@@ -15,6 +15,16 @@ add_darling_swift_library(CoreAudio
 	MODULES Dispatch CoreFoundation ObjectiveC Darwin
 	FLAGS ${overlay_shims}
 	LIBRARIES CoreAudio)
+
+# AppKit: the 5.2.2 overlay sources (AppKit.swift, AppKit_FoundationExtensions.swift, NSError.swift, NSEvent.swift,
+# NSGraphics.swift, NSOpenGL.swift), unmodified. They compile against the declarations, API notes and module map of
+# Darling's AppKit headers (nested type names, typed enums, the `__`-prefixed refined functions).
+file(GLOB APPKIT_OVERLAY_SOURCES "${OVERLAYS}/AppKit/*.swift")
+add_darling_swift_library(AppKit
+	SOURCES ${APPKIT_OVERLAY_SOURCES}
+	MODULES Foundation CoreGraphics Dispatch CoreFoundation ObjectiveC Darwin
+	FLAGS ${overlay_shims}
+	LIBRARIES AppKit Foundation)
 
 add_darling_swift_library(Compression
 	SOURCES "${OVERLAYS}/Compression/Compression.swift"
