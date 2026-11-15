@@ -27,17 +27,17 @@ extension NSPopUpButton {
     /// A pull-down button that shows `image` and pulls down `menu`; its title is empty.
     public convenience init(image: NSImage, pullDownMenu: NSMenu) {
         self.init(frame: .zero, pullsDown: true)
-        setMenu(pullDownMenu)
+        menu = pullDownMenu
         setCellTitle("")
-        setImage(image)
+        self.image = image
     }
 
     /// A pull-down button that shows `title` and `image` and pulls down `menu`.
     public convenience init(title: String, image: NSImage? = nil, pullDownMenu: NSMenu) {
         self.init(frame: .zero, pullsDown: true)
-        setMenu(pullDownMenu)
+        menu = pullDownMenu
         setCellTitle(title)
-        setImage(image)
+        self.image = image
     }
 
     private func setCellTitle(_ title: String) {
