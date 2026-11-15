@@ -44,4 +44,4 @@ that says why. To see the difference, diff the file against the checkout, for ex
   original `_swift_nw_parameters_create_custom_ip` did not return its result. The shim redeclares the functions that
   Network.framework exports but does not publish (`nw_endpoint_create_unix`, `nw_endpoint_copy_interface`,
   `nw_interface_create_with_name`, `NWCreateNSDataFromDispatchData`, ...), so libnetwork and the Network
-  framework declare them with the same types. The Network overlay itself is not built from source here.
+  framework declare them with the same types.
