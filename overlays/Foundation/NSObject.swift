@@ -98,14 +98,14 @@ public class NSKeyValueObservation : NSObject {
         
         @objc private func _swizzle_me_observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSString : Any]?, context: UnsafeMutableRawPointer?) {
             guard let object = object as? NSObject, object === self.object, let change = change else { return }
-            let rawKind = UInt(bitPattern: (change[NSKeyValueChangeKindKey as NSString] as? NSNumber)?.integerValue() ?? 1)
+            let rawKind = UInt(bitPattern: (change[NSKeyValueChangeKey.kindKey.rawValue as NSString] as? NSNumber)?.integerValue() ?? 1)
             let kind = NSKeyValueChange(rawValue: rawKind)
             // NSNull values are passed through: observe()'s converter turns them into .some(nil) for optional values.
             let notification = NSKeyValueObservedChange(kind: kind,
-                                                        newValue: change[NSKeyValueChangeNewKey as NSString],
-                                                        oldValue: change[NSKeyValueChangeOldKey as NSString],
-                                                        indexes: (change[NSKeyValueChangeIndexesKey as NSString] as? NSIndexSet).map { IndexSet._unconditionallyBridgeFromObjectiveC($0) },
-                                                        isPrior: (change[NSKeyValueChangeNotificationIsPriorKey as NSString] as? NSNumber)?.boolValue() ?? false)
+                                                        newValue: change[NSKeyValueChangeKey.newKey.rawValue as NSString],
+                                                        oldValue: change[NSKeyValueChangeKey.oldKey.rawValue as NSString],
+                                                        indexes: (change[NSKeyValueChangeKey.indexesKey.rawValue as NSString] as? NSIndexSet).map { IndexSet._unconditionallyBridgeFromObjectiveC($0) },
+                                                        isPrior: (change[NSKeyValueChangeKey.notificationIsPriorKey.rawValue as NSString] as? NSNumber)?.boolValue() ?? false)
             callback(object, notification)
         }
     }
