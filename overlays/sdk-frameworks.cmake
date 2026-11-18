@@ -11,7 +11,7 @@ add_darling_swift_library(IOKit
 	LIBRARIES IOKit)
 
 add_darling_swift_library(CoreAudio
-	SOURCES "${OVERLAYS}/CoreAudio/CoreAudio.swift"
+	SOURCES "${OVERLAYS}/CoreAudio/CoreAudio.swift" "${OVERLAYS}/CoreAudio/AudioChannelLayout.swift"
 	MODULES Dispatch CoreFoundation ObjectiveC Darwin
 	FLAGS ${overlay_shims}
 	LIBRARIES CoreAudio)
