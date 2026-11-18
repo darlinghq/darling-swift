@@ -3,9 +3,6 @@ import Darwin
 
 // AudioChannelLayout, like AudioBufferList, ends in a variable-length array: mNumberChannelDescriptions
 // descriptions, of which the struct declares one.
-private let kAudioChannelLayoutTag_UseChannelDescriptions: AudioChannelLayoutTag = 0
-private let kAudioChannelLayoutTag_UseChannelBitmap: AudioChannelLayoutTag = 1 << 16
-private let kAudioChannelLabel_Unknown: AudioChannelLabel = 0xFFFF_FFFF
 
 private func descriptions(of layout: UnsafeMutableRawPointer) -> UnsafeMutablePointer<AudioChannelDescription> {
 	let offset = MemoryLayout<AudioChannelLayout>.offset(of: \AudioChannelLayout.mChannelDescriptions)!
@@ -15,11 +12,16 @@ private func descriptions(of layout: UnsafeMutableRawPointer) -> UnsafeMutablePo
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension AudioChannelLayout {
 	/// The size of an AudioChannelLayout that holds `maximumDescriptions` channel descriptions.
+	///
+	/// QUIRK: a `maximumDescriptions` below 1 stops the program with a precondition failure instead of
+	/// yielding the size of the bare struct. Not documented. Evidence: black-box observation on macOS 26.7.3
+	/// (tier 2): `sizeInBytes(maximumDescriptions: 0)` traps while 1 gives 32 and 3 gives 72 bytes, as for
+	/// AudioBufferList.sizeInBytes(maximumBuffers:). Test: overlays/tests/coreaudio_channel_layout.swift
+	/// (the sizes; the trap itself is not testable in-process).
 	public static func sizeInBytes(maximumDescriptions: Int) -> Int {
-		precondition(maximumDescriptions >= 0, "maximumDescriptions should not be negative")
+		precondition(maximumDescriptions >= 1, "AudioChannelLayout should contain at least one AudioChannelDescription")
 		let offset = MemoryLayout<AudioChannelLayout>.offset(of: \AudioChannelLayout.mChannelDescriptions)!
-		return max(MemoryLayout<AudioChannelLayout>.size,
-		           offset + maximumDescriptions * MemoryLayout<AudioChannelDescription>.stride)
+		return offset + maximumDescriptions * MemoryLayout<AudioChannelDescription>.stride
 	}
 
 	/// A zeroed AudioChannelLayout with room for `maximumDescriptions` descriptions; free it with `free`.
@@ -142,8 +144,9 @@ public struct ManagedAudioChannelLayout {
 		}
 
 		func copy() -> Storage {
-			let storage = Storage(maximumDescriptions: count)
-			memcpy(storage.layout, layout, AudioChannelLayout.sizeInBytes(maximumDescriptions: count))
+			// A layout adopted from elsewhere may declare no descriptions; it still holds the one the struct has.
+			let storage = Storage(maximumDescriptions: max(count, 1))
+			memcpy(storage.layout, layout, AudioChannelLayout.sizeInBytes(maximumDescriptions: max(count, 1)))
 			return storage
 		}
 
@@ -160,7 +163,11 @@ public struct ManagedAudioChannelLayout {
 	}
 
 	public init(tag: AudioChannelLayoutTag) {
-		storage = Storage(maximumDescriptions: 0)
+		// QUIRK: the layout made from a tag holds one (zeroed) channel description. Not documented.
+		// Evidence: black-box observation on macOS 26.7.3 (tier 2): channelDescriptions.count is 1 and
+		// sizeInBytes is 32 for init(tag: kAudioChannelLayoutTag_Stereo).
+		// Test: overlays/tests/coreaudio_channel_layout.swift ("init(tag:) holds one description").
+		storage = Storage(maximumDescriptions: 1)
 		storage.layout.pointee.mChannelLayoutTag = tag
 	}
 
@@ -218,9 +225,9 @@ public struct ManagedAudioChannelLayout {
 		}
 	}
 
-	private static let lent = Storage(maximumDescriptions: 0)
+	private static let lent = Storage(maximumDescriptions: 1)
 
-	public var sizeInBytes: Int { AudioChannelLayout.sizeInBytes(maximumDescriptions: storage.count) }
+	public var sizeInBytes: Int { AudioChannelLayout.sizeInBytes(maximumDescriptions: max(storage.count, 1)) }
 
 	/// The channels the tag stands for: its descriptions, the bitmap's channels, or the count
 	/// in the tag's low 16 bits.
