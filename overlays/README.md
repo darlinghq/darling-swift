@@ -1,6 +1,6 @@
 # Swift SDK overlays built from source
 
-Swift.org toolchains stopped shipping the Darwin SDK overlays, so the copies in this repository were x86_64-only (Swift 5.2.2). The CMake build of this repository builds six of them from source, for the architecture the Darling build produces (x86_64, or arm64 with `TARGET_ARM64`), and installs them in place of the 5.2.2 ones. Four are built from the last open-source Swift sources; `os` and `XPC` were never open source, so they are written from Apple's public API documentation and the imported symbol names (no Apple code).
+Swift.org toolchains stopped shipping the Darwin SDK overlays, so the copies in this repository were x86_64-only (Swift 5.2.2). The CMake build of this repository builds six of them from source, for every 64-bit slice the Darling build produces (the x86_64 and arm64 slices of `DARLING_ARCHS`), and installs them in place of the 5.2.2 ones. Four are built from the last open-source Swift sources; `os` and `XPC` were never open source, so they are written from Apple's public API documentation and the imported symbol names (no Apple code).
 
 | Overlay | Sources | Notes |
 |---|---|---|
