@@ -1002,6 +1002,8 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
         @inlinable // This is @inlinable as a generic, trivially forwarding function.
         mutating func withUnsafeMutableBytes<Result>(_ apply: (UnsafeMutableRawBufferPointer) throws -> Result) rethrows -> Result {
             ensureUniqueReference()
+            // Darling: also copy storage that this Data does not own (capacity 0, Data(referencing:)), as the other writers do.
+            storage.ensureUniqueBufferReference()
             return try storage.withUnsafeMutableBytes(in: range, apply: apply)
         }
 
@@ -1211,6 +1213,8 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
         @inlinable // This is @inlinable as a generic, trivially forwarding function.
         mutating func withUnsafeMutableBytes<Result>(_ apply: (UnsafeMutableRawBufferPointer) throws -> Result) rethrows -> Result {
             ensureUniqueReference()
+            // Darling: also copy storage that this Data does not own (capacity 0, Data(referencing:)), as the other writers do.
+            storage.ensureUniqueBufferReference()
             return try storage.withUnsafeMutableBytes(in: range, apply: apply)
         }
 

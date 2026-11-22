@@ -46,7 +46,7 @@ that says why. To see the difference, diff the file against the checkout, for ex
   `nw_interface_create_with_name`, `NWCreateNSDataFromDispatchData`, ...), so libnetwork and the Network
   framework declare them with the same types.
 
-## Data
+## Data and NSData
 
 `Foundation/Data.swift` is the `release/5.4` file, not a copy of swift-foundation's `Data.swift`, so it is not
 compared against upstream line by line. Where it adopts a later upstream declaration, this section says so.
@@ -94,6 +94,29 @@ compared against upstream line by line. Where it adopts a later upstream declara
     commit `511394753aa873fd390674301594b4bb8460a74b`, `DataStorage.swift`; Apache License v2.0 with the Runtime
     Library Exception). The function is `@usableFromInline` code in `libswiftFoundation`, not inlined into clients, so
     this fix needs the rebuilt dylib, unlike the helper itself.
+    Evidence: in the guest, with this guard removed from the dylib, `tests/data_span.swift` dies with SIGTRAP in the
+    live-parent empty-slice case; with it the case passes.
+
+- **`Data.withUnsafeMutableBytes` copies storage that the `Data` does not own.** `InlineSlice.withUnsafeMutableBytes`
+  and `LargeSlice.withUnsafeMutableBytes` (the `release/5.4` code, and so `Data.withUnsafeMutableBytes`) checked only
+  the reference count of the storage. A `Data` made by `Data(referencing:)` holds the `NSData` bytes in a storage with
+  capacity 0, so a write through `withUnsafeMutableBytes` reached the `NSData` and every `Data` made from it later.
+  Both functions now call `storage.ensureUniqueBufferReference()` after `ensureUniqueReference()`, the same two lines
+  as `_uniqueMutableBuffer`. `bytesNoCopy` storage (capacity equal to length) is still written in place. Observed in a
+  Darling guest without the change: the write reached the `NSData` at 15 and 100000 bytes, for referencing slices (40
+  and 100000 bytes) and at `Int32.max` bytes. A bridged `third = (first as NSData) as Data` can share the storage with
+  `first` by reading the code, so `third.withUnsafeMutableBytes { $0[0] = 1 }` would change `first`; that was NOT
+  reproduced in the guest with the direct `(x as NSData) as Data` (the compiler can cancel the two bridge calls), and
+  the round-trip cases now also hop through an `NSArray` in a function that is never inlined; they passed in the guest without
+  the fix too, so round-trip aliasing remains expected by reading the code and not reproduced, and those cases do not
+  discriminate this fix.
+  `tests/data_nsdata_aliasing.swift` holds the cases. GUARDS in it, which cannot fail by design or pass in every
+  variant: the 1 and 14-byte cases (inline storage, copied by construction) and the four other writers below. Other
+  write paths, read for the same gap: the subscript setter (`storage.set`), `replaceSubrange` and `append`
+  (`storage.replaceBytes`) and `resetBytes` all call `ensureUniqueBufferReference`, and the test checks the four.
+  `Data(contentsOf:)` with a mapped file goes through `Data(referencing:)`, so writing to such a `Data` now copies the
+  mapping first; before, the write went to the mapping, and a crash on a read-only mapping was possible (GUESS: not
+  tried).
 
   Verification scope. Built: the final candidate (`local/integration-2215d`, the tree whose Foundation code equals the last commit of
   this series) with `ninja swiftCryptoKit`, arm64 Debug: exit 0, 29.2 s, 0 errors and no lifetime warning; it compiled
@@ -102,17 +125,28 @@ compared against upstream line by line. Where it adopts a later upstream declara
   helper fix by the d-unfixed-helper variant (below). Run: in a Darling guest on a refresh prefix plus this overlay, with
   hand-linked arm64 Debug test binaries, not on `master` and not on a clean install; each variant had its own
   `libswiftFoundation` and modules.
-  - d-fixed (the final candidate): `data_span` PASS 111 ok, 0 FAIL.
+  - d-fixed (the final candidate): `data_span` PASS 111 ok, 0 FAIL, `data_nsdata_aliasing` PASS 26/0.
   - d-unfixed-helper (the helper's `ensureUniqueBufferReference` call removed): `data_span` FAIL, 96 ok, 15 FAIL, namely
     the `NSData` cases at 15 and 100000 bytes (the `mutableSpan` and `mutableBytes` writes and the `Data` made from the
     `NSData` afterwards), four round-trip lines at 15 and 100000 bytes (the cause was not isolated), the two referencing
-    slices (40 and 100000 bytes) with their `mutableBytes` write, and the `Int32.max` `NSData` case.
+    slices (40 and 100000 bytes) with their `mutableBytes` write, and the `Int32.max` `NSData` case; `data_nsdata_aliasing` PASS 26/0.
+  - d-unfixed-wumb (the `withUnsafeMutableBytes` fix removed): `data_nsdata_aliasing` FAIL, 19 ok, 7 FAIL, namely the
+    `withUnsafeMutableBytes` write and the later `Data` at 15 and 100000 bytes (4), the referencing slices at 40 and
+    100000 bytes (2) and the `Int32.max` case (1); `data_span` PASS 111/0.
   - d-unfixed-guard (the `_bytes` guard in `ensureUniqueBufferReference` removed; it lives in the dylib, the module is
     the same as d-fixed, so the dylib decides for it): `data_span` CRASHES with SIGTRAP (exit 133, stderr empty, no
     stdout when piped); a re-run under a pty stops in the live-parent empty-slice case (`data_span.swift` lines 38 to
-    43) right after `ok: an empty slice gives empty spans`, so that case discriminates the guard.
+    43) right after `ok: an empty slice gives empty spans`, so that case discriminates the guard; `data_nsdata_aliasing` PASS 26/0.
+  - Against d-fixed: `cryptokit_smoke` PASS (9 ok) and the CryptoKit known-answer tests PASS (hash 27, aead 64, curves
+    44), 0 FAIL.
   The helper and the `withUnsafeMutableBytes` bodies are `@_alwaysEmitIntoClient` or `@inlinable`, so for those cases
   the module that a test is compiled against decides, not the dylib.
+
+  Round trip through the bridge pair: that a write to a `Data` that went through `(x as NSData) as Data` reaches the
+  first `Data` is expected by reading the code and NOT reproduced in the guest. The direct `(x as NSData) as Data` and
+  the variant that hops through an `NSArray` in an `@inline(never)` function both passed without the
+  `withUnsafeMutableBytes` fix, so these round-trip cases do not discriminate that fix; they stay as guards. The
+  round-trip lines of `data_span` that failed without the helper fix are listed above with their cause not isolated.
 
   Still GUESS: that `@_addressableForDependencies` is not an ABI change, and that macOS 26 does not export the four removed names,
   `_$s10Foundation4DataV5bytesSVvg`, `_$s10Foundation4DataV5bytesSVvpMV`, `_$s10Foundation4DataV12mutableBytesSvvg`
