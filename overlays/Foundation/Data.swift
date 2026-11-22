@@ -42,6 +42,7 @@ internal func __NSDataIsCompact(_ data: NSData) -> Bool {
 
 @_exported import Foundation // Clang module
 import Darwin
+import Builtin // Darling: the overlay is built without DEPLOYMENT_RUNTIME_SWIFT; the span accessors need Builtin
 // Darling: no _SwiftFoundationOverlayShims; Darling's NSData has no _isCompact SPI or deallocator globals.
 
 internal func __NSDataIsCompact(_ data: NSData) -> Bool {
@@ -191,7 +192,11 @@ internal final class __DataStorage {
             if isExternallyOwned {
                 let newCapacity = malloc_good_size(_length)
                 let newBytes = __DataStorage.allocate(newCapacity, false)
-                __DataStorage.move(newBytes!, _bytes!, _length)
+                // Darling: an empty slice of shared storage has no bytes (storage.mutableCopy of an empty range);
+                // swift-foundation has the same guard (PR 2058).
+                if let bytes = _bytes {
+                    __DataStorage.move(newBytes!, bytes, _length)
+                }
                 _freeBytes()
                 _bytes = newBytes
                 _capacity = newCapacity
@@ -626,6 +631,7 @@ internal class __NSSwiftData : NSData {
 }
 
 @frozen
+@_addressableForDependencies
 public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessCollection, MutableCollection, RangeReplaceableCollection, MutableDataProtocol, ContiguousBytes {
     public typealias ReferenceType = NSData
 
@@ -2177,6 +2183,95 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
         return try _representation.withUnsafeBytes(body)
     }
 
+    // Darling: bytes, span, mutableBytes and mutableSpan come from swift-foundation's Data.swift (swift-6.3.3-RELEASE,
+    // Apache-2.0 with Runtime Library Exception, see DARLING-CHANGES.md); the unique-storage step is shared in _uniqueMutableBuffer.
+    // The raw pointers are sound because each span borrows or exclusively mutates self and Data is addressable, so the
+    // address of its inline bytes stays valid for the span's lifetime.
+    @available(macOS 10.14.4, iOS 12.2, watchOS 5.2, tvOS 12.2, *)
+    @_alwaysEmitIntoClient
+    public var bytes: RawSpan {
+        @_lifetime(borrow self)
+        borrowing get {
+            let buffer: UnsafeRawBufferPointer
+            switch _representation {
+            case .empty:
+                buffer = UnsafeRawBufferPointer(start: nil, count: 0)
+            case .inline:
+                buffer = UnsafeRawBufferPointer(
+                    start: UnsafeRawPointer(Builtin.addressOfBorrow(self)),
+                    count: _representation.count)
+            case .slice(let slice):
+                buffer = UnsafeRawBufferPointer(
+                    start: slice.storage.mutableBytes?.advanced(by: slice.startIndex), count: slice.count)
+            case .large(let slice):
+                buffer = UnsafeRawBufferPointer(
+                    start: slice.storage.mutableBytes?.advanced(by: slice.startIndex), count: slice.count)
+            }
+            let span = RawSpan(_unsafeBytes: buffer)
+            return _overrideLifetime(span, borrowing: self)
+        }
+    }
+
+    @available(macOS 10.14.4, iOS 12.2, watchOS 5.2, tvOS 12.2, *)
+    @_alwaysEmitIntoClient
+    public var span: Span<UInt8> {
+        @_lifetime(borrow self)
+        borrowing get {
+            let span = bytes._unsafeView(as: UInt8.self)
+            return _overrideLifetime(span, borrowing: self)
+        }
+    }
+
+    // Makes the storage uniquely referenced, then returns its bytes. The representation is cleared while the
+    // slice is checked, so that the slice copy taken by the pattern is the only reference, and put back afterwards.
+    // ensureUniqueBufferReference also copies storage the Data does not own (capacity 0, as in Data(referencing:)),
+    // so a write never reaches the NSData; bytesNoCopy storage has capacity == length and is still written in place.
+    @_alwaysEmitIntoClient
+    internal mutating func _uniqueMutableBuffer() -> UnsafeMutableRawBufferPointer {
+        switch _representation {
+        case .empty:
+            return UnsafeMutableRawBufferPointer(start: nil, count: 0)
+        case .inline:
+            return UnsafeMutableRawBufferPointer(
+                start: UnsafeMutableRawPointer(Builtin.addressOfBorrow(self)),
+                count: _representation.count)
+        case .slice(var slice):
+            _representation = .empty
+            slice.ensureUniqueReference()
+            slice.storage.ensureUniqueBufferReference()
+            _representation = .slice(slice)
+            return UnsafeMutableRawBufferPointer(
+                start: slice.storage.mutableBytes?.advanced(by: slice.startIndex), count: slice.count)
+        case .large(var slice):
+            _representation = .empty
+            slice.ensureUniqueReference()
+            slice.storage.ensureUniqueBufferReference()
+            _representation = .large(slice)
+            return UnsafeMutableRawBufferPointer(
+                start: slice.storage.mutableBytes?.advanced(by: slice.startIndex), count: slice.count)
+        }
+    }
+
+    @available(macOS 10.14.4, iOS 12.2, watchOS 5.2, tvOS 12.2, *)
+    @_alwaysEmitIntoClient
+    public var mutableBytes: MutableRawSpan {
+        @_lifetime(&self)
+        mutating get {
+            let span = MutableRawSpan(_unsafeBytes: _uniqueMutableBuffer())
+            return _overrideLifetime(span, mutating: &self)
+        }
+    }
+
+    @available(macOS 10.14.4, iOS 12.2, watchOS 5.2, tvOS 12.2, *)
+    @_alwaysEmitIntoClient
+    public var mutableSpan: MutableSpan<UInt8> {
+        @_lifetime(&self)
+        mutating get {
+            let span = MutableSpan<UInt8>(_unsafeBytes: _uniqueMutableBuffer())
+            return _overrideLifetime(span, mutating: &self)
+        }
+    }
+
     /// Mutate the bytes in the data.
     ///
     /// This function assumes that you are mutating the contents.
@@ -2698,12 +2793,6 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
         get { fatalError() }
         set { fatalError() }
     }
-    
-    @available(*, unavailable, message: "use withUnsafeBytes instead")
-    public var bytes: UnsafeRawPointer { fatalError() }
-    
-    @available(*, unavailable, message: "use withUnsafeMutableBytes instead")
-    public var mutableBytes: UnsafeMutableRawPointer { fatalError() }
     
     /// Returns `true` if the two `Data` arguments are equal.
     @inlinable // This is @inlinable as emission into clients is safe -- the concept of equality on Data will not change.
