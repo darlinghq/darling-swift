@@ -118,6 +118,29 @@ compared against upstream line by line. Where it adopts a later upstream declara
   mapping first; before, the write went to the mapping, and a crash on a read-only mapping was possible (GUESS: not
   tried).
 
+- **Left open: `NSData.regions`.** `NSData.regions` (`Foundation/NSData+DataProtocol.swift`) returns one
+  `Data(bytesNoCopy:)` over the bytes of the `NSData`, with a deallocator that keeps the `NSData` alive. That is what
+  swift-corelibs-foundation does (commit `f41070b9399539519cc0432a75972fdcfd74371f`, `Sources/Foundation/NSData+DataProtocol.swift`
+  lines 33 to 41, over `NSData.enumerateBytes`, `Sources/Foundation/NSData.swift` lines 637 to 645, which hands out
+  `bytes` as one range; Apache-2.0, re-read at that commit), so it is not changed here. `bytesNoCopy` storage is
+  written in place, by contract, so writing to a region changes the `NSData`: `var r = (a as NSData).regions[0];
+  r[0] = 9` changes `a[0]` for a `Data` `a` (read from the code, not run); and for an `NSMutableData` the pointer can
+  dangle after the object reallocates. NOT fixed; whether Darling should diverge from corelibs here is a question for
+  the maintainers.
+- **Left open: binaries that do not take these fixes.** The bodies that were fixed are `@inlinable` or
+  `@_alwaysEmitIntoClient`, so a binary built against an older Foundation module keeps the old behaviour until it is
+  rebuilt. An app compiled on macOS inlines Apple's accessor body (swift-foundation's version of it checks only the
+  reference count for `mutableBytes` and `mutableSpan`), so such an app can still write through for
+  `Data(referencing:)` storage under Darling.
+- Known limitations of the Data storage are recorded separately and are not part of this series.
+- **Expected fixed (by reading the code; not run): `withUnsafeMutableBytes` on an empty slice whose parent is alive.** In the `release/5.4` code,
+  `base[10..<10].withUnsafeMutableBytes { _ in }` with `base` still referenced trapped: the slice's storage is a copy
+  of an empty range with no bytes, and `storage.withUnsafeMutableBytes(in:)` unwraps `_bytes`. With the `_bytes` guard
+  of the accessor commit and the call this series adds to `withUnsafeMutableBytes`, that
+  storage is given bytes before the closure runs, so the trap is expected to be gone. This is by reading the code: no
+  test covers the `withUnsafeMutableBytes` path and it was not run. (The accessor path of the same scenario trapped in
+  the guest without the guard.)
+
   Verification scope. Built: the final candidate (`local/integration-2215d`, the tree whose Foundation code equals the last commit of
   this series) with `ninja swiftCryptoKit`, arm64 Debug: exit 0, 29.2 s, 0 errors and no lifetime warning; it compiled
   `libswiftFoundation` and linked both libraries (the Swift of CryptoKit was not recompiled: its module input was unchanged). The intermediate commits of this series were NOT built one by one; the
