@@ -97,8 +97,14 @@ internal func _withStackOrHeapBuffer(capacity: Int, _ body: (UnsafeMutableBuffer
 // NOTE: older overlays called this class _DataStorage. The two must
 // coexist without a conflicting ObjC class name, so it was renamed.
 // The old name must not be used in the new runtime.
+// Darling: @unchecked Sendable is sound for aliasing because no two Data values can mutate the same bytes. Every
+// mutation path reviewed for aliasing between Data values checks the storage reference count (ensureUniqueReference
+// copies storage that another Data holds) and the buffer ownership (ensureUniqueBufferReference copies storage this Data
+// does not own: capacity 0, as from Data(referencing:)), except the documented exceptions: bytesNoCopy storage
+// (capacity == length) is written in place, as documented, and so are the Data values that NSData.regions returns, which
+// are bytesNoCopy views (see DARLING-CHANGES.md).
 @usableFromInline
-internal final class __DataStorage {
+internal final class __DataStorage : @unchecked Sendable {
     @usableFromInline static let maxSize = Int.max >> 1
     @usableFromInline static let vmOpsThreshold = NSPageSize() * 4
     
@@ -632,7 +638,7 @@ internal class __NSSwiftData : NSData {
 
 @frozen
 @_addressableForDependencies
-public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessCollection, MutableCollection, RangeReplaceableCollection, MutableDataProtocol, ContiguousBytes {
+public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessCollection, MutableCollection, RangeReplaceableCollection, MutableDataProtocol, ContiguousBytes, Sendable {
     public typealias ReferenceType = NSData
 
     public typealias ReadingOptions = NSDataReadingOptions
@@ -648,7 +654,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
     // Inlinability strategy: everything here should be inlined for direct operation on the stack wherever possible.
     @usableFromInline
     @frozen
-    internal struct InlineData {
+    internal struct InlineData : Sendable {
 #if arch(x86_64) || arch(arm64) || arch(s390x) || arch(powerpc64) || arch(powerpc64le)
         @usableFromInline typealias Buffer = (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
                                               UInt8, UInt8, UInt8, UInt8, UInt8, UInt8) //len  //enum
@@ -869,7 +875,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
     // Inlinability strategy: everything here should be easily inlinable as large _DataStorage methods should not inline into here.
     @usableFromInline
     @frozen
-    internal struct InlineSlice {
+    internal struct InlineSlice : Sendable {
         // ***WARNING***
         // These ivars are specifically laid out so that they cause the enum _Representation to be 16 bytes on 64 bit platforms. This means we _MUST_ have the class type thing last
         @usableFromInline var slice: Range<HalfInt>
@@ -1087,9 +1093,12 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
 
     // A reference wrapper around a Range<Int> for when the range of a data buffer is too large to whole in a single word.
     // Inlinability strategy: everything should be inlinable as trivial.
+    // Darling: @unchecked Sendable is sound for the same reason as __DataStorage: no two Data values can mutate the same
+    // range. Each write to range (count, append, resetBytes, replaceSubrange of LargeSlice) follows
+    // LargeSlice.ensureUniqueReference, which copies a RangeReference that another Data holds.
     @usableFromInline
     @_fixed_layout
-    internal final class RangeReference {
+    internal final class RangeReference : @unchecked Sendable {
         @usableFromInline var range: Range<Int>
 
         @inlinable @inline(__always) // This is @inlinable as trivially forwarding.
@@ -1117,7 +1126,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
     // Inlinability strategy: everything here should be easily inlinable as large _DataStorage methods should not inline into here.
     @usableFromInline
     @frozen
-    internal struct LargeSlice {
+    internal struct LargeSlice : Sendable {
         // ***WARNING***
         // These ivars are specifically laid out so that they cause the enum _Representation to be 16 bytes on 64 bit platforms. This means we _MUST_ have the class type thing last
         @usableFromInline var slice: RangeReference
@@ -1295,7 +1304,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
     // Inlinability strategy: almost everything should be inlinable as forwarding the underlying implementations. (Inlining can also help avoid retain-release traffic around pulling values out of enums.)
     @usableFromInline
     @frozen
-    internal enum _Representation {
+    internal enum _Representation : Sendable {
         case empty
         case inline(InlineData)
         case slice(InlineSlice)

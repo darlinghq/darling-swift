@@ -51,6 +51,31 @@ that says why. To see the difference, diff the file against the checkout, for ex
 `Foundation/Data.swift` is the `release/5.4` file, not a copy of swift-foundation's `Data.swift`, so it is not
 compared against upstream line by line. Where it adopts a later upstream declaration, this section says so.
 
+- **`Data` is `Sendable`**, as Apple documents. `Data` and its internal `InlineData`, `InlineSlice`, `LargeSlice` and
+  `_Representation` conform to `Sendable`; the storage classes `__DataStorage` and `RangeReference` are
+  `@unchecked Sendable`, because they hold mutable state and a deallocator closure that the compiler cannot check.
+  These are the declarations swift-foundation's `Data.swift` has at `swift-6.3.3-RELEASE`. Each `@unchecked Sendable`
+  has a comment saying why it is sound: no two `Data` values can mutate the same bytes, because every mutation path
+  checks the reference count of the storage and then calls `ensureUniqueBufferReference`. Paths read for that claim:
+  the subscript setter, `reserveCapacity`, `append`, `resetBytes`, `replaceSubrange`, `withUnsafeMutableBytes` and
+  `_uniqueMutableBuffer` (the last two since the commits before this one). The
+  exceptions are `bytesNoCopy` storage, written in place by contract, and the `Data` values that `NSData.regions` returns, which
+  are `bytesNoCopy` views (see the open items below). `Sendable` is a marker protocol and adds no symbol to
+  `libswiftFoundation`: a scratch library built with library evolution showed none, and the reviewer's `llvm-nm` of
+  the built arm64 Debug `libswiftFoundation` found no `Sendable` conformance symbol for `Data` in the export table
+  (checked for absence). Clients in language mode 6, for example CryptoKit.framework, need it.
+  `tests/data_sendable.swift` is the check.
+  **Why the series travels together.** Once `Data` is `Sendable`, a write that reaches another `Data` through shared
+  bytes is an unflagged data race, so the write-through paths are closed or recorded in the same series. The commits
+  are independent and can be split into separate PRs if the maintainers prefer.
+
+  Verification scope. Built: the final candidate (`local/integration-2215d`) with `ninja swiftCryptoKit`, arm64 Debug: exit
+  0, 29.2 s, 0 errors and no lifetime warning; it compiled `libswiftFoundation` and linked both libraries (CryptoKit
+  was not recompiled; CryptoKit builds in language mode 6 with `Data` Sendable). The intermediate commits were NOT built one by one. Run:
+  `tests/data_sendable.swift` (built with `-swift-version 6`) printed 3 ok, 0 FAIL against each of the four variants
+  (d-fixed, d-unfixed-helper, d-unfixed-wumb, d-unfixed-guard) in a Darling guest on a refresh prefix plus this overlay,
+  with hand-linked arm64 Debug test binaries, not on `master` and not on a clean install (the full matrix is in the
+  verification scope below).
 - **`Data.bytes`, `.span`, `.mutableBytes` and `.mutableSpan`** (`RawSpan`, `Span<UInt8>`, `MutableRawSpan`,
   `MutableSpan<UInt8>`, documented by Apple since macOS 10.14.4) replace the two unavailable `bytes` and
   `mutableBytes` stubs of the `release/5.4` file. Origin: `Sources/FoundationEssentials/Data/Data.swift` of
@@ -148,18 +173,18 @@ compared against upstream line by line. Where it adopts a later upstream declara
   helper fix by the d-unfixed-helper variant (below). Run: in a Darling guest on a refresh prefix plus this overlay, with
   hand-linked arm64 Debug test binaries, not on `master` and not on a clean install; each variant had its own
   `libswiftFoundation` and modules.
-  - d-fixed (the final candidate): `data_span` PASS 111 ok, 0 FAIL, `data_nsdata_aliasing` PASS 26/0.
+  - d-fixed (the final candidate): `data_span` PASS 111 ok, 0 FAIL, `data_nsdata_aliasing` PASS 26/0, `data_sendable` PASS 3/0.
   - d-unfixed-helper (the helper's `ensureUniqueBufferReference` call removed): `data_span` FAIL, 96 ok, 15 FAIL, namely
     the `NSData` cases at 15 and 100000 bytes (the `mutableSpan` and `mutableBytes` writes and the `Data` made from the
     `NSData` afterwards), four round-trip lines at 15 and 100000 bytes (the cause was not isolated), the two referencing
-    slices (40 and 100000 bytes) with their `mutableBytes` write, and the `Int32.max` `NSData` case; `data_nsdata_aliasing` PASS 26/0.
+    slices (40 and 100000 bytes) with their `mutableBytes` write, and the `Int32.max` `NSData` case; `data_nsdata_aliasing` PASS 26/0; `data_sendable` PASS 3/0.
   - d-unfixed-wumb (the `withUnsafeMutableBytes` fix removed): `data_nsdata_aliasing` FAIL, 19 ok, 7 FAIL, namely the
     `withUnsafeMutableBytes` write and the later `Data` at 15 and 100000 bytes (4), the referencing slices at 40 and
-    100000 bytes (2) and the `Int32.max` case (1); `data_span` PASS 111/0.
+    100000 bytes (2) and the `Int32.max` case (1); `data_span` PASS 111/0; `data_sendable` PASS 3/0.
   - d-unfixed-guard (the `_bytes` guard in `ensureUniqueBufferReference` removed; it lives in the dylib, the module is
     the same as d-fixed, so the dylib decides for it): `data_span` CRASHES with SIGTRAP (exit 133, stderr empty, no
     stdout when piped); a re-run under a pty stops in the live-parent empty-slice case (`data_span.swift` lines 38 to
-    43) right after `ok: an empty slice gives empty spans`, so that case discriminates the guard; `data_nsdata_aliasing` PASS 26/0.
+    43) right after `ok: an empty slice gives empty spans`, so that case discriminates the guard; `data_nsdata_aliasing` PASS 26/0; `data_sendable` PASS 3/0.
   - Against d-fixed: `cryptokit_smoke` PASS (9 ok) and the CryptoKit known-answer tests PASS (hash 27, aead 64, curves
     44), 0 FAIL.
   The helper and the `withUnsafeMutableBytes` bodies are `@_alwaysEmitIntoClient` or `@inlinable`, so for those cases

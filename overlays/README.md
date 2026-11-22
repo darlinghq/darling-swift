@@ -39,6 +39,8 @@ The toolchain is the Linux Swift release matching `version.txt` (for example `sw
 
 `tests/os_xpc.swift` covers `Logger`, `os_log` with arguments, signpost IDs and intervals, `OSAllocatedUnfairLock` across threads, `XPCDictionary`/`XPCArray` and `XPCSession`. `tests/objc_only.swift` and `tests/objc_cf.swift` cover an NSObject subclass with `@objc` methods and selectors, NSObject `Equatable`/`Hashable`, `autoreleasepool`, `ObjCBool`, CF types as `Hashable` (`_CFObject`), CFString round trips, and CGFloat. Build them for `<arch>-apple-macosx26.0` against these overlays, link with Darling's ld64 (plus `-Xfrontend -disable-objc-attr-requires-foundation-module`, since there is no Foundation Swift overlay), and run them with `darling shell`.
 
+`tests/data_sendable.swift` checks that `Data` is `Sendable`; build it with `-swift-version 6`, because language mode 5 only warns.
+
 `tests/data_span.swift` covers `Data.bytes`, `.span`, `.mutableBytes` and `.mutableSpan` for empty, inline, slice and `Int32.max`-byte Data, copy on write, a `Data` made from an `NSMutableData` or from an immutable `NSData` (`Data(referencing:)`, also as a slice whose parent is gone and at `Int32.max` bytes, with a round trip back through `NSData`; a write must not reach the `NSData`) and `bytesNoCopy`.
 
 `tests/data_nsdata_aliasing.swift` checks that a `Data` made from an `NSData` is a value: `withUnsafeMutableBytes`, the subscript, `replaceSubrange`, `append` and `resetBytes` change that `Data` only (also after a round trip through `NSData` and an `NSArray` hop, for a slice whose parent is gone and at `Int32.max` bytes).
