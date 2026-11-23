@@ -200,3 +200,63 @@ compared against upstream line by line. Where it adopts a later upstream declara
   `_$s10Foundation4DataV5bytesSVvg`, `_$s10Foundation4DataV5bytesSVvpMV`, `_$s10Foundation4DataV12mutableBytesSvvg`
   and `_$s10Foundation4DataV12mutableBytesSvvpMV`, which only a Mac can confirm. CryptoKit.framework needs these four
   members.
+
+# How CryptoKit.framework differs from swift-crypto
+
+`CryptoKit.framework` is the `Crypto` module of [apple/swift-crypto](https://github.com/apple/swift-crypto) at tag
+`5.1.2` (commit `3280a5f72874d2f73bf25551bbb64f524c76d834`), Apache License v2.0, with BoringSSL (Apache-2.0) and
+XKCP (CC0-1.0) as vendored by swift-crypto; `CryptoKit/NOTICE.md` has the notices. Unlike the Foundation overlay no
+upstream file is copied into this repository: the files are compiled from a checkout (`SWIFT_CRYPTO_SOURCE_DIR`) and
+the differences below are made on a copy in the build directory, so there are no `// Darling:` comments.
+
+- **Module name.** Built with `-module-name CryptoKit`. The 92 `#if canImport(CryptoKit)` tests of the API files
+  (which re-export Apple's CryptoKit when true) become `#if canImport(CryptoKit) && !DARLING_CRYPTOKIT_MODULE`, and
+  `-DDARLING_CRYPTOKIT_MODULE` is defined, so the implementation in the `#else` branch is compiled. The four
+  `Crypto.X` qualifiers (`Digests/HashFunctions.swift`, `Message Authentication Codes/MACFunctions.swift`,
+  `HPKE/Ciphersuite/HPKE-KexKeyDerivation.swift`, `HPKE/Ciphersuite/KEM/Conformances/DHKEM.swift`) become
+  `CryptoKit.X`. `CryptoKit/rewrite-sources.cmake` does both and asserts the counts. To see the difference, diff the
+  build directory's `cryptokit-src` against `Sources/Crypto` of the checkout: 99 changed lines.
+- **Library evolution.** `add_darling_swift_library` always compiles with `-enable-library-evolution`, which
+  swift-crypto has never been built with. The first build found one class of error that comes from it: an
+  `@inlinable` initializer of a struct that is not `@frozen` that assigns `self.x` directly. `@inlinable` becomes
+  `@usableFromInline` on exactly three initializers, named by file and text in `CryptoKit/rewrite-sources.cmake`
+  (rule 3, each must occur once, else the build stops before writing): `init(rawRepresentation:)` of
+  `OpenSSLCurve25519PublicKeyImpl` in `Keys/EC/BoringSSL/Ed25519_boring.swift` (line 109 in 5.1.2) and in
+  `X25519Keys_boring.swift` (line 39), and `init(wrapping:)` of `OpenSSLNISTCurvePublicKeyImpl` in
+  `NISTCurvesKeys_boring.swift` (line 119). A scan of every `@inlinable` or `@_alwaysEmitIntoClient` initializer in
+  `Sources/Crypto` found no other one that assigns a stored property without delegating (done by script). Reproduced
+  and fixed on a stand-in file with the toolchain's swiftc (library evolution on: the error with `@inlinable`, none
+  with `@usableFromInline`), then on the real sources: with these three rules and the Foundation changes
+  (`Data: Sendable`, the span accessors) `ninja swiftCryptoKit` compiles and links the whole module (5 min 16 s,
+  arm64 Debug), so no fourth initializer needed a rule. Any other `@inlinable` or `@usableFromInline` fix that a
+  later tag needs becomes another rule here.
+- **Failed AEAD open.** On macOS `AES.GCM.open` and `ChaChaPoly.open` throw `CryptoKitError.authenticationFailure` when the
+  tag does not authenticate. swift-crypto's BoringSSL path throws `underlyingCoreCryptoError(error: <BoringSSL code>)`,
+  because on Apple platforms swift-crypto re-exports Apple's CryptoKit and this path only runs elsewhere. Rules 4 and 5
+  of `CryptoKit/rewrite-sources.cmake` (counts asserted): the two failed-open sites of
+  `CryptoBoringWrapper/AEAD/BoringSSLAEAD.swift` (the wrapper, which cannot name `CryptoKitError`) throw
+  `CryptoBoringWrapperError.authenticationFailure` when BoringSSL's newest error is the cipher library's bad-decrypt
+  error, and keep `internalBoringSSLError()` for any other failure; the two `open` wrappers in Crypto's
+  `ChaChaPoly_boring.swift`, which already convert the wrapper's `underlyingCoreCryptoError`, convert
+  `authenticationFailure` to `CryptoKitError.authenticationFailure`. Pinned by `tests/cryptokit_vectors.swift`.
+- **Files left out.** `CryptoError_boring.swift` and `_CryptoModuleAnchor.swift` of `Crypto` (see README.md, CryptoKit),
+  the three socket files of BoringSSL, and every other target of the package.
+- **Flags of Package.swift that are carried:** `-package-name com.apple.swift-crypto`, the experimental features
+  `Lifetimes` and `SourceWarningControl`, the upcoming feature `MemberImportVisibility`, and language mode 6 (given
+  as `-swift-version 6`, after the 5 that the function passes; it takes effect: the first build in that mode reported
+  the Sendable errors for `Data` that exist only in language mode 6).
+- **Platform branches that take the Darwin side.** `Util/BoringSSL/Zeroization_boring.swift` (`!canImport(Darwin)`,
+  so the `memset_s` shim over `OPENSSL_cleanse` is not compiled), `HPKE/Ciphersuite/HPKE-Utils.swift` (`import
+  Darwin`) and `CryptoBoringWrapper/Util/RandomBytes.swift` (`SystemRandomNumberGenerator`). The framework therefore
+  depends on Darling's `memset_s`, `getentropy` and `pthread_atfork`.
+- **CryptoBoringWrapper** is compiled with `add_darling_swift_object`, like the `_RopeModule` of the Foundation
+  overlay, and its symbols are unexported.
+- **Native code.** The BoringSSL and XKCP sources are unchanged. The C++ files get `-std=c++17 -fno-exceptions
+  -fno-rtti`, which swift-crypto's `Package.swift` does not pass (it sets only the C++ standard); that BoringSSL
+  compiles that way is verified by the build: all 243 files compile with those flags (`build.ninja` of the build shows
+  them on the compile rules; a grep also found no `virtual` under `crypto/` and `include/`). All native sources of the
+  arm64 slice also get `-Xarch_arm64 -march=armv8-a+crypto`: Darling's arm64 default (`-mcpu=generic`) defines neither
+  `__ARM_FEATURE_AES` nor `__ARM_FEATURE_SHA2`, and BoringSSL's `crypto/cpu_aarch64_apple.cc` stops with `#error`
+  without them. The arm64 slice therefore assumes the AES and SHA extensions at run time (SIGILL on a CPU without
+  them).
+- **Not in the framework:** `SecureEnclave` and `CorecryptoCurveType`, which swift-crypto does not have.
