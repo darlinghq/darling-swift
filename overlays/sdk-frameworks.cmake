@@ -62,3 +62,15 @@ add_darling_swift_library(Network
 	MODULES Foundation Dispatch CoreFoundation ObjectiveC Darwin
 	FLAGS ${overlay_shims}
 	LIBRARIES Network Security)
+
+# CoreData: NSManagedObjectContext.fetch(_:) and count(for:) for NSFetchRequest<T> (typed results), the CocoaError
+# codes of CoreData and the NSFetchRequestResult conformances of NSNumber, NSDictionary, NSManagedObject and
+# NSManagedObjectID. CocoaError.swift and CoreData.mm are the 5.2.2 sources (stdlib/public/Darwin/CoreData),
+# unmodified; NSManagedObjectContext.swift is described in overlays/README.md. The generic methods call
+# -executeFetchRequest:error: and -countForFetchRequest:error: through overlays/shims/CoreDataOverlayShims.h.
+add_darling_swift_library(CoreData
+	SOURCES "${OVERLAYS}/CoreData/CocoaError.swift" "${OVERLAYS}/CoreData/NSManagedObjectContext.swift"
+	MODULES Foundation CoreGraphics Dispatch CoreFoundation ObjectiveC Darwin
+	FLAGS ${overlay_shims}
+	NATIVE_SOURCES "${OVERLAYS}/CoreData/CoreData.mm"
+	LIBRARIES CoreData Foundation)

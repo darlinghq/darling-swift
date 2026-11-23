@@ -14,3 +14,6 @@ module _FoundationICU [system] {
 module _SwiftNetworkOverlayShims {
   header "NetworkOverlayShims.h"
 }
+module _SwiftCoreDataOverlayShims {
+  header "CoreDataOverlayShims.h"
+}
