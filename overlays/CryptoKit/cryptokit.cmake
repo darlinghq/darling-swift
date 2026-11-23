@@ -6,7 +6,7 @@
 # compiled and what is changed.
 #
 # SWIFT_CRYPTO_SOURCE_DIR is a checkout of swift-crypto at the tag 5.1.2 (the main repository's src/external/swift-crypto
-# submodule once the darlinghq/swift-crypto mirror exists). It is never written to: the Swift sources are copied into the
+# submodule, the darlinghq/swift-crypto mirror). It is never written to: the Swift sources are copied into the
 # build directory with the changes of rewrite-sources.cmake. BoringSSL (Sources/CCryptoBoringSSL) and XKCP (Sources/CXKCP)
 # are compiled into the framework as they are, with hidden visibility.
 #
