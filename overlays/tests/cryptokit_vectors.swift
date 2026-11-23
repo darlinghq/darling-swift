@@ -109,6 +109,26 @@ do { _ = try AES.GCM.open(case4, using: zeroKey, authenticating: aad4) } catch C
     authenticationFailure = true
 } catch {}
 check(authenticationFailure, "AES.GCM open failure is CryptoKitError.authenticationFailure")
+func opensWithAuthenticationFailure(_ body: () throws -> Data) -> Bool {
+    do { _ = try body() } catch CryptoKitError.authenticationFailure { return true } catch { return false }
+    return false
+}
+check(opensWithAuthenticationFailure { try AES.GCM.open(case4, using: key34, authenticating: Data("other".utf8)) },
+      "AES.GCM open with other additional data is CryptoKitError.authenticationFailure")
+// ChaCha20-Poly1305 (RFC 8439): the same failure contract as AES.GCM
+let chachaKey = SymmetricKey(data: Data(repeating: 7, count: 32))
+let chachaBox = try! ChaChaPoly.seal(Data("chacha".utf8), using: chachaKey, authenticating: aad4)
+check((try? ChaChaPoly.open(chachaBox, using: chachaKey, authenticating: aad4)) == Data("chacha".utf8),
+      "ChaChaPoly open round trip")
+check(opensWithAuthenticationFailure { try ChaChaPoly.open(chachaBox, using: SymmetricKey(size: .bits256), authenticating: aad4) },
+      "ChaChaPoly open with the wrong key is CryptoKitError.authenticationFailure")
+check(opensWithAuthenticationFailure { try ChaChaPoly.open(chachaBox, using: chachaKey, authenticating: Data("other".utf8)) },
+      "ChaChaPoly open with other additional data is CryptoKitError.authenticationFailure")
+var chachaFlipped = chachaBox.combined
+chachaFlipped[chachaFlipped.count - 1] ^= 1
+check(opensWithAuthenticationFailure {
+          try ChaChaPoly.open(try ChaChaPoly.SealedBox(combined: chachaFlipped), using: chachaKey, authenticating: aad4)
+      }, "ChaChaPoly open with a modified tag is CryptoKitError.authenticationFailure")
 check((try? AES.GCM.Nonce(data: Data(repeating: 0, count: 5))) == nil, "AES.GCM.Nonce rejects 5 bytes")
 check((try? AES.GCM.seal(Data("x".utf8), using: SymmetricKey(data: Data(repeating: 0, count: 5)))) == nil,
       "AES.GCM seal rejects a 5-byte key")

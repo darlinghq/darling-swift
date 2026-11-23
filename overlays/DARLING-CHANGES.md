@@ -230,6 +230,15 @@ the differences below are made on a copy in the build directory, so there are no
   (`Data: Sendable`, the span accessors) `ninja swiftCryptoKit` compiles and links the whole module (5 min 16 s,
   arm64 Debug), so no fourth initializer needed a rule. Any other `@inlinable` or `@usableFromInline` fix that a
   later tag needs becomes another rule here.
+- **Failed AEAD open.** On macOS `AES.GCM.open` and `ChaChaPoly.open` throw `CryptoKitError.authenticationFailure` when the
+  tag does not authenticate. swift-crypto's BoringSSL path throws `underlyingCoreCryptoError(error: <BoringSSL code>)`,
+  because on Apple platforms swift-crypto re-exports Apple's CryptoKit and this path only runs elsewhere. Rules 4 and 5
+  of `CryptoKit/rewrite-sources.cmake` (counts asserted): the two failed-open sites of
+  `CryptoBoringWrapper/AEAD/BoringSSLAEAD.swift` (the wrapper, which cannot name `CryptoKitError`) throw
+  `CryptoBoringWrapperError.authenticationFailure` when BoringSSL's newest error is the cipher library's bad-decrypt
+  error, and keep `internalBoringSSLError()` for any other failure; the two `open` wrappers in Crypto's
+  `ChaChaPoly_boring.swift`, which already convert the wrapper's `underlyingCoreCryptoError`, convert
+  `authenticationFailure` to `CryptoKitError.authenticationFailure`. Pinned by `tests/cryptokit_vectors.swift`.
 - **Files left out.** `CryptoError_boring.swift` and `_CryptoModuleAnchor.swift` of `Crypto` (see README.md, CryptoKit),
   the three socket files of BoringSSL, and every other target of the package.
 - **Flags of Package.swift that are carried:** `-package-name com.apple.swift-crypto`, the experimental features

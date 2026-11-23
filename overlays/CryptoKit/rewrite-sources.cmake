@@ -5,7 +5,9 @@
 #
 #   cmake -DSOURCE_DIR=<Sources/Crypto of the swift-crypto checkout> -DOUTPUT_DIR=<directory for the copies>
 #         -DFILE_LIST=<file with one path relative to SOURCE_DIR per line>
-#         -DEXPECTED_GUARDS=<n> -DEXPECTED_QUALIFIERS=<n> -P rewrite-sources.cmake
+#         -DEXPECTED_GUARDS=<n> -DEXPECTED_QUALIFIERS=<n>
+#         -DWRAPPER_SOURCE_DIR=<Sources/CryptoBoringWrapper> -DWRAPPER_OUTPUT_DIR=<directory for the copy>
+#         -P rewrite-sources.cmake
 #
 # 1. Every `#if canImport(CryptoKit)` becomes `#if canImport(CryptoKit) && !DARLING_CRYPTOKIT_MODULE`. swift-crypto
 #    wraps each of its API files in that test and re-exports Apple's CryptoKit when it is true, and the module being
@@ -19,12 +21,24 @@
 #    is named by file and exact text and must occur exactly once. The body then stays in the framework instead of
 #    being emitted into clients.
 #
+# 4. In the CryptoBoringWrapper file AEAD/BoringSSLAEAD.swift (copied to WRAPPER_OUTPUT_DIR; the other wrapper files are
+#    compiled from the checkout), the two places that throw for a failed AEAD open call a new helper,
+#    failedAEADOpenError(), which is appended to the copy. It returns CryptoBoringWrapperError.authenticationFailure
+#    when the newest BoringSSL error is a cipher bad-decrypt error (the failure of a tag, whose check BoringSSL
+#    reports like that for AES-GCM and ChaCha20-Poly1305) and otherwise the error that was thrown before
+#    (internalBoringSSLError()), so other failures keep their mapping. The wrapper cannot name CryptoKitError, so:
+# 5. In Crypto's AEADs/ChachaPoly/BoringSSL/ChaChaPoly_boring.swift, the two `open` wrappers (shared by AES.GCM and
+#    ChaChaPoly) that already turn the wrapper's underlyingCoreCryptoError into CryptoKitError also turn
+#    authenticationFailure into CryptoKitError.authenticationFailure, the error that CryptoKit throws for a failed
+#    open. swift-crypto does not need this itself: on Apple platforms it re-exports Apple's CryptoKit, and the BoringSSL
+#    code paths only run on other platforms, where they report the raw BoringSSL error.
+#
 # Any other use of canImport(CryptoKit) on a #if or #elseif line (negated, combined, an #elseif) stops the build, since
 # the rewrite would not cover it. The numbers of changes are checked against the swift-crypto tag the lists were made
 # for. A source that needs a third kind of change, or one more guard than expected (a bump that adds a file), stops the
 # build before any file is written, instead of giving an empty or half-renamed module.
 
-foreach(var SOURCE_DIR OUTPUT_DIR FILE_LIST EXPECTED_GUARDS EXPECTED_QUALIFIERS)
+foreach(var SOURCE_DIR OUTPUT_DIR FILE_LIST EXPECTED_GUARDS EXPECTED_QUALIFIERS WRAPPER_SOURCE_DIR WRAPPER_OUTPUT_DIR)
 	if (NOT DEFINED ${var})
 		message(FATAL_ERROR "rewrite-sources.cmake: ${var} is not set")
 	endif()
@@ -47,6 +61,32 @@ set(inlinable_init_files
 set(curve25519_init "@inlinable\n        init<D: ContiguousBytes>(rawRepresentation: D) throws {\n            self.keyBytes = try rawRepresentation.withUnsafeBytes {")
 set(nist_init "@inlinable\n    init(wrapping key: BoringSSLECPublicKeyWrapper<Curve>) {\n        self.key = key\n    }")
 set(inlinable_init_texts "${curve25519_init}" "${curve25519_init}" "${nist_init}")
+
+# Rule 4: the wrapper file, the texts of the two failed-open sites and the helper appended to the file. Each site text
+# must occur exactly once. The first is the in-place open (open_gather into the message), the second the open that
+# allocates the output.
+set(wrapper_file "AEAD/BoringSSLAEAD.swift")
+set(open_site_in_place "guard rc == 1 else {\n            throw CryptoBoringWrapperError.internalBoringSSLError()\n        }\n    }\n\n    /// The unsafe base call: not inlinable so that it can touch private variables.\n    @usableFromInline\n    func _openContiguous(\n        ciphertext: RawSpan,")
+set(open_site_allocating "free(outputBuffer.baseAddress)\n            throw CryptoBoringWrapperError.internalBoringSSLError()")
+set(failed_open_helper "
+@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+extension CryptoBoringWrapperError {
+    /// The error for a failed AEAD open call: the tag did not authenticate when BoringSSL's newest error is the
+    /// bad-decrypt error of the cipher library, anything else keeps the generic mapping.
+    static func failedAEADOpenError() -> CryptoBoringWrapperError {
+        let code = CCryptoBoringSSL_ERR_peek_last_error()
+        if CCryptoBoringSSL_ERR_GET_LIB(code) == ERR_LIB_CIPHER && CCryptoBoringSSL_ERR_GET_REASON(code) == CIPHER_R_BAD_DECRYPT {
+            CCryptoBoringSSL_ERR_clear_error()
+            return .authenticationFailure
+        }
+        return .internalBoringSSLError()
+    }
+}
+")
+# Rule 5: the `open` wrappers of ChaChaPoly_boring.swift: the call up to the catch of underlyingCoreCryptoError.
+set(crypto_open_file "AEADs/ChachaPoly/BoringSSL/ChaChaPoly_boring.swift")
+set(crypto_open_regex "(context\\.open\\([^}]*\\)\n        )(\\} catch CryptoBoringWrapperError\\.underlyingCoreCryptoError)")
+set(crypto_open_replacement "\\1} catch CryptoBoringWrapperError.authenticationFailure {\n            throw CryptoKitError.authenticationFailure\n        \\2")
 
 # The number of times `needle` occurs in `text`, without regular expressions.
 function(_count_occurrences text needle out)
@@ -112,6 +152,27 @@ foreach(index RANGE ${last_init})
 	endif()
 endforeach()
 
+list(FIND files "${crypto_open_file}" crypto_open_in_list)
+if (crypto_open_in_list EQUAL -1)
+	message(FATAL_ERROR "${crypto_open_file} is not in ${FILE_LIST}, but rule 5 of "
+		"overlays/CryptoKit/rewrite-sources.cmake rewrites it")
+endif()
+file(READ "${SOURCE_DIR}/${crypto_open_file}" content)
+string(REGEX MATCHALL "${crypto_open_regex}" found "${content}")
+list(LENGTH found found_crypto_opens)
+if (NOT found_crypto_opens EQUAL 2)
+	message(FATAL_ERROR "${crypto_open_file}: expected two open wrappers rewritten by rule 5, found "
+		"${found_crypto_opens}. Is the checkout the tag the rule was made for? The rule needs review.")
+endif()
+file(READ "${WRAPPER_SOURCE_DIR}/${wrapper_file}" wrapper_content)
+foreach(site IN ITEMS open_site_in_place open_site_allocating)
+	_count_occurrences("${wrapper_content}" "${${site}}" found_sites)
+	if (NOT found_sites EQUAL 1)
+		message(FATAL_ERROR "${wrapper_file}: expected the failed-open site '${site}' of rule 4 once, found "
+			"${found_sites} times. Is the checkout the tag the rule was made for? The rule needs review.")
+	endif()
+endforeach()
+
 foreach(rel IN LISTS files)
 	file(READ "${SOURCE_DIR}/${rel}" content)
 	string(REPLACE "${guard}" "${guard} && !DARLING_CRYPTOKIT_MODULE" content "${content}")
@@ -124,9 +185,20 @@ foreach(rel IN LISTS files)
 			string(REPLACE "${init_text}" "${init_replacement}" content "${content}")
 		endif()
 	endforeach()
+	if (rel STREQUAL crypto_open_file)
+		string(REGEX REPLACE "${crypto_open_regex}" "${crypto_open_replacement}" content "${content}")
+	endif()
 	get_filename_component(dir "${OUTPUT_DIR}/${rel}" DIRECTORY)
 	file(MAKE_DIRECTORY "${dir}")
 	file(WRITE "${OUTPUT_DIR}/${rel}" "${content}")
 endforeach()
+foreach(site IN ITEMS open_site_in_place open_site_allocating)
+	string(REPLACE "CryptoBoringWrapperError.internalBoringSSLError()" "CryptoBoringWrapperError.failedAEADOpenError()"
+		site_replacement "${${site}}")
+	string(REPLACE "${${site}}" "${site_replacement}" wrapper_content "${wrapper_content}")
+endforeach()
+get_filename_component(wrapper_dir "${WRAPPER_OUTPUT_DIR}/${wrapper_file}" DIRECTORY)
+file(MAKE_DIRECTORY "${wrapper_dir}")
+file(WRITE "${WRAPPER_OUTPUT_DIR}/${wrapper_file}" "${wrapper_content}${failed_open_helper}")
 message(STATUS "CryptoKit sources: ${guards} canImport(CryptoKit) tests, ${qualifiers} qualifiers and "
 	"${inlinable_inits} initializers rewritten")

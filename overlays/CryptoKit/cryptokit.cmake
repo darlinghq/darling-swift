@@ -63,6 +63,8 @@ endfunction()
 set(CRYPTOKIT_SOURCE_COPY "${CMAKE_CURRENT_BINARY_DIR}/cryptokit-src")
 set(CRYPTOKIT_SOURCE_LIST "${CMAKE_CURRENT_BINARY_DIR}/cryptokit-src.txt")
 _cryptokit_files(cryptokit_orig "${CRYPTOKIT_SOURCES_DIR}/Crypto" ${SWIFT_CRYPTO_SWIFT_FILES})
+set(CRYPTOKIT_WRAPPER_COPY "${CMAKE_CURRENT_BINARY_DIR}/cryptokit-wrapper-src")
+set(CRYPTOKIT_WRAPPER_AEAD_COPY "${CRYPTOKIT_WRAPPER_COPY}/AEAD/BoringSSLAEAD.swift")
 set(CRYPTOKIT_SWIFT_SOURCES)
 foreach(rel IN LISTS SWIFT_CRYPTO_SWIFT_FILES)
 	list(APPEND CRYPTOKIT_SWIFT_SOURCES "${CRYPTOKIT_SOURCE_COPY}/${rel}")
@@ -70,11 +72,12 @@ endforeach()
 list(JOIN SWIFT_CRYPTO_SWIFT_FILES "\n" cryptokit_list_content)
 file(GENERATE OUTPUT "${CRYPTOKIT_SOURCE_LIST}" CONTENT "${cryptokit_list_content}\n")
 add_custom_command(
-	OUTPUT ${CRYPTOKIT_SWIFT_SOURCES}
+	OUTPUT ${CRYPTOKIT_SWIFT_SOURCES} "${CRYPTOKIT_WRAPPER_AEAD_COPY}"
 	COMMAND "${CMAKE_COMMAND}" -DSOURCE_DIR=${CRYPTOKIT_SOURCES_DIR}/Crypto -DOUTPUT_DIR=${CRYPTOKIT_SOURCE_COPY}
 		-DFILE_LIST=${CRYPTOKIT_SOURCE_LIST} -DEXPECTED_GUARDS=92 -DEXPECTED_QUALIFIERS=4
+		-DWRAPPER_SOURCE_DIR=${CRYPTOKIT_SOURCES_DIR}/CryptoBoringWrapper -DWRAPPER_OUTPUT_DIR=${CRYPTOKIT_WRAPPER_COPY}
 		-P "${CRYPTOKIT_OVERLAY_DIR}/rewrite-sources.cmake"
-	DEPENDS ${cryptokit_orig} "${CRYPTOKIT_SOURCE_LIST}" "${CRYPTOKIT_OVERLAY_DIR}/rewrite-sources.cmake"
+	DEPENDS ${cryptokit_orig} "${CRYPTOKIT_SOURCES_DIR}/CryptoBoringWrapper/AEAD/BoringSSLAEAD.swift" "${CRYPTOKIT_SOURCE_LIST}" "${CRYPTOKIT_OVERLAY_DIR}/rewrite-sources.cmake"
 	COMMENT "Rewriting the swift-crypto sources into the module CryptoKit"
 	VERBATIM
 )
@@ -99,6 +102,9 @@ set(cryptokit_swift_flags
 # CryptoBoringWrapper is an implementation detail of Crypto: compiled without library evolution, linked into the
 # framework, and kept out of its export table (unexported.txt).
 _cryptokit_files(cryptokit_wrapper_sources "${CRYPTOKIT_SOURCES_DIR}/CryptoBoringWrapper" ${SWIFT_CRYPTO_WRAPPER_FILES})
+# AEAD/BoringSSLAEAD.swift is the rewritten copy (rule 4 of rewrite-sources.cmake).
+list(REMOVE_ITEM cryptokit_wrapper_sources "${CRYPTOKIT_SOURCES_DIR}/CryptoBoringWrapper/AEAD/BoringSSLAEAD.swift")
+list(APPEND cryptokit_wrapper_sources "${CRYPTOKIT_WRAPPER_AEAD_COPY}")
 add_darling_swift_object(CryptoBoringWrapper
 	SOURCES ${cryptokit_wrapper_sources}
 	MODULES Foundation
