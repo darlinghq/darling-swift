@@ -36,6 +36,10 @@ The Foundation overlay also needs a checkout of apple/swift-foundation and of sw
 
 The toolchain is the Linux Swift release matching `version.txt` (for example `swift-6.3.3-RELEASE-debian12.tar.gz` from download.swift.org); its `swiftc -frontend` cross-compiles to `apple-macosx`. The Darling SDK must contain the Clang module maps and API notes for Darwin, ObjectiveC, Dispatch, os, XPC and CoreFoundation, and the `sys/cdefs.h` default-platform fix. Without that fix, arm64 code links against `$UNIX2003` symbol variants that don't exist. The Dispatch overlay needs the libdispatch with the `OS_dispatch_queue_serial_executor` class.
 
+## CoreData
+
+`CoreData/NSManagedObjectContext.swift` is adapted from the Swift project (`swiftlang/swift`, `stdlib/public/SDK/CoreData/NSManagedObjectContext.swift`, commit ba33f9e0b772015326bdecc0d597b2ac9fc61717). It keeps the public signature of `fetch(_:)` (generic over `NSFetchRequestResult`, throwing, returning a typed array) and the file header with the copyright and licence lines; the body is rewritten to call a small Objective-C shim (`shims/CoreDataOverlayShims.h`). Copyright: 2014 - 2017 Apple Inc. and the Swift project authors. Licence: Apache License v2.0 with Runtime Library Exception (https://swift.org/LICENSE.txt).
+
 ## Tests
 
 `tests/os_xpc.swift` covers `Logger`, `os_log` with arguments, signpost IDs and intervals, `OSAllocatedUnfairLock` across threads, `XPCDictionary`/`XPCArray` and `XPCSession`. `tests/objc_only.swift` and `tests/objc_cf.swift` cover an NSObject subclass with `@objc` methods and selectors, NSObject `Equatable`/`Hashable`, `autoreleasepool`, `ObjCBool`, CF types as `Hashable` (`_CFObject`), CFString round trips, and CGFloat. Build them for `<arch>-apple-macosx26.0` against these overlays, link with Darling's ld64 (plus `-Xfrontend -disable-objc-attr-requires-foundation-module`, since there is no Foundation Swift overlay), and run them with `darling shell`.
