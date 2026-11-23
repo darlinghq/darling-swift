@@ -38,7 +38,7 @@ extension NSData : DataProtocol {
     public var regions: [Data] {
         let count = length()
         guard count > 0 else { return [] }
-        return [Data(bytesNoCopy: UnsafeMutableRawPointer(mutating: bytes!), count: count, deallocator: .custom({ (ptr: UnsafeMutableRawPointer, count: Int) -> Void in
+        return [Data(bytesNoCopy: UnsafeMutableRawPointer(mutating: bytes), count: count, deallocator: .custom({ (ptr: UnsafeMutableRawPointer, count: Int) -> Void in
             withExtendedLifetime(self) { }
         }))]
     }
@@ -46,6 +46,6 @@ extension NSData : DataProtocol {
     @nonobjc
     public subscript(position: Int) -> UInt8 {
         precondition(position >= 0 && position < length(), "NSData index out of range")
-        return bytes!.load(fromByteOffset: position, as: UInt8.self)
+        return bytes.load(fromByteOffset: position, as: UInt8.self)
     }
 }
