@@ -13,6 +13,12 @@ static inline NSArray *_Nullable DarlingCoreDataExecuteFetch(NSManagedObjectCont
 	return [context executeFetchRequest:(NSFetchRequest *)request error:error];
 }
 
+// Calls -countForFetchRequest:error: on the context; the count is NSNotFound with *error set when it fails.
+static inline NSUInteger DarlingCoreDataCount(NSManagedObjectContext *context, id request,
+	NSError *_Nullable *_Nullable error) {
+	return [context countForFetchRequest:(NSFetchRequest *)request error:error];
+}
+
 NS_ASSUME_NONNULL_END
 
 #endif

@@ -21,4 +21,12 @@ extension NSManagedObjectContext {
         }
         return values as! [T]
     }
+
+    public func count<T>(for request: NSFetchRequest<T>) throws -> Int
+        where T: NSFetchRequestResult {
+        var error: NSError?
+        let count = DarlingCoreDataCount(self, request, &error)
+        if let error { throw error }
+        return Int(count)
+    }
 }
