@@ -122,6 +122,10 @@ if (SWIFT_TOOLCHAIN_FOUND)
 
 	include(overlays/sdk-frameworks.cmake)
 
+	# CryptoKit.framework, built from apple/swift-crypto as the module CryptoKit (DARLING_CRYPTOKIT, see
+	# overlays/CryptoKit/cryptokit.cmake). It is skipped when SWIFT_CRYPTO_SOURCE_DIR is not a checkout.
+	include(overlays/CryptoKit/cryptokit.cmake)
+
 	# GroupActivities.framework: the public API shape of SharePlay's framework, answering as a device that is not
 	# in a FaceTime call (see overlays/README.md).
 	add_darling_swift_library(GroupActivities
