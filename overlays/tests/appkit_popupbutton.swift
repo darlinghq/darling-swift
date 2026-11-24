@@ -27,13 +27,13 @@ func itemTitle(_ menu: NSMenu, _ index: Int) -> String? {
 }
 
 func makeMenu() -> NSMenu {
-    let menu = NSMenu(title: "Actions")!
+    let menu = NSMenu(title: "Actions")
     _ = menu.addItem(withTitle: "first", action: nil, keyEquivalent: "")
     _ = menu.addItem(withTitle: "second", action: nil, keyEquivalent: "")
     return menu
 }
 
-let image = NSImage(size: NSSize(width: 4, height: 4))!
+let image = NSImage(size: NSSize(width: 4, height: 4))
 
 let imageMenu = makeMenu()
 let withImage = NSPopUpButton(image: image, pullDownMenu: imageMenu)
@@ -61,11 +61,11 @@ check(defaulted.kvPullsDown && defaulted.kvTitle == "Default", "the image defaul
 
 // An empty menu, observed on the Mac (same probe): pullsDown, 0 items, titleOfSelectedItem
 // nil, title "T" for the title form and "" for the image-only form; nothing is raised and nothing is added.
-let emptyMenu = NSMenu(title: "Empty")!
+let emptyMenu = NSMenu(title: "Empty")
 let onEmpty = NSPopUpButton(title: "T", image: nil, pullDownMenu: emptyMenu)
 check(onEmpty.kvPullsDown && onEmpty.kvTitle == "T" && emptyMenu.kvCount == 0 && onEmpty.kvSelectedTitle == nil,
       "title form on an empty menu: pull-down, title T, no items, no selected title")
-let emptyImage = NSMenu(title: "EmptyImage")!
+let emptyImage = NSMenu(title: "EmptyImage")
 let onEmptyImage = NSPopUpButton(image: image, pullDownMenu: emptyImage)
 check(onEmptyImage.kvPullsDown && onEmptyImage.kvTitle == "" && emptyImage.kvCount == 0 && onEmptyImage.kvSelectedTitle == nil,
       "image-only form on an empty menu: pull-down, empty title, no items, no selected title")

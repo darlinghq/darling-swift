@@ -600,14 +600,9 @@ internal class __NSSwiftData : NSData {
         return _range.upperBound - _range.lowerBound
     }
 
-    @objc override var bytes: UnsafeRawPointer? {
-        // NSData's byte pointer methods are not annotated for nullability correctly
-        // (but assume non-null by the wrapping macro guards). This placeholder value
-        // is to work-around this bug. Any indirection to the underlying bytes of an NSData
-        // with a length of zero would have been a programmer error anyhow so the actual
-        // return value here is not needed to be an allocated value. This is specifically
-        // needed to live like this to be source compatible with Swift3. Beyond that point
-        // this API may be subject to correction.
+    @objc override var bytes: UnsafeRawPointer {
+        // NSData.bytes is nonnull (as in the macOS SDK, where Swift imports it as UnsafeRawPointer), so
+        // empty storage needs a placeholder: nothing may dereference it, because the length is zero.
         guard let bytes = _backing.bytes else {
             return UnsafeRawPointer(bitPattern: 0xBAD0)!
         }

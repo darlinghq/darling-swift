@@ -52,6 +52,8 @@ Not included: the CoreData additions of newer SDKs (`NSPersistentStore.StoreType
 
 `tests/data_span.swift` covers `Data.bytes`, `.span`, `.mutableBytes` and `.mutableSpan` for empty, inline, slice and `Int32.max`-byte Data, copy on write, a `Data` made from an `NSMutableData` or from an immutable `NSData` (`Data(referencing:)`, also as a slice whose parent is gone and at `Int32.max` bytes, with a round trip back through `NSData`; a write must not reach the `NSData`) and `bytesNoCopy`.
 
+`tests/nsdata_bytes_nonnull.swift` checks that `NSData.bytes` is a non-optional `UnsafeRawPointer`, as in the macOS SDK (Darling's NSData header declares it nonnull), for the NSData that `Data as NSData` gives, and that the `DataProtocol` members of NSData read it without unwrapping.
+
 `tests/data_nsdata_aliasing.swift` checks that a `Data` made from an `NSData` is a value: `withUnsafeMutableBytes`, the subscript, `replaceSubrange`, `append` and `resetBytes` change that `Data` only (also after a round trip through `NSData` and an `NSArray` hop, for a slice whose parent is gone and at `Int32.max` bytes).
 
 ## Foundation coverage
@@ -64,7 +66,7 @@ The Combine integration is now built (`Schedulers+RunLoop`, `Schedulers+Operatio
 
 `CryptoKit.framework` is the Crypto module of [apple/swift-crypto](https://github.com/apple/swift-crypto) at tag 5.1.2 (commit `3280a5f72874d2f73bf25551bbb64f524c76d834`, Apache-2.0), compiled as the Swift module `CryptoKit` instead of `Crypto`. swift-crypto's README states that its API files are the same as Apple's CryptoKit source; that is the project's claim, and its README also says that it keeps no stable ABI. `overlays/CryptoKit` has the build rules; `DARLING-CHANGES.md` lists every difference from upstream; `NOTICE.md` has the licences.
 
-**Building.** `SWIFT_CRYPTO_SOURCE_DIR` is a checkout of swift-crypto at that tag (by default the sibling directory `../swift-crypto`). The `darlinghq/swift-crypto` mirror that the main repository would pin as a submodule does not exist yet. The tag 5.1.2 and a branch `darling/cryptokit-rename-5.1.2` are in the temporary personal fork `cristim/swift-crypto`, which a maintainer is to move to `darlinghq`; until a mirror is pinned the checkout has to be provided by hand. `DARLING_CRYPTOKIT` is `AUTO` (build when the checkout is there, say so and skip when it is not), `ON` (stop configuring when it is not there) or `OFF`. The framework adds 243 BoringSSL C++ files, 38 assembly files and 5 XKCP C files to the build, next to about 100 Swift files.
+**Building.** `SWIFT_CRYPTO_SOURCE_DIR` is a checkout of swift-crypto at that tag (by default the sibling directory `../swift-crypto`). The main repository pins the checkout as the submodule `src/external/swift-crypto` (the `darlinghq/swift-crypto` mirror, branch `release/5.1`, at tag 5.1.2), so `git submodule update --init` provides it; to build against another checkout, point `SWIFT_CRYPTO_SOURCE_DIR` at it. `DARLING_CRYPTOKIT` is `AUTO` (build when the checkout is there, say so and skip when it is not), `ON` (stop configuring when it is not there) or `OFF`. The framework adds 243 BoringSSL C++ files, 38 assembly files and 5 XKCP C files to the build, next to about 100 Swift files.
 
 **What is compiled.** The lists are in `overlays/CryptoKit/sources.cmake`, generated from the checkout and compared with swift-crypto's own lists (the header of the file says how):
 
