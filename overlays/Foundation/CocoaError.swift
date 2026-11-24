@@ -57,7 +57,7 @@ public extension CocoaError {
   /// The string encoding associated with this error, if any.
   var stringEncoding: String.Encoding? {
     return (_nsUserInfo[NSStringEncodingErrorKey as NSString] as? NSNumber)
-             .map { String.Encoding(rawValue: $0.unsignedIntegerValue()) }
+             .map { String.Encoding(rawValue: $0.unsignedIntegerValue) }
   }
 
   /// The underlying error behind this error, if any.

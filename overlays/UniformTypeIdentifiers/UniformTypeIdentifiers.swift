@@ -40,7 +40,7 @@ extension UTType {
 	public var preferredFilenameExtension: String? { _reference.preferredFilenameExtension }
 	public var preferredMIMEType: String? { _reference.preferredMIMEType }
 	public var localizedDescription: String? { _reference.localizedDescription }
-	public var version: Int? { _reference.typeVersion?.integerValue() }
+	public var version: Int? { _reference.typeVersion?.integerValue }
 	public var referenceURL: URL? { _reference.referenceURL.map { $0 as URL } }
 	public var isDynamic: Bool { _reference.isDynamic }
 	public var isDeclared: Bool { _reference.isDeclared }

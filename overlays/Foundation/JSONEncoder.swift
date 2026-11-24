@@ -2377,7 +2377,7 @@ private extension __JSONDecoder {
             //   * and the integral value was <= Float.greatestFiniteMagnitude, we are willing to lose precision past 2^24
             // * If it was a Float, you will get back the precise value
             // * If it was a Double or Decimal, you will get back the nearest approximation if it will fit
-            let double = number.doubleValue()
+            let double = number.doubleValue
             guard abs(double) <= Double(Float.greatestFiniteMagnitude) else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed JSON number \(number) does not fit in \(type)."))
             }
@@ -2423,7 +2423,7 @@ private extension __JSONDecoder {
             // * If the original value was integral, it is guaranteed to fit in a Double; we are willing to lose precision past 2^53 if you encoded a UInt64 but requested a Double
             // * If it was a Float or Double, you will get back the precise value
             // * If it was Decimal, you will get back the nearest approximation
-            return number.doubleValue()
+            return number.doubleValue
 
         /* FIXME: If swift-corelibs-foundation doesn't change to use NSNumber, this code path will need to be included and tested:
         } else if let double = value as? Double {

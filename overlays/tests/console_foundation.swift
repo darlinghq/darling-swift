@@ -41,7 +41,7 @@ if let unarchiver = NSKeyedUnarchiver(forReadingWith: data as Data) {
     let wrongClass: NSNumber? = unarchiver.decodeObject(of: NSNumber.self, forKey: "name")
     check(wrongClass == nil, "decodeObject(of:) with the wrong class gives nil")
     let number: NSNumber? = unarchiver.decodeObject(of: NSNumber.self, forKey: "number")
-    check(number?.intValue() == 7, "decodeObject(of: NSNumber.self)")
+    check(number?.intValue == 7, "decodeObject(of: NSNumber.self)")
     let missingName: NSString? = unarchiver.decodeObject(of: NSString.self, forKey: "missing")
     check(missingName == nil, "decodeObject(of:) for a missing key")
     let classes: [AnyClass]? = [NSString.self, NSNumber.self]

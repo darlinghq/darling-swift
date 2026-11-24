@@ -1756,7 +1756,7 @@ extension __PlistDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        let float = number.floatValue()
+        let float = number.floatValue
         guard NSNumber(value: float).isEqual(to: number) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed property list number <\(number)> does not fit in \(type)."))
         }
@@ -1771,7 +1771,7 @@ extension __PlistDecoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
-        let double = number.doubleValue()
+        let double = number.doubleValue
         guard NSNumber(value: double).isEqual(to: number) else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Parsed property list number <\(number)> does not fit in \(type)."))
         }

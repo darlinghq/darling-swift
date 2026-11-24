@@ -10,15 +10,15 @@ func check(_ condition: Bool, _ label: String) {
 }
 
 // Round trips through NSNumber
-check((UInt8(200) as NSNumber).unsignedCharValue() == 200, "UInt8 -> NSNumber")
-check((Int16(-300) as NSNumber).shortValue() == -300, "Int16 -> NSNumber")
-check((UInt16(60000) as NSNumber).unsignedShortValue() == 60000, "UInt16 -> NSNumber")
-check((Int32(-70000) as NSNumber).intValue() == -70000, "Int32 -> NSNumber")
-check((UInt32(4_000_000_000) as NSNumber).unsignedIntValue() == 4_000_000_000, "UInt32 -> NSNumber")
-check((UInt64.max as NSNumber).unsignedLongLongValue() == UInt64.max, "UInt64.max -> NSNumber")
-check((UInt(42) as NSNumber).unsignedIntegerValue() == 42, "UInt -> NSNumber")
-check((Float(1.5) as NSNumber).floatValue() == 1.5, "Float -> NSNumber")
-check((CGFloat(2.25) as NSNumber).doubleValue() == 2.25, "CGFloat -> NSNumber")
+check((UInt8(200) as NSNumber).unsignedCharValue == 200, "UInt8 -> NSNumber")
+check((Int16(-300) as NSNumber).shortValue == -300, "Int16 -> NSNumber")
+check((UInt16(60000) as NSNumber).unsignedShortValue == 60000, "UInt16 -> NSNumber")
+check((Int32(-70000) as NSNumber).intValue == -70000, "Int32 -> NSNumber")
+check((UInt32(4_000_000_000) as NSNumber).unsignedIntValue == 4_000_000_000, "UInt32 -> NSNumber")
+check((UInt64.max as NSNumber).unsignedLongLongValue == UInt64.max, "UInt64.max -> NSNumber")
+check((UInt(42) as NSNumber).unsignedIntegerValue == 42, "UInt -> NSNumber")
+check((Float(1.5) as NSNumber).floatValue == 1.5, "Float -> NSNumber")
+check((CGFloat(2.25) as NSNumber).doubleValue == 2.25, "CGFloat -> NSNumber")
 
 // Conditional casts keep the value only when it's exact
 let n200: NSNumber = NSNumber(value: 200)
@@ -50,7 +50,7 @@ check(CGFloat(exactly: NSNumber(value: 7)) == 7, "CGFloat(exactly:)")
 
 // Collections bridge their elements
 let floats: [Float] = [1, 2.5]
-check(((floats as NSArray).object(at: 1) as? NSNumber)?.floatValue() == 2.5, "[Float] -> NSArray")
+check(((floats as NSArray).object(at: 1) as? NSNumber)?.floatValue == 2.5, "[Float] -> NSArray")
 let fromObjC = [NSNumber(value: 1), NSNumber(value: 0.25)] as NSArray
 check((fromObjC as? [CGFloat]) == [1, 0.25], "NSArray as? [CGFloat]")
 check((fromObjC as? [UInt]) == nil, "NSArray with 0.25 as? [UInt] fails")
