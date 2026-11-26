@@ -33,6 +33,14 @@
 #    open. swift-crypto does not need this itself: on Apple platforms it re-exports Apple's CryptoKit, and the BoringSSL
 #    code paths only run on other platforms, where they report the raw BoringSSL error.
 #
+# 6. In Util/Backports.swift, `#if compiler(<6.4)` becomes `#if true`. That file gives ContiguousBytes.withBytes and the
+#    MutableRawSpan byte subscript to a toolchain older than Swift 6.4, which supplies both itself. CryptoKit is not
+#    compiled against the toolchain's own Foundation and standard library but against the Darling SDK's modules (the
+#    Foundation overlay, built from swift-foundation at swift-6.3.3-RELEASE, and the standard library module
+#    interfaces in stdlib-modules), whatever compiler builds them, and those have neither API. So the shims are needed with every
+#    toolchain: without the rewrite a Swift 6.4 build stops at "value of type 'H.Digest' has no member 'withBytes'".
+#    The declarations stay internal to CryptoKit and add nothing to the framework's or the overlays' public API.
+#
 # Any other use of canImport(CryptoKit) on a #if or #elseif line (negated, combined, an #elseif) stops the build, since
 # the rewrite would not cover it. The numbers of changes are checked against the swift-crypto tag the lists were made
 # for. A source that needs a third kind of change, or one more guard than expected (a bump that adds a file), stops the
@@ -87,6 +95,10 @@ extension CryptoBoringWrapperError {
 set(crypto_open_file "AEADs/ChachaPoly/BoringSSL/ChaChaPoly_boring.swift")
 set(crypto_open_regex "(context\\.open\\([^}]*\\)\n        )(\\} catch CryptoBoringWrapperError\\.underlyingCoreCryptoError)")
 set(crypto_open_replacement "\\1} catch CryptoBoringWrapperError.authenticationFailure {\n            throw CryptoKitError.authenticationFailure\n        \\2")
+
+# Rule 6: the file and the guard line that is made unconditional.
+set(backports_file "Util/Backports.swift")
+set(backports_guard "#if compiler(<6.4)\n")
 
 # The number of times `needle` occurs in `text`, without regular expressions.
 function(_count_occurrences text needle out)
@@ -164,6 +176,17 @@ if (NOT found_crypto_opens EQUAL 2)
 	message(FATAL_ERROR "${crypto_open_file}: expected two open wrappers rewritten by rule 5, found "
 		"${found_crypto_opens}. Is the checkout the tag the rule was made for? The rule needs review.")
 endif()
+list(FIND files "${backports_file}" backports_in_list)
+if (backports_in_list EQUAL -1)
+	message(FATAL_ERROR "${backports_file} is not in ${FILE_LIST}, but rule 6 of "
+		"overlays/CryptoKit/rewrite-sources.cmake rewrites it")
+endif()
+file(READ "${SOURCE_DIR}/${backports_file}" content)
+_count_occurrences("${content}" "${backports_guard}" found_backports_guards)
+if (NOT found_backports_guards EQUAL 1)
+	message(FATAL_ERROR "${backports_file}: expected the guard of rule 6 once, found ${found_backports_guards} "
+		"times. Is the checkout the tag the rule was made for? The rule needs review.")
+endif()
 file(READ "${WRAPPER_SOURCE_DIR}/${wrapper_file}" wrapper_content)
 foreach(site IN ITEMS open_site_in_place open_site_allocating)
 	_count_occurrences("${wrapper_content}" "${${site}}" found_sites)
@@ -187,6 +210,9 @@ foreach(rel IN LISTS files)
 	endforeach()
 	if (rel STREQUAL crypto_open_file)
 		string(REGEX REPLACE "${crypto_open_regex}" "${crypto_open_replacement}" content "${content}")
+	endif()
+	if (rel STREQUAL backports_file)
+		string(REPLACE "${backports_guard}" "#if true\n" content "${content}")
 	endif()
 	get_filename_component(dir "${OUTPUT_DIR}/${rel}" DIRECTORY)
 	file(MAKE_DIRECTORY "${dir}")

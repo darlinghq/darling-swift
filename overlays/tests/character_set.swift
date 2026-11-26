@@ -43,7 +43,7 @@ check(custom.subtracting(CharacterSet(charactersIn: "abc")).contains("x") && !cu
 // Bridging and value semantics
 let ns = custom as NSCharacterSet
 check(ns.longCharacterIsMember(UInt32(UInt8(ascii: "a"))), "CharacterSet bridges to NSCharacterSet")
-let back = CharacterSet._unconditionallyBridgeFromObjectiveC(NSCharacterSet.whitespaceCharacterSet() as? NSCharacterSet)
+let back = CharacterSet._unconditionallyBridgeFromObjectiveC(NSCharacterSet.whitespaceCharacterSet as? NSCharacterSet)
 check(back.contains(" "), "NSCharacterSet bridges back")
 var copy = custom
 copy.remove("a")

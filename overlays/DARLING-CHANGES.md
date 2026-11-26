@@ -239,6 +239,14 @@ the differences below are made on a copy in the build directory, so there are no
   error, and keep `internalBoringSSLError()` for any other failure; the two `open` wrappers in Crypto's
   `ChaChaPoly_boring.swift`, which already convert the wrapper's `underlyingCoreCryptoError`, convert
   `authenticationFailure` to `CryptoKitError.authenticationFailure`. Pinned by `tests/cryptokit_vectors.swift`.
+- **Backports on every toolchain.** `Util/Backports.swift` of swift-crypto declares `ContiguousBytes.withBytes` and the
+  `MutableRawSpan` byte subscript under `#if compiler(<6.4)`, because a Swift 6.4 toolchain provides both. CryptoKit
+  is compiled against the Darling SDK's modules, not the toolchain's own: the Foundation overlay (swift-foundation at
+  `swift-6.3.3-RELEASE`) and the standard library module interfaces in `stdlib-modules`, which have neither API
+  whichever compiler builds them. Rule 6 of `CryptoKit/rewrite-sources.cmake` (the guard must occur once) turns the
+  guard into `#if true`, so the two declarations, internal to the CryptoKit module, exist with every toolchain. Found
+  with a 6.4.2 toolchain, where `HMAC.swift` stopped at "value of type 'H.Digest' has no member 'withBytes'"; the
+  overlays and CryptoKit build with 6.3.3 and 6.4.2 (x86_64 and arm64).
 - **Files left out.** `CryptoError_boring.swift` and `_CryptoModuleAnchor.swift` of `Crypto` (see README.md, CryptoKit),
   the three socket files of BoringSSL, and every other target of the package.
 - **Flags of Package.swift that are carried:** `-package-name com.apple.swift-crypto`, the experimental features
