@@ -61,9 +61,9 @@ do { try throwsCoded() } catch let error as NSError {
 
 // NSNumber
 let n: NSNumber = 5
-check(n.integerValue() == 5, "NSNumber integer literal")
-check((true as NSNumber).boolValue(), "NSNumber boolean literal")
-check((2.5 as NSNumber).doubleValue() == 2.5, "NSNumber float literal")
+check(n.integerValue == 5, "NSNumber integer literal")
+check((true as NSNumber).boolValue, "NSNumber boolean literal")
+check((2.5 as NSNumber).doubleValue == 2.5, "NSNumber float literal")
 check((42 as NSNumber) as? Int == 42, "NSNumber as? Int")
 check((NSNumber(value: 1) as? Bool) == true, "NSNumber(1) as? Bool")
 check((NSNumber(value: 7) as? Bool) == nil, "NSNumber(7) as? Bool fails")

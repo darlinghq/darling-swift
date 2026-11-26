@@ -37,10 +37,10 @@ public struct URLResourceValues {
         return _values[key] as? T
     }
     private func _get(_ key : URLResourceKey) -> Bool? {
-        return (_values[key] as? NSNumber)?.boolValue()
+        return (_values[key] as? NSNumber)?.boolValue
     }
     private func _get(_ key: URLResourceKey) -> Int? {
-        return (_values[key] as? NSNumber)?.integerValue()
+        return (_values[key] as? NSNumber)?.integerValue
     }
     
     private mutating func _set(_ key : URLResourceKey, newValue : __owned Any?) {

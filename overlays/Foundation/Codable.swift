@@ -78,7 +78,7 @@ internal let _kCFNumberSInt128Type = CFNumberType(rawValue: 17)!
 internal func _exactly<T : BinaryInteger>(_ number: NSNumber, as type: T.Type) -> T? {
     switch String(cString: number.objCType) {
     case "f", "d":
-        return T(exactly: number.doubleValue())
+        return T(exactly: number.doubleValue)
     case "Q", "":
         // Darling's __NSCFNumber reports 128-bit integers (UInt64 values above Int64.max) as "Q", or as "" before
         // darling-corefoundation#7; longLongValue would truncate them. JSON integers above Int64.max arrive as
@@ -89,7 +89,7 @@ internal func _exactly<T : BinaryInteger>(_ number: NSNumber, as type: T.Type) -
         guard wide.high == 0 else { return nil }
         return T(exactly: wide.low)
     default:
-        return T(exactly: number.longLongValue())
+        return T(exactly: number.longLongValue)
     }
 }
 

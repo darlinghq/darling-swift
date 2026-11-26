@@ -321,7 +321,7 @@ extension DateComponents : _ObjectiveCBridgeable {
         components.hour = _fromReference(dateComponents.hour())
         components.minute = _fromReference(dateComponents.minute())
         components.second = _fromReference(dateComponents.second())
-        components.nanosecond = (dateComponents.value(forKey: "nanosecond") as? NSNumber).flatMap { _fromReference($0.integerValue()) }
+        components.nanosecond = (dateComponents.value(forKey: "nanosecond") as? NSNumber).flatMap { _fromReference($0.integerValue) }
         components.weekday = _fromReference(dateComponents.weekday())
         components.weekdayOrdinal = _fromReference(dateComponents.weekdayOrdinal())
         components.quarter = _fromReference(dateComponents.quarter())
