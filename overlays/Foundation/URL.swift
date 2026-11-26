@@ -124,7 +124,7 @@ public struct URL : ReferenceConvertible, Equatable {
 
     /// Returns true if the scheme is `file:`.
     public var isFileURL: Bool {
-        return _url.isFileURL()
+        return _url.isFileURL
     }
 
     /// If the URL conforms to RFC 1808 (the most common form of URL), returns the host component of the URL; otherwise it returns nil.

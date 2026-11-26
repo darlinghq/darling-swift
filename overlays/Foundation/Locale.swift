@@ -133,7 +133,7 @@ public struct Locale : Hashable, Equatable, ReferenceConvertible {
 
     /// Returns the identifier of the locale.
     public var identifier: String {
-        return _wrapped.localeIdentifier() ?? ""
+        return _wrapped.localeIdentifier ?? ""
     }
 
     /// Returns the language code of the locale, or nil if has none.
