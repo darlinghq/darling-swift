@@ -15,7 +15,7 @@ check(Locale(identifier: "fr").regionCode == nil, "no region code")
 
 // Darling's container may have no user locale or language defaults, so compare with what NSLocale reports.
 let current = Locale.current
-let objcCurrent = (NSLocale.currentLocale() as! NSLocale).localeIdentifier() ?? ""
+let objcCurrent = (NSLocale.currentLocale() as! NSLocale).localeIdentifier ?? ""
 check(current.identifier == objcCurrent, "Locale.current matches +[NSLocale currentLocale] (\"\(current.identifier)\")")
 check(Locale.autoupdatingCurrent == Locale.autoupdatingCurrent, "autoupdatingCurrent equals itself")
 check(Locale.autoupdatingCurrent != us, "autoupdatingCurrent differs from a fixed locale")
@@ -35,7 +35,7 @@ let idName = us.localizedString(forIdentifier: "de_DE")
 check(idName != nil && !idName!.isEmpty, "localizedString(forIdentifier:) (\(String(describing: idName)))")
 
 let ns = us as NSLocale
-check(ns.localeIdentifier() == "en_US", "Locale bridges to NSLocale")
+check(ns.localeIdentifier == "en_US", "Locale bridges to NSLocale")
 check((ns as Locale) == us, "NSLocale bridges back")
 check(us.description.hasPrefix("en_US"), "description (\(us.description))")
 
