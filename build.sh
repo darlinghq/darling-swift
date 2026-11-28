@@ -35,11 +35,14 @@ echo "Moving the useful files"
 mv ./usr/lib/swift/macosx/libswift*dylib ../
 
 # The textual module interfaces (both architectures) of the modules the runtime libraries implement.
-# The Swift overlays are compiled against these; see README.md.
-for module in Swift _Concurrency _StringProcessing _RegexParser RegexBuilder Observation Synchronization \
-	Distributed _Builtin_float _Volatile Runtime _Differentiation SwiftOnoneSupport; do
-	mkdir -p "../stdlib-modules/$module.swiftmodule"
-	cp usr/lib/swift/macosx/"$module".swiftmodule/*-apple-macos.swiftinterface "../stdlib-modules/$module.swiftmodule/"
+# The Swift overlays are compiled against these; see README.md. Copy every macOS interface the
+# package ships, including private interfaces and modules added by newer releases, so that a bump
+# of version.txt does not need another edit here.
+find usr/lib/swift/macosx -type f -name '*apple-macos*.swiftinterface' -print | while IFS= read -r interface; do
+	rel=${interface#usr/lib/swift/macosx/}
+	target="../stdlib-modules/$rel"
+	mkdir -p "$(dirname "$target")"
+	cp "$interface" "$target"
 done
 cd ..
 rm -rf build
