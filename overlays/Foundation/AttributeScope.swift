@@ -35,8 +35,11 @@ extension AttributeScopes : Sendable {}
 
 // Darling: compiled without FOUNDATION_FRAMEWORK. Scope fields are read with the standard library's
 // _forEachField instead of ReflectionInternal, and metatypes are keyed by ObjectIdentifier.
+// The cache lock uses Synchronization.Mutex, available in the pinned 6.3.3 toolchain and used by
+// newer swift-foundation, so this copy does not depend on the 6.3.3-only LockedState helper.
 import Darwin
 @_spi(Reflection) import Swift
+internal import Synchronization
 
 fileprivate struct ScopeDescription : Sendable {
     var attributes: [String : any AttributedStringKey.Type] = [:]
@@ -115,7 +118,7 @@ fileprivate struct LoadedScopeCache : Sendable {
     }
 }
 
-fileprivate let _loadedScopeCache = LockedState(initialState: LoadedScopeCache())
+fileprivate let _loadedScopeCache = Mutex(LoadedScopeCache())
 
 internal func _loadDefaultAttributes() -> [String : any AttributedStringKey.Type] {
     // On native macOS, the UI framework that gets loaded is AppKit. On

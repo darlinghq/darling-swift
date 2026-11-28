@@ -45,6 +45,11 @@ that says why. To see the difference, diff the file against the checkout, for ex
   Network.framework exports but does not publish (`nw_endpoint_create_unix`, `nw_endpoint_copy_interface`,
   `nw_interface_create_with_name`, `NWCreateNSDataFromDispatchData`, ...), so libnetwork and the Network
   framework declare them with the same types.
+- **The scope-cache lock.** `Foundation/AttributeScope.swift` uses `Synchronization.Mutex` instead of the
+  `LockedState` helper of swift-foundation 6.3.3. Both offer `withLock`; `Mutex` is present in the pinned 6.3.3 Swift
+  interfaces and is what upstream uses from 6.4.3, so this copy does not need `LockedState` when the submodule is
+  bumped. `FoundationEssentials/LockedState.swift` stays in `swift-foundation-sources.cmake` until that bump because
+  other 6.3.3 upstream files still use it.
 
 ## Data and NSData
 

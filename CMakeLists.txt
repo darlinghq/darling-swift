@@ -154,13 +154,29 @@ function(add_swift_darwin_reexport name source)
 endfunction()
 
 if (SWIFT_TOOLCHAIN_FOUND)
-	add_swift_darwin_reexport(swift_errno swift_errno.S)
 	foreach(split
 		swift_DarwinFoundation1 swift_DarwinFoundation2 swift_DarwinFoundation3
 		swift_math swift_signal swift_stdio swift_time swiftsys_time swiftunistd)
 		add_swift_darwin_reexport(${split} swift_darwin_split.S)
 	endforeach()
 endif()
+
+# Unlike the split libraries above, libswift_errno is needed by the Swift runtime itself:
+# newer runtimes import the errno accessor from it non-weakly. Define the accessors directly
+# over libSystem so the dylib is installed even when the overlays are skipped (no toolchain).
+set(DYLIB_INSTALL_NAME "/usr/lib/swift/libswift_errno.dylib")
+add_darling_library(swift_errno SHARED swift_errno.c)
+target_link_libraries(swift_errno system)
+set_target_properties(swift_errno PROPERTIES
+	LINKER_LANGUAGE C
+	OUTPUT_NAME "swift_errno"
+)
+# The accessors above are the getter and setter. libswiftDarwin also provides the modify accessor
+# (used for in-place updates of errno), which C cannot express, so with overlays it is re-exported.
+if (SWIFT_TOOLCHAIN_FOUND)
+	reexport(swift_errno swiftDarwin "${CMAKE_CURRENT_BINARY_DIR}/libswiftDarwin.dylib")
+endif()
+install(TARGETS swift_errno DESTINATION libexec/darling/usr/lib/swift)
 
 set(DYLIB_INSTALL_NAME "/usr/lib/swift/libswiftWebKit.dylib")
 add_darling_library(swiftWebKit SHARED
