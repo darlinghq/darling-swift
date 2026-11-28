@@ -14,7 +14,7 @@ Swift.org toolchains no longer include the Darwin SDK overlays (`libswiftAppKit`
 
 A few small libraries are built from the sources in this directory (`CMakeLists.txt`) instead of being copied from a release:
 
-- `libswift_errno` defines the two `Darwin.errno` accessors over libSystem's `__error()`. Recent macOS SDKs split them out of `libswiftDarwin`, and new Swift runtimes import the getter from this library non-weakly, so it is built even when no Swift toolchain was found and the source-built overlays are skipped.
+- `libswift_errno` defines the two `Darwin.errno` accessors over libSystem's `__error()`. Recent macOS SDKs split them out of `libswiftDarwin`, and new Swift runtimes import the getter from this library non-weakly, so it is built even when no Swift toolchain was found and the source-built overlays are skipped. Without the overlays it provides the getter and setter only; with them it also re-exports `libswiftDarwin` for the modify accessor.
 - `libswift_DarwinFoundation1/2/3`, `libswift_math`, `libswift_signal`, `libswift_stdio`, `libswift_time`, `libswiftsys_time` and `libswiftunistd` contain no code. Recent macOS SDKs split the Darwin overlay across these libraries and binaries bind Darwin symbols to them by library ordinal. Here the whole overlay lives in `libswiftDarwin.dylib`, so each of these libraries only re-exports it, and they are built only together with the overlays (when a Swift toolchain was found).
 - `libswiftWebKit` only defines the `__swift_FORCE_LOAD_$_swiftWebKit` marker, so that binaries that link the WebKit overlay load. It exports nothing else.
 

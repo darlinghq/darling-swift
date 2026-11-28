@@ -171,6 +171,11 @@ set_target_properties(swift_errno PROPERTIES
 	LINKER_LANGUAGE C
 	OUTPUT_NAME "swift_errno"
 )
+# The accessors above are the getter and setter. libswiftDarwin also provides the modify accessor
+# (used for in-place updates of errno), which C cannot express, so with overlays it is re-exported.
+if (SWIFT_TOOLCHAIN_FOUND)
+	reexport(swift_errno swiftDarwin "${CMAKE_CURRENT_BINARY_DIR}/libswiftDarwin.dylib")
+endif()
 install(TARGETS swift_errno DESTINATION libexec/darling/usr/lib/swift)
 
 set(DYLIB_INSTALL_NAME "/usr/lib/swift/libswiftWebKit.dylib")
